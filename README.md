@@ -36,10 +36,12 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
 APKs are published on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page. Use the `armeabi-v7a` build: TCL/MediaTek TVs run
 32-bit apps.
 
-- The package id is `com.limelight.noir`, the same as official Artemis, but the APK is signed with a different key.
-  **Uninstall the official Artemis first**, then install this one (file manager, Downloader app, or `adb install`).
-- You will have to pair with your PC again.
+- The app is called **Moonlight TCL** and uses its own package id `com.limelight.tcl`, so it installs next to official Artemis or
+  Moonlight and is not replaced by their updates. Install it with a file manager, the Downloader app, or `adb install`.
+- Settings and PC pairings are per app, so pair with your PC again after installing.
 - The performance overlay no longer needs to be enabled.
+- Updates: [add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D)
+  or use the "Use Obtainium" entry in the app's settings.
 
 If the TV still freezes or reboots, open an issue with `adb logcat -v threadtime -b all` captured around the moment it happens, or, after a
 reboot, the output of `adb shell dumpsys dropbox --print system_server_native_crash`.
@@ -68,5 +70,6 @@ Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
 Это сборка [Artemis](https://github.com/ClassicOldSong/moonlight-android) (форк Moonlight Android) с обходами ошибок прошивки
 Android 14 на телевизорах TCL (C8K и похожие): зависание всего ТВ при регулировке громкости, смене приложения и выходе из
 стрима, а также перезагрузки из-за вибрации геймпада. Цель проекта — доработать клиент так, чтобы он стабильно работал на TCL.
-APK на странице [Releases](https://github.com/pabragin/moonlight-tcl/releases); перед установкой удалите официальный Artemis (другая
-подпись), после установки спарьтесь с ПК заново.
+Приложение называется Moonlight TCL и имеет свой идентификатор пакета `com.limelight.tcl`, поэтому ставится рядом с обычным Artemis
+и не затирается его обновлениями. APK на странице [Releases](https://github.com/pabragin/moonlight-tcl/releases); после установки
+спарьтесь с ПК заново.
