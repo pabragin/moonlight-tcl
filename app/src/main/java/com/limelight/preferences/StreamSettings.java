@@ -332,12 +332,26 @@ public class StreamSettings extends AppCompatActivity {
             initializePreferences();
         }
 
+        private void applyDeviceDefault(String key, boolean deviceDefault) {
+            CheckBoxPreference pref = findPreference(key);
+            SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
+            if (pref != null && prefs != null && !prefs.contains(key)) {
+                pref.setChecked(deviceDefault);
+            }
+        }
+
         public void initializePreferences() {
             addPreferencesFromResource(R.xml.preferences);
             PreferenceScreen screen = getPreferenceScreen();
 
             AppCompatActivity activity = (AppCompatActivity) requireActivity();
             PackageManager pm = activity.getPackageManager();
+
+            // The Android TV firmware workarounds default to "on" only on known affected TVs.
+            // Persist the device default the first time the settings are shown so the checkbox
+            // matches what PreferenceConfiguration.readPreferences() uses when the key is absent.
+            applyDeviceDefault("checkbox_tv_compositor_workaround", PreferenceConfiguration.isTvWithBrokenCompositor(activity));
+            applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
 
             // hide on-screen controls category on non touch screen devices
             if (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {

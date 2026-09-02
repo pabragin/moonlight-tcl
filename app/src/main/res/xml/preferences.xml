@@ -338,6 +338,13 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:dependency="checkbox_enable_rumble"
+            android:key="checkbox_tv_block_rumble"
+            android:summary="@string/summary_tv_block_rumble"
+            android:title="@string/title_tv_block_rumble"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="checkbox_enable_rumble"
             android:key="checkbox_vibrate_fallback"
             android:summary="@string/summary_checkbox_vibrate_fallback"
             android:title="@string/title_checkbox_vibrate_fallback"
@@ -972,6 +979,12 @@
             android:key="checkbox_prevent_packet_loss"
             android:summary="@string/summary_prevent_packet_loss"
             android:title="@string/title_prevent_packet_loss"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="checkbox_tv_compositor_workaround"
+            android:summary="@string/summary_tv_compositor_workaround"
+            android:title="@string/title_tv_compositor_workaround"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 

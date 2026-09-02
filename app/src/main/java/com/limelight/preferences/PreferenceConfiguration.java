@@ -3,8 +3,11 @@ package com.limelight.preferences;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.view.Display;
+
+import java.util.Locale;
 
 import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.profiles.ProfilesManager;
@@ -96,6 +99,8 @@ public class PreferenceConfiguration {
     private static final String FULL_SCREEN_PREF_STRING = "checkbox_full_screen";
 
     private static final String ENABLE_RUMBLE_PREF_STRING = "checkbox_enable_rumble";
+    private static final String TV_COMPOSITOR_WORKAROUND_PREF_STRING = "checkbox_tv_compositor_workaround";
+    private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
     private static final String PREVENT_PACKET_LOSS_PREF_STRING = "checkbox_prevent_packet_loss";
 
     private static final String LIST_ONSCREEN_KEYBOARD_ALIGN_MODE = "list_onscreen_keyboard_align_mode";
@@ -377,6 +382,10 @@ public class PreferenceConfiguration {
     public boolean enableRumble;
     public boolean preventPacketLoss;
 
+    // Android TV firmware workarounds (see isTvWithBrokenCompositor()/isTvWithBrokenInputRumble())
+    public boolean tvCompositorWorkaround;
+    public boolean tvBlockRumble;
+
     public boolean rememberZoomPan;
     public float zoomScale;
     public float panOffsetX;
@@ -553,6 +562,58 @@ public class PreferenceConfiguration {
         }
 
         return (int)Math.round(resolutionFactor * frameRateFactor) * 1000;
+    }
+
+    public static boolean isTvDevice(Context context) {
+        PackageManager manager = context.getPackageManager();
+        if (manager != null) {
+            if (manager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)) {
+                return true;
+            }
+
+            // API 21 uses LEANBACK instead of TELEVISION
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 &&
+                    manager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                return true;
+            }
+        }
+
+        Configuration config = context.getResources().getConfiguration();
+        return (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION;
+    }
+
+    private static boolean isTclDevice() {
+        String vendor = (Build.MANUFACTURER + " " + Build.BRAND).toLowerCase(Locale.ROOT);
+        return vendor.contains("tcl");
+    }
+
+    private static boolean isMediaTekSoc() {
+        String hw = (Build.HARDWARE + " " + Build.BOARD).toLowerCase(Locale.ROOT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            hw += " " + Build.SOC_MANUFACTURER.toLowerCase(Locale.ROOT);
+        }
+        return hw.contains("mediatek") || hw.contains("mtk") || Build.HARDWARE.toLowerCase(Locale.ROOT).startsWith("mt");
+    }
+
+    // TCL Google TVs on Android 14 firmware (C6K/C8K/QM6K/QM8K, ...) hard-freeze when SurfaceFlinger
+    // has to reconfigure the display pipeline while the stream's video SurfaceView is the only
+    // visible layer on screen (volume OSD, app switch, stream exit). The same TVs are fine on their
+    // Android 12 firmware. Keeping a tiny UI layer above the video and removing the video layer
+    // before leaving the activity avoids the freeze.
+    // See https://github.com/moonlight-stream/moonlight-android/issues/1533
+    public static boolean isTvWithBrokenCompositor(Context context) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && isTvDevice(context)
+                && (isTclDevice() || isMediaTekSoc());
+    }
+
+    // The same TCL Android 14 firmware has a data race in system_server's InputReader that is
+    // triggered by InputDevice vibrations (gamepad rumble) and crashes system_server, which shows up
+    // as the TV rebooting mid-game (SIGABRT in QueuedInputListener::flush on the InputReader thread).
+    public static boolean isTvWithBrokenInputRumble(Context context) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && isTvDevice(context)
+                && isTclDevice();
     }
 
     public static boolean getDefaultSmallMode(Context context) {
@@ -1021,6 +1082,10 @@ private static int getFramePacingValue(Context context) {
         config.forceMotionSensorsFallbackToDevice = prefs.getBoolean(FORCE_MOTION_SENSORS_FALLBACK_PREF_STRING, DEFAULT_FORCE_MOTION_SENSORS_FALLBACK);
         config.enableRumble = prefs.getBoolean(ENABLE_RUMBLE_PREF_STRING, DEFAULT_ENABLE_RUMBLE);
         config.preventPacketLoss = prefs.getBoolean(PREVENT_PACKET_LOSS_PREF_STRING, DEFAULT_PREVENT_PACKET_LOSS);
+
+        // Default to "on" only on TVs known to need the workarounds; the user can override either way
+        config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
+        config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
 
         // Read custom values
         config.customResolution = prefs.getString(CUSTOM_RESOLUTION_PREF_STRING, null);

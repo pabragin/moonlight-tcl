@@ -738,6 +738,11 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         if (prefConfig.enableDeviceRumble) {
             context.vibrator = deviceVibrator;
+        } else if (prefConfig.tvBlockRumble) {
+            // Vibrating an InputDevice is routed through system_server's InputReader thread, which
+            // has a crashing data race on some Android TV firmwares (TCL on Android 14). Leave this
+            // gamepad without a vibrator so no rumble ever reaches the input stack.
+            LimeLog.info("Gamepad rumble blocked for " + devName + " (Android TV workaround)");
         } else {
             // Try to use the InputDevice's associated vibrators first
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && hasQuadAmplitudeControlledRumbleVibrators(dev.getVibratorManager())) {
