@@ -46,6 +46,9 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    category Android ignores the app's `GameManager` state updates and game-mode config, and TV vendors' automatic game picture
    mode keys off the category too. Together with `preferMinimalPostProcessing` this is everything an app can do to request the
    TV's game mode; whether the TV honours it is up to the firmware.
+7. **No 3D mode, leaner APK.** Artemis' "AI 3D" stereo renderer with OpenCV, LiteRT and the MiDaS depth model is removed
+   (a TV stream only needs the plain SurfaceView path). Gamepad/keyboard input is requested unbuffered on the window's decor view,
+   so the request cannot be lost when another view takes focus.
 
 
 ## Download and install

@@ -156,47 +156,6 @@
             android:summary="@string/summary_checkbox_enforce_display_mode"
             android:title="@string/title_checkbox_enforce_display_mode"
             app:iconSpaceReserved="false" />
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/render_mode_names"
-            android:entryValues="@array/render_mode_values"
-            android:key="render_mode_list"
-            android:summary="@string/summary_render_mode"
-            android:title="@string/title_render_mode"
-            app:iconSpaceReserved="false" />
-        <com.limelight.preferences.SeekBarPreference
-            android:key="parallax_depth"
-            android:dialogMessage=""
-            android:text="%"
-            android:title="@string/title_render_mode_strength_title"
-            android:summary="@string/title_render_mode_strength_description"
-            android:defaultValue="50"
-            android:max="100"
-            seekbar:min="1"
-            seekbar:step="1"
-            app:iconSpaceReserved="false" />
-        <com.limelight.preferences.SeekBarPreference
-            android:key="convergence_ratio"
-            android:dialogMessage=""
-            android:text="%"
-            android:title="@string/title_render_mode_convergence_title"
-            android:summary="@string/title_render_mode_convergence_description"
-            android:defaultValue="50"
-            android:max="100"
-            seekbar:min="0"
-            seekbar:step="1"
-            app:iconSpaceReserved="false" />
-        <com.limelight.preferences.SeekBarPreference
-            android:key="balance_shift"
-            android:dialogMessage=""
-            android:text="%"
-            android:title="@string/title_render_mode_balance_shift_title"
-            android:summary="@string/title_render_mode_balance_shift_description"
-            android:defaultValue="50"
-            android:max="100"
-            seekbar:min="-0"
-            seekbar:step="1"
-            app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="checkbox_enable_hdr"

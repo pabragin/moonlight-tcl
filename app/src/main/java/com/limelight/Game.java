@@ -422,10 +422,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         boolean shouldInvertDecoderResolution = false;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && onExternelDisplay
-                && prefConfig.renderMode == 0 // For 3D we want to maintain configured resolution
-        ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && onExternelDisplay) {
             Display.Mode currentMode = currentDisplay.getMode();
             displayWidth = currentMode.getPhysicalWidth();
             displayHeight = currentMode.getPhysicalHeight();
@@ -439,10 +436,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             currentOrientation = Configuration.ORIENTATION_LANDSCAPE;
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
         } else {
-            if (prefConfig.renderMode != 0) {
-                prefConfig.videoScaleMode = PreferenceConfiguration.ScaleMode.STRETCH;
-            }
-
             if (prefConfig.autoOrientation) {
                 currentOrientation = getResources().getConfiguration().orientation;
             } else {
@@ -530,6 +523,12 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                             InputDevice.SOURCE_CLASS_POSITION | // Touchpads
                             InputDevice.SOURCE_CLASS_TRACKBALL // Mice (pointer capture)
             );
+            // ViewGroup.onDescendantUnbufferedRequested() only forwards non-pointer (gamepad,
+            // keyboard) requests from the child that currently holds focus, so a request made on
+            // a child view can silently be lost. Requesting on the window's decor view applies to
+            // the whole window regardless of focus.
+            requestUnbufferedInputForWindow();
+
             backgroundTouchView.requestUnbufferedDispatch(
                     InputDevice.SOURCE_CLASS_BUTTON | // Keyboards
                             InputDevice.SOURCE_CLASS_JOYSTICK | // Gamepads
@@ -1357,6 +1356,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
+
+        if (hasFocus) {
+            requestUnbufferedInputForWindow();
+        }
 
         // We can't guarantee the state of modifiers keys which may have
         // lifted while focus was not on us. Clear the modifier state.
@@ -3925,6 +3928,17 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 return handleKeyMultiple(keyEvent);
             default:
                 return false;
+        }
+    }
+
+    private void requestUnbufferedInputForWindow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().getDecorView().requestUnbufferedDispatch(
+                    InputDevice.SOURCE_CLASS_BUTTON |
+                            InputDevice.SOURCE_CLASS_JOYSTICK |
+                            InputDevice.SOURCE_CLASS_POINTER |
+                            InputDevice.SOURCE_CLASS_POSITION |
+                            InputDevice.SOURCE_CLASS_TRACKBALL);
         }
     }
 
