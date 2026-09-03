@@ -50,6 +50,9 @@
     <string name="conn_metered">Внимание: Происходит измерение Вашего сетевого соединения!</string>
     <string name="conn_client_latency">Средняя задержка декодирования кадра: </string>
     <string name="conn_client_latency_hw">Задержка аппаратного декодирования:</string>
+    <string name="conn_client_latency_compositor">Композитор (отдача → экран): средн. %1$d мс, макс. %2$d мс за %3$d кадров, обход для TV %4$s</string>
+    <string name="conn_workaround_on">включён</string>
+    <string name="conn_workaround_off">выключен</string>
     <string name="conn_hardware_latency">Средняя задержка аппаратного декодирования:</string>
     <string name="conn_starting">Запуск</string>
     <string name="conn_error_title">Ошибка соединения</string>

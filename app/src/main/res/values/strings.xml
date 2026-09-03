@@ -105,6 +105,9 @@
     <string name="conn_metered">Warning: Your active network connection is metered!</string>
     <string name="conn_client_latency">Average frame decoding latency:</string>
     <string name="conn_client_latency_hw">hardware decoder latency:</string>
+    <string name="conn_client_latency_compositor">Compositor (release → screen): avg %1$d ms, max %2$d ms over %3$d frames, TV workaround %4$s</string>
+    <string name="conn_workaround_on">on</string>
+    <string name="conn_workaround_off">off</string>
     <string name="conn_hardware_latency">Average hardware decoding latency:</string>
     <string name="conn_starting">Starting</string>
     <string name="conn_error_title">Connection Error</string>

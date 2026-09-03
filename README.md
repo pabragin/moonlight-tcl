@@ -77,8 +77,11 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
 11. **Compositor latency in the overlay (tcl7).** With the performance overlay or the latency test enabled, the decoder
    registers a frame-rendered listener and shows "Present (compositor)": the average and maximum time between
    `releaseOutputBuffer()` and the moment the display actually showed the frame. The latency test gets the same value as a
-   separate "compositor" component. Compare it with the compositor workaround on and off to see what the 2x2 px keep-alive
-   layer costs, without `dumpsys SurfaceFlinger`. Nothing is tracked when both overlay and test are off.
+   separate "compositor" component. A visible overlay is itself a second compositor layer, so the clean measurement is the
+   **post-stream toast** (`Settings → UI → Show post-stream latency toast`, tcl8): nothing is drawn over the video during the
+   stream and the toast at the end reports the compositor average/maximum, the frame count and whether the TV workaround was
+   on. Run one session with the workaround on and one with it off to see what the 2x2 px keep-alive layer costs, without
+   `dumpsys SurfaceFlinger`. Nothing is tracked when overlay, test and toast are all off.
 
 ## Download and install
 

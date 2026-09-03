@@ -1513,6 +1513,15 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 message = getResources().getString(R.string.conn_hardware_latency) + " " + averageDecoderLat + " ms";
             }
 
+            // Compositor share (release -> on screen), measured with nothing drawn over the video
+            if (decoderRenderer.getPresentedFrames() > 0) {
+                String compositor = getResources().getString(R.string.conn_client_latency_compositor,
+                        decoderRenderer.getAveragePresentLatency(), decoderRenderer.getMaxPresentLatency(),
+                        decoderRenderer.getPresentedFrames(),
+                        getResources().getString(prefConfig.tvCompositorWorkaround ? R.string.conn_workaround_on : R.string.conn_workaround_off));
+                message = message == null ? compositor : message + "\n" + compositor;
+            }
+
             // Add the video codec to the post-stream toast
             selectedVideoFormat += " [";
 

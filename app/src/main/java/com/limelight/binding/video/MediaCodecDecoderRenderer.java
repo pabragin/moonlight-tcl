@@ -1038,7 +1038,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private boolean submitThreadPriorityApplied;
 
     private void startPresentTracking() {
-        if (!(prefs.enablePerfOverlay || prefs.enablePerfOverlayLite || prefs.latencyTest)) {
+        // The post-stream toast is the clean way to measure: nothing is drawn over the video during the
+        // stream (a visible overlay would itself be a second compositor layer), the numbers appear at the end.
+        if (!(prefs.enablePerfOverlay || prefs.enablePerfOverlayLite || prefs.latencyTest || prefs.enableLatencyToast)) {
             return;
         }
         if (frameRenderedThread == null) {
@@ -1866,6 +1868,21 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             return 0;
         }
         return (int)(globalVideoStats.totalTimeMs / globalVideoStats.totalFramesReceived);
+    }
+
+    public int getPresentedFrames() {
+        return globalVideoStats.framesPresented;
+    }
+
+    public int getAveragePresentLatency() {
+        if (globalVideoStats.framesPresented == 0) {
+            return 0;
+        }
+        return (int)(globalVideoStats.presentTimeMs / globalVideoStats.framesPresented);
+    }
+
+    public int getMaxPresentLatency() {
+        return (int)globalVideoStats.maxPresentTimeMs;
     }
 
     public int getAverageDecoderLatency() {
