@@ -28,8 +28,17 @@ import java.util.Locale;
  */
 public final class LatencyTester {
     private static final int TIMEOUT_MS = 2000;
-    private static final int MIN_REACTION_FRAME_BYTES = 4000;
-    private static final int REACTION_SIZE_FACTOR = 6;
+    // Reaction frame detection. Under CBR encoding a static picture still costs ~1/3 of the target
+    // bitrate, so the flip to white is only a few times bigger than the "quiet" frames.
+    private static final double REACTION_SIZE_FACTOR = 2.5;
+    private static final int REACTION_SIZE_MIN_DELTA_BYTES = 8000;
+    // Sunshine/Apollo send a static picture at a reduced rate (typically fps/2); when the picture
+    // changes the frame interval drops back to the full rate.
+    private static final double REACTION_INTERVAL_FACTOR = 0.65;
+    private static final long STATIC_INTERVAL_MIN_MS = 25;
+    // A reaction cannot arrive faster than this after the press; earlier frames were already in flight
+    private static final long MIN_REACTION_DELAY_MS = 15;
+    private static final int DEBUG_FRAMES_AFTER_PRESS = 24;
     private static final int MAX_SAMPLES = 30;
 
     /** Supplies a short description of the stream state (decode time, RTT, display Hz) for logging. */
@@ -47,8 +56,11 @@ public final class LatencyTester {
     private final ArrayDeque<long[]> samples = new ArrayDeque<>(); // {total, hostNet, decodePresent, inputStack}
     private volatile String lastStats = "";
 
-    // Running average of frame sizes (decoder thread)
+    // Running averages of frame size and inter-arrival interval (decoder thread)
     private double avgFrameBytes = -1;
+    private double avgIntervalMs = -1;
+    private long lastFrameArrival = 0;
+    private int debugFramesLeft = 0;
 
     // Measurement in flight
     private final Object lock = new Object();
@@ -60,12 +72,28 @@ public final class LatencyTester {
     private final Runnable timeout = new Runnable() {
         @Override
         public void run() {
+            long hostNet = -1, inputStack = 0;
             synchronized (lock) {
                 if (!measuring) {
                     return;
                 }
                 measuring = false;
+                if (reactionPtsUs >= 0) {
+                    hostNet = tArrival - t0Uptime;
+                    inputStack = Math.max(0, t0Uptime - eventTimeUptime);
+                }
                 reactionPtsUs = -1;
+            }
+            if (hostNet >= 0) {
+                LimeLog.info("Latency test: reaction frame arrived after " + hostNet + " ms but its render was not seen (frame pacing not 'lowest latency'?)");
+                synchronized (samples) {
+                    samples.addLast(new long[] { hostNet, hostNet, 0, inputStack });
+                    while (samples.size() > MAX_SAMPLES) {
+                        samples.removeFirst();
+                    }
+                }
+                publish(activity.getString(R.string.latency_test_render_unmatched));
+                return;
             }
             LimeLog.info("Latency test: no reaction frame within " + TIMEOUT_MS + " ms");
             publish(activity.getString(R.string.latency_test_timeout));
@@ -117,6 +145,7 @@ public final class LatencyTester {
             t.t0Uptime = now;
             t.eventTimeUptime = eventTimeUptimeMs;
             t.reactionPtsUs = -1;
+            t.debugFramesLeft = DEBUG_FRAMES_AFTER_PRESS;
         }
         t.mainHandler.removeCallbacks(t.timeout);
         t.mainHandler.postDelayed(t.timeout, TIMEOUT_MS);
@@ -128,15 +157,39 @@ public final class LatencyTester {
         if (t == null) {
             return;
         }
+        long now = SystemClock.uptimeMillis();
+        String debug = null;
         synchronized (t.lock) {
-            boolean big = t.avgFrameBytes >= 0 && sizeBytes >= Math.max(MIN_REACTION_FRAME_BYTES, t.avgFrameBytes * REACTION_SIZE_FACTOR);
-            if (t.measuring && t.reactionPtsUs < 0 && big) {
-                t.reactionPtsUs = presentationTimeUs;
-                t.tArrival = SystemClock.uptimeMillis();
-            } else {
-                // Only learn the "quiet" frame size from frames that are not the reaction itself
-                t.avgFrameBytes = t.avgFrameBytes < 0 ? sizeBytes : t.avgFrameBytes * 0.9 + sizeBytes * 0.1;
+            long interval = t.lastFrameArrival > 0 ? now - t.lastFrameArrival : -1;
+            t.lastFrameArrival = now;
+
+            boolean sizeJump = t.avgFrameBytes >= 0
+                    && sizeBytes >= t.avgFrameBytes * REACTION_SIZE_FACTOR
+                    && sizeBytes >= t.avgFrameBytes + REACTION_SIZE_MIN_DELTA_BYTES;
+            boolean rateJump = t.avgIntervalMs >= STATIC_INTERVAL_MIN_MS && interval > 0
+                    && interval <= t.avgIntervalMs * REACTION_INTERVAL_FACTOR;
+            boolean candidate = t.measuring && t.reactionPtsUs < 0 && (now - t.t0Uptime) >= MIN_REACTION_DELAY_MS;
+
+            if (t.measuring && t.debugFramesLeft > 0) {
+                t.debugFramesLeft--;
+                debug = String.format(Locale.ROOT, "Latency test frame: +%d ms size=%d avg=%.0f interval=%d avgInterval=%.1f%s",
+                        now - t.t0Uptime, sizeBytes, t.avgFrameBytes, interval, t.avgIntervalMs,
+                        candidate && (sizeJump || rateJump) ? (sizeJump ? " <- size jump" : " <- rate jump") : "");
             }
+
+            if (candidate && (sizeJump || rateJump)) {
+                t.reactionPtsUs = presentationTimeUs;
+                t.tArrival = now;
+            } else {
+                // Learn the "quiet" statistics from frames that are not the reaction itself
+                t.avgFrameBytes = t.avgFrameBytes < 0 ? sizeBytes : t.avgFrameBytes * 0.9 + sizeBytes * 0.1;
+                if (interval > 0 && interval < 1000) {
+                    t.avgIntervalMs = t.avgIntervalMs < 0 ? interval : t.avgIntervalMs * 0.9 + interval * 0.1;
+                }
+            }
+        }
+        if (debug != null) {
+            LimeLog.info(debug);
         }
     }
 
@@ -148,7 +201,7 @@ public final class LatencyTester {
         }
         long total, hostNet, decodePresent, inputStack;
         synchronized (t.lock) {
-            if (!t.measuring || t.reactionPtsUs != presentationTimeUs) {
+            if (!t.measuring || t.reactionPtsUs < 0 || presentationTimeUs < t.reactionPtsUs) {
                 return;
             }
             long now = SystemClock.uptimeMillis();
