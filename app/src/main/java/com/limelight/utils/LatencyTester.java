@@ -39,11 +39,18 @@ public final class LatencyTester {
     private static final int LUMA_DELTA_THRESHOLD = 80;
     private static final int MAX_SAMPLES = 30;
 
+    /** Supplies a short description of the stream state (decode time, RTT, display Hz) for logging. */
+    public interface StatsProvider {
+        String describe();
+    }
+
     private static volatile LatencyTester instance;
 
     private final Activity activity;
     private final SurfaceView surfaceView;
     private final TextView overlay;
+    private final StatsProvider statsProvider;
+    private volatile String lastStats = "";
     private final HandlerThread thread;
     private final Handler handler;
     private final Bitmap probe = Bitmap.createBitmap(PROBE_SIZE, PROBE_SIZE, Bitmap.Config.ARGB_8888);
@@ -60,18 +67,19 @@ public final class LatencyTester {
     private long deadline;
     private int baselineLuma = -1;
 
-    private LatencyTester(Activity activity, SurfaceView surfaceView, TextView overlay) {
+    private LatencyTester(Activity activity, SurfaceView surfaceView, TextView overlay, StatsProvider statsProvider) {
         this.activity = activity;
         this.surfaceView = surfaceView;
         this.overlay = overlay;
+        this.statsProvider = statsProvider;
         this.thread = new HandlerThread("LatencyTester");
         this.thread.start();
         this.handler = new Handler(thread.getLooper());
     }
 
-    public static void start(Activity activity, SurfaceView surfaceView, TextView overlay) {
+    public static void start(Activity activity, SurfaceView surfaceView, TextView overlay, StatsProvider statsProvider) {
         stop();
-        instance = new LatencyTester(activity, surfaceView, overlay);
+        instance = new LatencyTester(activity, surfaceView, overlay, statsProvider);
         overlay.setVisibility(android.view.View.VISIBLE);
         overlay.setText(activity.getString(R.string.latency_test_waiting));
         LimeLog.info("Latency test mode enabled");
@@ -144,8 +152,17 @@ public final class LatencyTester {
                         samples.removeFirst();
                     }
                 }
-                LimeLog.info(String.format(Locale.ROOT, "Latency test: button->frame %d ms (input stack %d ms, luma %d -> %d)",
-                        latency, lastInputStackMs, baselineLuma, luma));
+                String stats = "";
+                if (statsProvider != null) {
+                    try {
+                        stats = statsProvider.describe();
+                    } catch (Exception e) {
+                        stats = "";
+                    }
+                }
+                lastStats = stats;
+                LimeLog.info(String.format(Locale.ROOT, "Latency test: button->frame %d ms (input stack %d ms, luma %d -> %d) [%s]",
+                        latency, lastInputStackMs, baselineLuma, luma, stats));
                 measuring = false;
                 publish(null);
                 return;
@@ -190,6 +207,9 @@ public final class LatencyTester {
                 }
                 String stats = activity.getString(R.string.latency_test_overlay,
                         last, sum / samples.size(), min, max, samples.size(), lastInputStackMs);
+                if (!lastStats.isEmpty()) {
+                    stats = stats + "\n" + lastStats;
+                }
                 text = note != null ? stats + "\n" + note : stats;
             }
         }

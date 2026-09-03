@@ -511,6 +511,12 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                             InputDevice.SOURCE_CLASS_POSITION | // Touchpads
                             InputDevice.SOURCE_CLASS_TRACKBALL // Mice (pointer capture)
             );
+
+            // ViewGroup.onDescendantUnbufferedRequested() only forwards non-pointer (gamepad,
+            // keyboard) requests from the child that currently holds focus, so a request made on
+            // a child view can silently be lost. Requesting on the window's decor view applies to
+            // the whole window regardless of focus.
+            requestUnbufferedInputForWindow();
         }
 
         notificationOverlayView = findViewById(R.id.notificationOverlay);
@@ -776,7 +782,16 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         controllerHandler = new ControllerHandler(this, conn, this, prefConfig);
 
         if (prefConfig.latencyTest && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            com.limelight.utils.LatencyTester.start(this, streamView, latencyOverlayView);
+            com.limelight.utils.LatencyTester.start(this, streamView, latencyOverlayView,
+                    new com.limelight.utils.LatencyTester.StatsProvider() {
+                        @Override
+                        public String describe() {
+                            long rttInfo = MoonBridge.getEstimatedRttInfo();
+                            return "decode " + decoderRenderer.getAverageDecoderLatency() + " ms · rtt "
+                                    + (int) (rttInfo >> 32) + " ms · display "
+                                    + Math.round(getWindowManager().getDefaultDisplay().getRefreshRate()) + " Hz";
+                        }
+                    });
         }
         keyboardTranslator = new KeyboardTranslator(prefConfig);
 
@@ -1321,6 +1336,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
+
+        if (hasFocus) {
+            requestUnbufferedInputForWindow();
+        }
 
         // We can't guarantee the state of modifiers keys which may have
         // lifted while focus was not on us. Clear the modifier state.
@@ -3912,6 +3931,17 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 return handleKeyMultiple(keyEvent);
             default:
                 return false;
+        }
+    }
+
+    private void requestUnbufferedInputForWindow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().getDecorView().requestUnbufferedDispatch(
+                    InputDevice.SOURCE_CLASS_BUTTON |
+                            InputDevice.SOURCE_CLASS_JOYSTICK |
+                            InputDevice.SOURCE_CLASS_POINTER |
+                            InputDevice.SOURCE_CLASS_POSITION |
+                            InputDevice.SOURCE_CLASS_TRACKBALL);
         }
     }
 

@@ -25,6 +25,11 @@ Added on top of 20.2.6:
    its game picture mode.
 
 Both workarounds turn themselves on for TCL/MediaTek TVs on Android 14 or newer and can be toggled by hand.
+
+5. **Input and decoder latency tweaks** (tcl10). Gamepad/keyboard events are requested unbuffered on the window's decor view, so the
+   request cannot be lost when another view holds focus (Android only forwards it from the focused child). The video renderer thread
+   runs at display priority. "Ultra Low Latency" is on by default on MediaTek TVs and additionally asks the MediaTek decoder for its
+   maximum operating rate; the performance overlay shows a "Low-latency mode" line with the options the decoder actually kept.
 Background: [moonlight-stream/moonlight-android#1533](https://github.com/moonlight-stream/moonlight-android/issues/1533).
 
 ## Measuring latency (built in)
