@@ -311,7 +311,7 @@
     <string name="latency_test_waiting">Latency test: press A/B/X/Y on the black test page</string>
     <string name="latency_test_timeout">no reaction frame within 2 s (is the test page full screen? works with frame pacing "Prefer lowest latency")</string>
     <string name="latency_test_render_unmatched">reaction frame received but its render was not seen: value above is host+net only (set frame pacing to "Prefer lowest latency")</string>
-    <string name="latency_test_overlay">Latency: last %1$d ms · avg %2$d · min %3$d · max %4$d · n=%5$d\ninput→app %6$d ms · host+net %7$d ms · decode+present %8$d ms</string>
+    <string name="latency_test_overlay">Latency: last %1$d ms · avg %2$d · min %3$d · max %4$d · n=%5$d\navg input→app %6$d ms · host+net %7$d ms · decode+present %8$d ms</string>
     <string name="title_enable_post_stream_toast">Show latency message after streaming</string>
     <string name="summary_enable_post_stream_toast">Display a latency information message after the stream ends</string>
 
