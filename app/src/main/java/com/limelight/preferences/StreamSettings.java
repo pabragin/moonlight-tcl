@@ -339,8 +339,8 @@ public class StreamSettings extends AppCompatActivity {
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
 
-            // Turning the rumble block off on an affected TV reboots it on the first rumble command
-            // (confirmed on a TCL C8K, Android 14). Ask before applying.
+            // Turning the rumble block off on an affected TV leads to reboots sooner or later (race in
+            // system_server; confirmed on a TCL C8K, Android 14: an hour of play, then two reboots). Ask first.
             final CheckBoxPreference blockRumblePref = findPreference("checkbox_tv_block_rumble");
             if (blockRumblePref != null && PreferenceConfiguration.isTvWithBrokenInputRumble(activity)) {
                 blockRumblePref.setOnPreferenceChangeListener((preference, newValue) -> {

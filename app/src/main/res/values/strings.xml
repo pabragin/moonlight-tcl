@@ -108,7 +108,7 @@
     <string name="conn_client_latency_compositor">Compositor (release → screen): avg %1$d ms, max %2$d ms over %3$d frames, TV workaround %4$s</string>
     <string name="conn_workaround_on">on</string>
     <string name="tv_block_rumble_warning_title">Rumble reboots this TV</string>
-    <string name="tv_block_rumble_warning_text">On this TV firmware (TCL, Android 14) the first rumble command sent through the Android input stack crashes the system and reboots the TV. The only safe rumble is an Xbox controller on a USB cable with the USB driver enabled.\n\nTurn the block off anyway?</string>
+    <string name="tv_block_rumble_warning_text">On this TV firmware (TCL, Android 14) gamepad rumble sent through the Android input stack hits a race in the system process: it can work for an hour and then reboot the TV, sometimes twice in a row. The only safe rumble is an Xbox controller on a USB cable with the USB driver enabled.\n\nTurn the block off anyway?</string>
     <string name="tv_block_rumble_warning_disable">Turn off anyway</string>
     <string name="tv_block_rumble_warning_keep">Keep blocking</string>
     <string name="conn_workaround_off">off</string>
