@@ -199,8 +199,9 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private static final int COMPOSITOR_KEEP_ALIVE_INTERVAL_MS = 1000;
     private static final int GRACEFUL_EXIT_DELAY_MS = 200;
     private final Handler workaroundHandler = new Handler(Looper.getMainLooper());
-    private View compositorKeepAliveView;
+    private SurfaceView compositorKeepAliveView;
     private boolean compositorKeepAliveToggle;
+    private boolean compositorKeepAliveSurfaceReady;
     private boolean streamTeardownStarted;
     private final Runnable compositorKeepAliveRunnable = new Runnable() {
         @Override
@@ -208,9 +209,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             if (compositorKeepAliveView == null || streamTeardownStarted) {
                 return;
             }
-            // Alternate between two (invisible) alpha values so the window really gets redrawn
+            // Repaint the 2x2 px surface now and then so it always has a fresh buffer; the colour
+            // alternates between two practically transparent values
             compositorKeepAliveToggle = !compositorKeepAliveToggle;
-            compositorKeepAliveView.setBackgroundColor(compositorKeepAliveToggle ? 0x02000000 : 0x01000000);
+            paintCompositorKeepAlive();
             workaroundHandler.postDelayed(this, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
         }
     };
@@ -247,6 +249,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private boolean floatingButtonShown;
     private boolean overlayToggleZoomButtonShown;
     private TextView notificationOverlayView;
+    private TextView latencyOverlayView;
     private int requestedNotificationOverlayVisibility = View.GONE;
     private View performanceOverlayView;
 
@@ -539,6 +542,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
 
         notificationOverlayView = findViewById(R.id.notificationOverlay);
+        latencyOverlayView = findViewById(R.id.latencyOverlay);
 
         performanceOverlayView = findViewById(R.id.performanceOverlay);
 
@@ -798,6 +802,19 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 httpsPort, uniqueId, config,
                 PlatformBinding.getCryptoProvider(this), serverCert);
         controllerHandler = new ControllerHandler(this, conn, this, prefConfig);
+
+        if (prefConfig.latencyTest) {
+            com.limelight.utils.LatencyTester.start(this, streamContainer.getSurfaceView(), latencyOverlayView,
+                    new com.limelight.utils.LatencyTester.StatsProvider() {
+                        @Override
+                        public String describe() {
+                            long rttInfo = MoonBridge.getEstimatedRttInfo();
+                            return "decode " + decoderRenderer.getAverageDecoderLatency() + " ms · rtt "
+                                    + (int) (rttInfo >> 32) + " ms · display "
+                                    + Math.round(getWindowManager().getDefaultDisplay().getRefreshRate()) + " Hz";
+                        }
+                    });
+        }
         keyboardTranslator = new KeyboardTranslator(prefConfig);
 
         InputManager inputManager = (InputManager) getSystemService(Context.INPUT_SERVICE);
@@ -1663,6 +1680,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         instance = null;
         timerHandler.removeCallbacksAndMessages(null);
         workaroundHandler.removeCallbacksAndMessages(null);
+        com.limelight.utils.LatencyTester.stop();
 
         if (prefConfig.enableFullExDisplay) handleDisplayRemoved();
 
@@ -3948,9 +3966,52 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             return;
         }
 
-        LimeLog.info("Android TV compositor workaround enabled");
+        LimeLog.info("Android TV compositor workaround enabled (2x2 px overlay surface)");
+        // Above the stream SurfaceView, below the window. Must be set before the surface exists.
+        compositorKeepAliveView.setZOrderMediaOverlay(true);
+        compositorKeepAliveView.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
+        compositorKeepAliveView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                compositorKeepAliveSurfaceReady = true;
+                paintCompositorKeepAlive();
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                paintCompositorKeepAlive();
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                compositorKeepAliveSurfaceReady = false;
+            }
+        });
         compositorKeepAliveView.setVisibility(View.VISIBLE);
         workaroundHandler.postDelayed(compositorKeepAliveRunnable, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
+    }
+
+    private void paintCompositorKeepAlive() {
+        if (compositorKeepAliveView == null || !compositorKeepAliveSurfaceReady) {
+            return;
+        }
+        SurfaceHolder holder = compositorKeepAliveView.getHolder();
+        android.graphics.Canvas canvas = null;
+        try {
+            canvas = holder.lockCanvas();
+            if (canvas != null) {
+                canvas.drawColor(compositorKeepAliveToggle ? 0x02000000 : 0x01000000, android.graphics.PorterDuff.Mode.SRC);
+            }
+        } catch (Exception e) {
+            // Surface may be going away
+        } finally {
+            if (canvas != null) {
+                try {
+                    holder.unlockCanvasAndPost(canvas);
+                } catch (Exception ignored) {
+                }
+            }
+        }
     }
 
     /**

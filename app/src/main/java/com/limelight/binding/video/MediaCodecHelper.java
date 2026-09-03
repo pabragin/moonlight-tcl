@@ -555,15 +555,6 @@ public class MediaCodecHelper {
 
         boolean setNewOption = false;
 
-//derflacco
-        // NVIDIA Tegra extra low-latency toggles
-        if (isNvidiaDecoder(decoderInfo.getName())) {
-            safeSet(videoFormat, "media.low-latency.enable", 1);
-            safeSet(videoFormat, "vendor.low-latency.enable", 1);
-            safeSet(videoFormat, "disable-output-reorder", 1);
-            safeSet(videoFormat, "vendor.nvidia.disable-output-reorder", 1);
-            setNewOption = true;
-        }
         if (tryNumber < 1) {
             // Official Android 11+ low latency option (KEY_LOW_LATENCY).
             videoFormat.setInteger("low-latency", 1);
@@ -633,10 +624,7 @@ public class MediaCodecHelper {
                 //
                 // We will first try both, then try vendor.qti-ext-dec-low-latency.enable alone if that fails
                 if (tryNumber < 4) {
-                    // Adjust picture-order flag: 0 for OMX.qcom (disable reordering), 1 for C2.*
-                    boolean __isOmxQcom = decoderInfo.getName() != null &&
-                            decoderInfo.getName().toLowerCase(java.util.Locale.US).startsWith("omx.qcom");
-                    safeSet(videoFormat, "vendor.qti-ext-dec-picture-order.enable", __isOmxQcom ? 0 : 1);
+                    videoFormat.setInteger("vendor.qti-ext-dec-picture-order.enable", 1);
                     setNewOption = true;
                 }
                 if (tryNumber < 5) {
@@ -1139,38 +1127,5 @@ public class MediaCodecHelper {
     }
 
     //derflacco
-    public static void applyExtraVendorOptions(MediaFormat videoFormat, String decoderName) {
-        if (videoFormat == null || decoderName == null) return;
-        // NVIDIA Tegra (Shield TV): enable generic low-latency + disable frame reordering
-        if (isNvidiaDecoder(decoderName)) {
-            safeSet(videoFormat, "media.low-latency.enable", 1);
-            safeSet(videoFormat, "vendor.low-latency.enable", 1); // fallback generic vendor key
-            safeSet(videoFormat, "disable-output-reorder", 1);
-            safeSet(videoFormat, "vendor.nvidia.disable-output-reorder", 1); // in case vendor namespace is required
-        }
-        // Qualcomm: ensure vendor low latency and frame-order tweaks
-        if (isQualcommDecoder(decoderName)) {
-            safeSet(videoFormat, "vendor.qti-ext-dec-low-latency.enable", 1);
-            safeSet(videoFormat, "vendor.qti-ext-dec-picture-order.enable", 0);
-            safeSet(videoFormat, "vendor.qti-ext-dec-frame-drop.enable", 1);
-        }
-
-        // Legacy Qualcomm OMX decoders: apply vendor keys + AOSP knobs
-        if (decoderName != null && decoderName.toLowerCase(java.util.Locale.US).startsWith("omx.qcom")) {
-            // Low latency & reordering off
-            safeSet(videoFormat, "vendor.qti-ext-dec-low-latency.enable", 1);
-            safeSet(videoFormat, "vendor.qti-ext-dec-picture-order.enable", 0);
-            safeSet(videoFormat, "vendor.qti-ext-dec-frame-drop.enable", 1);
-            // Reduce DPB output delay on older OMX stacks
-            safeSet(videoFormat, "vendor.qti-ext-dec-dpb-output-delay.enable", 0);
-            // Prefer IDR when possible
-            safeSet(videoFormat, "vendor.qti-ext-dec-picture-type.enable", 0); //ignored in logs
-            // Generic AOSP scheduling hints
-            try { videoFormat.setInteger(android.media.MediaFormat.KEY_OPERATING_RATE, (int)Short.MAX_VALUE); } catch (Throwable ignored) {}
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                try { videoFormat.setInteger(android.media.MediaFormat.KEY_PRIORITY, 0); } catch (Throwable ignored) {}
-            }
-        }
-    }
 
 }

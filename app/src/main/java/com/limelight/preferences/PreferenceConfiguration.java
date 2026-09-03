@@ -101,6 +101,7 @@ public class PreferenceConfiguration {
     private static final String ENABLE_RUMBLE_PREF_STRING = "checkbox_enable_rumble";
     private static final String TV_COMPOSITOR_WORKAROUND_PREF_STRING = "checkbox_tv_compositor_workaround";
     private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
+    private static final String LATENCY_TEST_PREF_STRING = "checkbox_latency_test";
     private static final String PREVENT_PACKET_LOSS_PREF_STRING = "checkbox_prevent_packet_loss";
 
     private static final String LIST_ONSCREEN_KEYBOARD_ALIGN_MODE = "list_onscreen_keyboard_align_mode";
@@ -381,6 +382,7 @@ public class PreferenceConfiguration {
     // Android TV firmware workarounds (see isTvWithBrokenCompositor()/isTvWithBrokenInputRumble())
     public boolean tvCompositorWorkaround;
     public boolean tvBlockRumble;
+    public boolean latencyTest;
 
     public boolean rememberZoomPan;
     public float zoomScale;
@@ -1079,6 +1081,7 @@ private static int getFramePacingValue(Context context) {
         // Default to "on" only on TVs known to need the workarounds; the user can override either way
         config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
         config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
+        config.latencyTest = prefs.getBoolean(LATENCY_TEST_PREF_STRING, false);
 
         // Read custom values
         config.customResolution = prefs.getString(CUSTOM_RESOLUTION_PREF_STRING, null);

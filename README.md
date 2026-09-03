@@ -23,8 +23,9 @@ What is changed compared to Artemis:
 
 1. **Compositor workaround** (`Settings → Advanced Settings → Android TV compositor workaround`). The TV's compositor hangs when it has to
    reconfigure while the stream video is the only layer on screen and is still receiving frames (volume OSD, app switch, leaving the
-   stream). The app now keeps a tiny invisible UI layer above the video at all times, the same effect people got by enabling the
-   performance overlay, and on exit it stops the decoder and removes the video layer *before* the activity transition starts.
+   stream). The app keeps a separate 2x2 px surface above the video at all times, so the video is never the only layer the compositor
+   sees while the window's own UI layer stays transparent and cheap, and on exit it stops the decoder and removes the video layer
+   *before* the activity transition starts.
 2. **Gamepad rumble block** (`Settings → Gamepad → Block gamepad rumble on this TV`). The firmware has a race in `system_server`'s
    InputReader that crashes when an `InputDevice` vibrates, which shows up as the TV rebooting mid-game. Rumble through the Android
    input stack is blocked; USB gamepads driven by Moonlight's own USB driver still rumble.
@@ -50,6 +51,11 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    (a TV stream only needs the plain SurfaceView path). Gamepad/keyboard input is requested unbuffered on the window's decor view,
    so the request cannot be lost when another view takes focus.
 
+
+8. **Built-in latency test** (`Settings → Advanced Settings → Latency test mode`). Open [`tools/latency-test.html`](tools/latency-test.html)
+   full screen on the PC (press **F**; a small square keeps the host capturing at full rate), start the stream and press A/B/X/Y.
+   The overlay shows the button-to-frame latency (last/avg/min/max) and the averages of input→app, host+net and decode+present;
+   the TV panel's own delay is excluded, so app versions can be compared on the same TV. Each sample is logged to logcat.
 
 ## Download and install
 

@@ -50,6 +50,20 @@
         android:preferKeepClear="true"
         android:visibility="gone" />
 
+    <!-- Latency test mode results (see LatencyTester) -->
+    <TextView
+        android:id="@+id/latencyOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="24dp"
+        android:padding="6dp"
+        android:textSize="14sp"
+        android:textColor="#FFFFFFFF"
+        android:background="#A0000000"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/performanceOverlay"
         android:orientation="vertical"
@@ -88,15 +102,14 @@
 
     </LinearLayout>
 
-    <!-- Android TV compositor workaround: a 1x1dp, practically transparent view that keeps this
-         window's UI layer visible to SurfaceFlinger while streaming, so the video SurfaceView is
-         never the only layer on screen. See Game.startCompositorKeepAlive(). -->
-    <View
+    <!-- Android TV compositor workaround: a separate 2x2 px surface above the video, so the video
+         SurfaceView is never the only layer the compositor sees, while the window's own (full-screen)
+         UI layer stays fully transparent and culled. See Game.startCompositorKeepAlive(). -->
+    <SurfaceView
         android:id="@+id/compositorKeepAlive"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
+        android:layout_width="2px"
+        android:layout_height="2px"
         android:layout_gravity="bottom|end"
-        android:background="#01000000"
         android:visibility="gone" />
 
     <!-- Floating Menu Button -->
