@@ -45,6 +45,8 @@
 
     <application
         android:name=".ArtemisApplication"
+        android:appCategory="game"
+        android:isGame="true"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/backup_rules_s"

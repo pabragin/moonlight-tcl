@@ -1,83 +1,54 @@
-# Artemis Android
+# Moonlight TCL (minimal)
 
-Previously named Moonlight Noir
+A build of the [Artemis](https://github.com/ClassicOldSong/moonlight-android) game streaming client (a fork of
+[Moonlight Android](https://github.com/moonlight-stream/moonlight-android)) for TCL Google TVs running **Android 14 firmware**
+(C8K, C6K, QM6K, QM8K and similar).
 
-An open source client for [Apollo](https://github.com/ClassicOldSong/Apollo)/[Sunshine](https://github.com/LizardByte/Sunshine).
+## What this branch is
 
-Artemis Android will allow you to stream your collection of games from your Windows PC to your Android device,
-whether in your own home or over the internet.
+This branch (`tcl-minimal`) is Artemis **20.2.6 exactly as released in August 2025** (commit `4de0227f`) plus the smallest
+possible TCL layer. Nothing that landed in Artemis after that commit is included: on TCL the later renderer changes made
+controller response noticeably worse, so the video, decoder and input code here is the untouched 20.2.6 code.
 
-Artemis is currently the best fork of Moonlight with loads of optimizations for office usage.
+Added on top of 20.2.6:
 
-A more seamless experience with virtual display will be Artemis paired with [Apollo](https://github.com/ClassicOldSong/Apollo).
+1. **Separate app**: package `com.limelight.tcl`, name "Moonlight TCL", own TV banner. Installs next to official Artemis and is
+   not replaced by its updates. Only `armeabi-v7a` (TCL/MediaTek TVs run 32-bit apps; 64-bit TVs install it too).
+2. **Compositor workaround** (`Settings → Advanced Settings → Android TV compositor workaround`). The TV's compositor hangs when it
+   has to reconfigure while the stream video is the only layer on screen and is still receiving frames (volume OSD, app switch,
+   leaving the stream). The app keeps a tiny invisible UI layer above the video and, on exit, stops the decoder and removes the
+   video layer *before* the activity transition starts.
+3. **Gamepad rumble block** (`Settings → Gamepad → Block gamepad rumble on this TV`). The firmware has a race in `system_server`'s
+   InputReader that crashes when an `InputDevice` vibrates, which shows up as the TV rebooting mid-game. Rumble through the Android
+   input stack is blocked; USB gamepads driven by Moonlight's own USB driver still rumble.
+4. **4K defaults** for a fresh install: 3840x2160, 60 FPS, 100 Mbps. Declared as a game (`appCategory="game"`) so the TV may apply
+   its game picture mode.
 
-# Features
+Both workarounds turn themselves on for TCL/MediaTek TVs on Android 14 or newer and can be toggled by hand.
+Background: [moonlight-stream/moonlight-android#1533](https://github.com/moonlight-stream/moonlight-android/issues/1533).
 
-If you switch back to the main stream version, you'll be missing the following awesome features which are very unlikely to be added there:
+## Download
 
-1. Custom virtual buttons with import and export support.
-2. [Custom resolutions](https://github.com/moonlight-stream/moonlight-android/pull/1349).
-3. Custom bitrates.
-4. [Multiple mouse mode switching](https://github.com/moonlight-stream/moonlight-android/pull/1304) (normal mouse, [multi-touch](https://github.com/moonlight-stream/moonlight-android/pull/1364), touchpad, disabled, local cursor mode).
-5. Optimized virtual gamepad skins and free joystick.
-6. External monitor mode.
-7. Joycon D-pad support.
-8. Simplified performance information display.
-9. [Game back menu](https://github.com/moonlight-stream/moonlight-android/pull/1171).
-10. Custom shortcut commands.
-11. Easy soft keyboard switching.
-12. Portrait mode.
-13. Display on top mode, useful for foldable phones.
-14. [Virtual touchpad space and sensitivity adjustment](https://github.com/moonlight-stream/moonlight-android/issues/1348#issuecomment-2236344729) for playing right-click view games, such as Warcraft.
-15. Force use device's own vibration motor (in case your gamepad's vibration is not effective).
-16. Gamepad debugging page to view gamepad vibration and gyroscope information, as well as Android kernel version information.
-17. Trackpad tap/scrolling support
-18. Natural track pad mode with touch screen
-19. Non-QWERTY keyboard layout support
-20. Quick Meta key with physical BACK button
-21. Frame rate lock fix for some devices
-22. Video scale mode: Fit/Fill/Stretch
-23. View pan/zoom support
-24. Rotate screen in-game
-25. Add option to quit app directly
-26. Samsung DeX scrolling support
-27. Proper click/scroll/right-click for trackpad on generic Android tablet when using local cursor
-28. Virtual Display integration with [Apollo](https://github.com/ClassicOldSong/Apollo)
-29. Server Command integration with [Apollo](https://github.com/ClassicOldSong/Apollo)
-30. Clipboard sync (requires Apollo)
-
-# Disclaimer
-
-This is the `go away` version of Moonlight Android.
-
-I got kicked from Moonlight and Sunshine's Discord server literally for helping people out.
-
-This is what I got for finding a bug, opened an issue, getting no response, troubleshoot myself, fixed the issue myself, shared it by PR to the main repo hoping my efforts can help someone else during the maintainance gap.
-
-Yes, I'm going away. Fixes and improvements on this fork are not necessarily be merged to the main repo either. I have also started [a fork of Sunshine called Apollo](https://github.com/ClassicOldSong/Apollo) and will add useful features that will never get merged by the main repo shortly. [Apollo](https://github.com/ClassicOldSong/Apollo) and [Moonlight Noir](https://github.com/ClassicOldSong/moonlight-android) will no longer be compatible with OG Sunshine and OG Moonlight eventually, but they'll work even better with much more carefully designed features.
-
-The main repo had stayed silent for 5 months, with nobody actually responding to issues, and people are getting totally no help besides the limited FAQ in their Discord server. I tried to answer issues and questions, solve problems within my ablilty but I got kicked out just for helping others.
-
-**PRs for feature improvements are welcomed here unlike the main repo, your ideas are more likely to be appreciated and your efforts are actually being respected. We welcome people who can and willing to share their efforts, helping yourselves and other people in need.**
-
-**Update**: They have contacted me and apologized for this incident, but the fact it **happened** still motivated me to start my own fork.
-
-## Downloads
-* [Download APK directly](https://github.com/ClassicOldSong/moonlight-android/releases)
-* [Use Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.noir%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FClassicOldSong%2Fmoonlight-android%22%2C%22author%22%3A%22ClassicOldSong%22%2C%22name%22%3A%22Artemis%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22nonRoot%5C%22%2C%5C%22matchGroutToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D) (recommended)
+APKs are on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page. Install with a file manager, the Downloader
+app, or `adb install`; pair with your PC again on first start (settings are per app).
 
 ## Building
-* Install Android Studio and the Android NDK
-* Run ‘git submodule update --init --recursive’ from within moonlight-android/
-* In moonlight-android/, create a file called ‘local.properties’. Add an ‘ndk.dir=’ property to the local.properties file and set it equal to your NDK directory.
-* Build the APK using Android Studio or gradle
 
-## Authors
+JDK 17, Android SDK with NDK `27.0.12077973`, `git submodule update --init --recursive`, then
+`./gradlew :app:assembleNonRoot_gameRelease` and `zipalign` + `apksigner sign` the APK from
+`app/build/outputs/apk/nonRoot_game/release/` with your own keystore. Do not build with `-Pandroid.injected.build.abi`: it marks the
+APK `testOnly` and the TV's installer rejects it.
 
-* [Cameron Gutman](https://github.com/cgutman)  
-* [Diego Waxemberg](https://github.com/dwaxemberg)  
-* [Aaron Neyer](https://github.com/Aaronneyer)  
-* [Andrew Hennessy](https://github.com/yetanothername)
+## Credits and license
 
-Moonlight is the work of students at [Case Western](http://case.edu) and was
-started as a project at [MHacks](http://mhacks.org).
+All streaming functionality is the work of the Moonlight and Artemis authors: [Cameron Gutman](https://github.com/cgutman),
+[Diego Waxemberg](https://github.com/dwaxemberg), [Aaron Neyer](https://github.com/Aaronneyer), [Andrew Hennessy](https://github.com/yetanothername),
+[ClassicOldSong](https://github.com/ClassicOldSong) and the contributors of both projects. Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
+
+---
+
+## Кратко по-русски
+
+Ветка `tcl-minimal` — это Artemis 20.2.6 ровно в том виде, как он вышел в августе 2025 (`4de0227f`), плюс минимум для TCL:
+отдельный пакет `com.limelight.tcl`, обходы зависания композитора и вибрации на прошивке Android 14, только armeabi-v7a и
+настройки 4K по умолчанию. Всё, что Artemis добавил после этого коммита, сюда не вошло: на TCL это ухудшало отклик геймпада.

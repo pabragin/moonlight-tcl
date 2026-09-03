@@ -10,7 +10,7 @@
         android:title="@string/category_video_settings"
         app:iconSpaceReserved="false">
         <ListPreference
-            android:defaultValue="1280x720"
+            android:defaultValue="3840x2160"
             android:entries="@array/resolution_names"
             android:entryValues="@array/resolution_values"
             android:key="list_resolution"
@@ -240,6 +240,12 @@
             android:key="checkbox_vibrate_fallback"
             android:summary="@string/summary_checkbox_vibrate_fallback"
             android:title="@string/title_checkbox_vibrate_fallback"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="checkbox_tv_block_rumble"
+            android:summary="@string/summary_tv_block_rumble"
+            android:title="@string/title_tv_block_rumble"
             app:iconSpaceReserved="false" />
         <com.limelight.preferences.SeekBarPreference
             android:defaultValue="100"
@@ -859,6 +865,12 @@
             android:key="checkbox_full_range"
             android:summary="@string/summary_full_range"
             android:title="@string/title_full_range"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="checkbox_tv_compositor_workaround"
+            android:summary="@string/summary_tv_compositor_workaround"
+            android:title="@string/title_tv_compositor_workaround"
             app:iconSpaceReserved="false" />
         <ListPreference
             android:defaultValue="auto"

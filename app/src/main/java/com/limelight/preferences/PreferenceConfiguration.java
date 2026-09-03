@@ -3,8 +3,11 @@ package com.limelight.preferences;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.view.Display;
+
+import java.util.Locale;
 
 import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.profiles.ProfilesManager;
@@ -70,6 +73,8 @@ public class PreferenceConfiguration {
     private static final String ENABLE_HDR_PREF_STRING = "checkbox_enable_hdr";
     private static final String ENABLE_PIP_PREF_STRING = "checkbox_enable_pip";
     private static final String ENABLE_PERF_OVERLAY_STRING = "checkbox_enable_perf_overlay";
+    private static final String TV_COMPOSITOR_WORKAROUND_PREF_STRING = "checkbox_tv_compositor_workaround";
+    private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
     private static final String ENABLE_PERF_LOGGING = "checkbox_enable_perf_logging";
     private static final String BIND_ALL_USB_STRING = "checkbox_usb_bind_all";
     private static final String MOUSE_EMULATION_STRING = "checkbox_mouse_emulation";
@@ -132,7 +137,8 @@ public class PreferenceConfiguration {
 
     private static final String CHECKBOX_ENABLE_COMMIT_TEXT = "checkbox_enable_commit_text";
 
-    static final String DEFAULT_RESOLUTION = "1280x720";
+    // This build targets 4K TVs (TCL C8K and similar): default to 4K60 at 100 Mbps
+    static final String DEFAULT_RESOLUTION = "3840x2160";
     static final String DEFAULT_FPS = "60";
     private static final boolean DEFAULT_ENABLE_ULTRA_LOW_LATENCY = false;
     private static final boolean DEFAULT_ENFORCE_DISPLAY_MODE = false;
@@ -253,6 +259,10 @@ public class PreferenceConfiguration {
     public boolean enableHdr;
     public boolean enablePip;
     public boolean enablePerfOverlay;
+
+    // Android TV firmware workarounds (see isTvWithBrokenCompositor()/isTvWithBrokenInputRumble())
+    public boolean tvCompositorWorkaround;
+    public boolean tvBlockRumble;
     public boolean enablePerfLogging;
     //简化版性能信息
     public boolean enablePerfOverlayLite;
@@ -494,7 +504,7 @@ public class PreferenceConfiguration {
             5,
             10,
             20,
-            40,
+            50, // 4K60 -> 100 Mbps (upstream uses 40 -> 80 Mbps)
             -1
         };
 
@@ -526,6 +536,51 @@ public class PreferenceConfiguration {
         }
 
         return (int)Math.round(resolutionFactor * frameRateFactor) * 1000;
+    }
+
+    public static boolean isTvDevice(Context context) {
+        PackageManager manager = context.getPackageManager();
+        if (manager != null) {
+            if (manager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)) {
+                return true;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 &&
+                    manager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                return true;
+            }
+        }
+        Configuration config = context.getResources().getConfiguration();
+        return (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION;
+    }
+
+    private static boolean isTclDevice() {
+        String vendor = (Build.MANUFACTURER + " " + Build.BRAND).toLowerCase(Locale.ROOT);
+        return vendor.contains("tcl");
+    }
+
+    private static boolean isMediaTekSoc() {
+        String hw = (Build.HARDWARE + " " + Build.BOARD).toLowerCase(Locale.ROOT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            hw += " " + Build.SOC_MANUFACTURER.toLowerCase(Locale.ROOT);
+        }
+        return hw.contains("mediatek") || hw.contains("mtk") || Build.HARDWARE.toLowerCase(Locale.ROOT).startsWith("mt");
+    }
+
+    // TCL Google TVs on Android 14 firmware hard-freeze when SurfaceFlinger has to reconfigure the
+    // display pipeline while the stream's video SurfaceView is the only visible layer (volume OSD,
+    // app switch, stream exit). See https://github.com/moonlight-stream/moonlight-android/issues/1533
+    public static boolean isTvWithBrokenCompositor(Context context) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && isTvDevice(context)
+                && (isTclDevice() || isMediaTekSoc());
+    }
+
+    // The same firmware has an InputReader race in system_server triggered by InputDevice
+    // vibrations (gamepad rumble) that crashes system_server and reboots the TV mid-game.
+    public static boolean isTvWithBrokenInputRumble(Context context) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && isTvDevice(context)
+                && isTclDevice();
     }
 
     public static boolean getDefaultSmallMode(Context context) {
@@ -881,6 +936,10 @@ public class PreferenceConfiguration {
         config.enableHdr = prefs.getBoolean(ENABLE_HDR_PREF_STRING, DEFAULT_ENABLE_HDR) && !isShieldAtvFirmwareWithBrokenHdr();
         config.enablePip = prefs.getBoolean(ENABLE_PIP_PREF_STRING, DEFAULT_ENABLE_PIP);
         config.enablePerfOverlay = prefs.getBoolean(ENABLE_PERF_OVERLAY_STRING, DEFAULT_ENABLE_PERF_OVERLAY);
+
+        // Default to "on" only on TVs known to need the workarounds; the user can override either way
+        config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
+        config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
         config.enablePerfLogging = prefs.getBoolean(ENABLE_PERF_LOGGING, DEFAULT_ENABLE_PERF_LOGGING);
         config.enablePerfOverlayLite = prefs.getBoolean("checkbox_enable_perf_overlay_lite",DEFAULT_ENABLE_PERF_OVERLAY);
         config.enablePerfOverlayBottom = prefs.getBoolean("checkbox_enable_perf_overlay_bottom",DEFAULT_PERF_OVERLAY_BOTTOM);

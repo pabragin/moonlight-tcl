@@ -186,6 +186,29 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     public boolean connected = false;
     private boolean autoEnterPip = false;
     private boolean surfaceCreated = false;
+
+    // Android TV compositor workaround (prefConfig.tvCompositorWorkaround). Some TV firmwares
+    // (TCL on Android 14) freeze the whole TV when SurfaceFlinger reconfigures composition while
+    // the stream's video SurfaceView is the only visible layer and is still receiving frames.
+    // We keep a tiny UI view above the video and redraw it periodically, and on exit we stop the
+    // decoder and remove the video layer before the activity transition starts.
+    private static final int COMPOSITOR_KEEP_ALIVE_INTERVAL_MS = 1000;
+    private static final int GRACEFUL_EXIT_DELAY_MS = 200;
+    private final Handler workaroundHandler = new Handler(Looper.getMainLooper());
+    private View compositorKeepAliveView;
+    private boolean compositorKeepAliveToggle;
+    private boolean streamTeardownStarted;
+    private final Runnable compositorKeepAliveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (compositorKeepAliveView == null || streamTeardownStarted) {
+                return;
+            }
+            compositorKeepAliveToggle = !compositorKeepAliveToggle;
+            compositorKeepAliveView.setBackgroundColor(compositorKeepAliveToggle ? 0x02000000 : 0x01000000);
+            workaroundHandler.postDelayed(this, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
+        }
+    };
     private boolean attemptedConnection = false;
     private int suppressPipRefCount = 0;
     private String pcName;
@@ -621,6 +644,8 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 performanceOverlayView.setLayoutParams(params);
             }
         }
+
+        startCompositorKeepAlive();
 
         decoderRenderer = new MediaCodecDecoderRenderer(
                 this,
@@ -1253,6 +1278,14 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     public void onUserLeaveHint() {
         super.onUserLeaveHint();
 
+        // Home/Recents: unless we may enter PiP (or a system prompt such as the USB permission
+        // dialog is on top of us), the stream is torn down in onStop() anyway, so on affected TVs
+        // drop the video layer before the launcher covers it.
+        boolean mayEnterPip = prefConfig.enablePip && connected && !isOnExternalDisplay();
+        if (!mayEnterPip && suppressPipRefCount == 0) {
+            beginStreamTeardownForWorkaround();
+        }
+
         // PiP is only supported on Oreo and later, and we don't need to manually enter PiP on
         // Android S and later. On Android R, we will use onPictureInPictureRequested() instead.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
@@ -1583,6 +1616,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         super.onDestroy();
 
         instance = null;
+        workaroundHandler.removeCallbacksAndMessages(null);
 
         if (prefConfig.enableFullExDisplay) handleDisplayRemoved();
 
@@ -1623,6 +1657,9 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     @Override
     protected void onPause() {
         if (isFinishing()) {
+            // Fallback for exit paths that didn't go through finishGracefully()
+            beginStreamTeardownForWorkaround();
+
             // Stop any further input device notifications before we lose focus (and pointer capture)
             if (controllerHandler != null) {
                 controllerHandler.stop();
@@ -1822,7 +1859,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
                     // Quit
                     case KeyEvent.KEYCODE_Q:
-                        finish();
+                        finishGracefully();
                         break;
 
                     // Toggle cursor visibility
@@ -3514,7 +3551,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                                 message, true);
                     }
                     else {
-                        finish();
+                        finishGracefully();
                     }
                 }
             }
@@ -3869,10 +3906,77 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
     }
 
+    private void startCompositorKeepAlive() {
+        compositorKeepAliveView = findViewById(R.id.compositorKeepAlive);
+        if (compositorKeepAliveView == null || !prefConfig.tvCompositorWorkaround || onExternelDisplay) {
+            return;
+        }
+
+        LimeLog.info("Android TV compositor workaround enabled");
+        compositorKeepAliveView.setVisibility(View.VISIBLE);
+        workaroundHandler.postDelayed(compositorKeepAliveRunnable, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
+    }
+
+    /**
+     * Stops feeding frames to the stream surface and removes the video layer from the screen while
+     * this window is still the top one. On affected TVs the compositor must never have to
+     * reconfigure (app switch, exit) while the video layer is actively receiving frames.
+     */
+    private void beginStreamTeardownForWorkaround() {
+        if (prefConfig == null || !prefConfig.tvCompositorWorkaround || onExternelDisplay || streamTeardownStarted) {
+            return;
+        }
+        streamTeardownStarted = true;
+        workaroundHandler.removeCallbacks(compositorKeepAliveRunnable);
+
+        LimeLog.info("Android TV compositor workaround: removing video layer before leaving");
+
+        if (attemptedConnection && decoderRenderer != null) {
+            // Stop the renderer thread right away so no further buffers are queued to the surface
+            decoderRenderer.prepareForStop();
+        }
+
+        // Hiding the SurfaceView destroys the stream surface, which runs surfaceDestroyed() ->
+        // stopConnection(). Our window stays on screen (black), so the compositor only drops the
+        // idle video layer; nothing else changes until the activity transition starts.
+        if (streamView != null) {
+            streamView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * finish() replacement for user-initiated exits. On affected TVs it first removes the video
+     * layer and gives SurfaceFlinger a couple of vsyncs to present the frame without it.
+     */
+    private void finishGracefully() {
+        if (isFinishing()) {
+            return;
+        }
+
+        if (prefConfig == null || !prefConfig.tvCompositorWorkaround || onExternelDisplay) {
+            finish();
+            return;
+        }
+
+        beginStreamTeardownForWorkaround();
+        workaroundHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isFinishing()) {
+                    finish();
+                }
+            }
+        }, GRACEFUL_EXIT_DELAY_MS);
+    }
+
     @Override
     public void onBackPressed() {
         if(prefConfig.enableBackMenu){
             showGameMenu(null);
+            return;
+        }
+        if (prefConfig.tvCompositorWorkaround) {
+            finishGracefully();
             return;
         }
         super.onBackPressed();
@@ -4113,7 +4217,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         if (prefConfig.smartClipboardSync) {
             getClipboard(-1);
         }
-        finish();
+        finishGracefully();
     }
 
     public void quit() {
@@ -4130,7 +4234,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         builder.setPositiveButton(getString(R.string.yes), (dialog, which) -> {
             quitOnStop = true;
             dialog.dismiss();
-            finish();
+            finishGracefully();
         });
 
         builder.setNegativeButton(getString(R.string.no), (dialog, which) -> dialog.dismiss());
