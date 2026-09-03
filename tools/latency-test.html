@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moonlight TCL latency test target</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #666; font: 16px/1.4 system-ui, sans-serif; overflow: hidden; cursor: none; }
+  body.on { background: #fff; }
+  #hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; max-width: 40em; }
+  #count { position: absolute; right: 1em; bottom: 0.5em; font-size: 12px; }
+  body.on #hint, body.on #count { color: #999; }
+</style>
+</head>
+<body>
+<div id="hint">Moonlight TCL latency test target<br>
+Press <b>F</b> or click for full screen.<br>
+The page turns white while any gamepad button, mouse button or key is held.<br>
+<small>This hint disappears after the first press.</small></div>
+<div id="count"></div>
+<script>
+(function () {
+  var body = document.body, hint = document.getElementById('hint'), count = document.getElementById('count');
+  var presses = 0, mouseDown = false, keyDown = false, padDown = false, shown = false;
+
+  function update() {
+    var on = mouseDown || keyDown || padDown;
+    if (on !== shown) {
+      shown = on;
+      body.classList.toggle('on', on);
+      if (on) { presses++; count.textContent = presses; hint.style.display = 'none'; }
+    }
+  }
+  function pollPads() {
+    var pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    var any = false;
+    for (var i = 0; i < pads.length; i++) {
+      var p = pads[i]; if (!p) continue;
+      for (var b = 0; b < p.buttons.length; b++) { if (p.buttons[b].pressed) { any = true; break; } }
+      if (any) break;
+    }
+    padDown = any;
+    update();
+  }
+  // Poll as fast as the browser allows; requestAnimationFrame alone would add up to a frame of delay
+  setInterval(pollPads, 1);
+  window.addEventListener('mousedown', function () { mouseDown = true; update(); });
+  window.addEventListener('mouseup', function () { mouseDown = false; update(); });
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); }
+    keyDown = true; update();
+  });
+  window.addEventListener('keyup', function () { keyDown = false; update(); });
+  window.addEventListener('click', function () { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); });
+})();
+</script>
+</body>
+</html>

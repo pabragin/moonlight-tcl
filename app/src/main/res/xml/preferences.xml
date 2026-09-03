@@ -860,6 +860,12 @@
             android:summary="@string/summary_full_range"
             android:title="@string/title_full_range"
             app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="checkbox_latency_test"
+            android:summary="@string/summary_latency_test"
+            android:title="@string/title_latency_test"
+            app:iconSpaceReserved="false" />
         <ListPreference
             android:defaultValue="auto"
             android:entries="@array/video_format_names"
