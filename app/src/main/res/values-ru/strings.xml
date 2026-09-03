@@ -184,7 +184,7 @@
     <string name="latency_test_waiting">Тест задержки: нажмите A/B/X/Y на чёрной тестовой странице</string>
     <string name="latency_test_timeout">нет кадра-реакции за 2 с (страница на весь экран? работает при Frame pacing «Prefer lowest latency»)</string>
     <string name="latency_test_render_unmatched">кадр-реакция получен, но его вывод не отмечен: выше только хост+сеть (поставьте Frame pacing «Prefer lowest latency»)</string>
-    <string name="latency_test_overlay">Задержка: посл. %1$d мс · средн. %2$d · мин. %3$d · макс. %4$d · n=%5$d\nввод→приложение %6$d мс · хост+сеть %7$d мс · декодер+вывод %8$d мс</string>
+    <string name="latency_test_overlay">Задержка: посл. %1$d мс · средн. %2$d · мин. %3$d · макс. %4$d · n=%5$d\nсредние: ввод→приложение %6$d мс · хост+сеть %7$d мс · декодер+вывод %8$d мс</string>
     <string name="perf_overlay_decoder">Декодер: %1$s</string>
     <string name="perf_overlay_lowlatency">Режим низкой задержки: %1$s</string>
     <string name="perf_overlay_incomingfps">Входящая частота кадров из сети: %1$.2f FPS</string>

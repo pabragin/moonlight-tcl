@@ -8,6 +8,8 @@
   body.on { background: #fff; }
   #hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; max-width: 40em; }
   #count { position: absolute; right: 1em; bottom: 0.5em; font-size: 12px; }
+  #keepalive { position: absolute; right: 24px; top: 24px; width: 48px; height: 48px; background: #444; }
+  body.on #keepalive { display: none; }
   body.on #hint, body.on #count { color: #999; }
 </style>
 </head>
@@ -15,8 +17,10 @@
 <div id="hint">Moonlight TCL latency test target<br>
 Press <b>F</b> or click for full screen.<br>
 The page turns white while any gamepad button, mouse button or key is held.<br>
+The small square top-right changes every frame so the streaming host keeps capturing at full rate (press <b>K</b> to toggle it).<br>
 <small>This hint disappears after the first press.</small></div>
 <div id="count"></div>
+<div id="keepalive" title="changes every frame so the host keeps capturing at full rate (K toggles)"></div>
 <script>
 (function () {
   var body = document.body, hint = document.getElementById('hint'), count = document.getElementById('count');
@@ -43,10 +47,21 @@ The page turns white while any gamepad button, mouse button or key is held.<br>
   }
   // Poll as fast as the browser allows; requestAnimationFrame alone would add up to a frame of delay
   setInterval(pollPads, 1);
+
+  // Keep-alive marker: a static picture makes Sunshine/Apollo drop to a reduced capture rate and the
+  // capture may take 100+ ms to wake up, which inflates the measured latency. A small element that
+  // changes every frame keeps the host in the steady state a real game has.
+  var keep = document.getElementById('keepalive'), keepOn = true, tick = 0;
+  function animate() {
+    if (keepOn) { tick = (tick + 1) % 360; keep.style.background = 'hsl(' + tick + ',60%,40%)'; }
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
   window.addEventListener('mousedown', function () { mouseDown = true; update(); });
   window.addEventListener('mouseup', function () { mouseDown = false; update(); });
   window.addEventListener('keydown', function (e) {
     if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); }
+    if (e.key === 'k' || e.key === 'K') { keepOn = !keepOn; keep.style.display = keepOn ? '' : 'none'; return; }
     keyDown = true; update();
   });
   window.addEventListener('keyup', function () { keyDown = false; update(); });

@@ -241,14 +241,21 @@ public final class LatencyTester {
                 text = note != null ? note : activity.getString(R.string.latency_test_waiting);
             } else {
                 long[] last = samples.getLast();
-                long min = Long.MAX_VALUE, max = 0, sum = 0;
+                long min = Long.MAX_VALUE, max = 0, sum = 0, sumHostNet = 0, sumDecode = 0, sumInput = 0, nDecode = 0;
                 for (long[] v : samples) {
                     min = Math.min(min, v[0]);
                     max = Math.max(max, v[0]);
                     sum += v[0];
+                    sumHostNet += v[1];
+                    sumInput += v[3];
+                    if (v[2] > 0) {
+                        sumDecode += v[2];
+                        nDecode++;
+                    }
                 }
+                int n = samples.size();
                 String stats = activity.getString(R.string.latency_test_overlay,
-                        last[0], sum / samples.size(), min, max, samples.size(), last[3], last[1], last[2]);
+                        last[0], sum / n, min, max, n, sumInput / n, sumHostNet / n, nDecode > 0 ? sumDecode / nDecode : 0);
                 if (!lastStats.isEmpty()) {
                     stats = stats + "\n" + lastStats;
                 }
