@@ -71,7 +71,6 @@ public class StreamSettings extends AppCompatActivity {
     private SettingsFragment prefsFragment;
 
     // HACK for Android 9
-    static DisplayCutout displayCutoutP;
 
     void reloadSettings() {
         Display.Mode mode = getActiveDisplay(StreamSettings.this, previousPrefs).getMode();

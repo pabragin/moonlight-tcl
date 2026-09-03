@@ -179,7 +179,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private boolean displayedFailureDialog = false;
     private boolean connecting = false;
     public boolean connected = false;
-    private boolean autoEnterPip = false;
     private boolean surfaceCreated = false;
 
     // Android TV compositor workaround (prefConfig.tvCompositorWorkaround). Some TV firmwares
@@ -1341,10 +1340,8 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         displayRefreshRate = bestMode.getRefreshRate();
 
-        boolean aspectRatioMatch = false;
-
         // Don't do setFixedSize since it might not update the view dimensions correctly when entering PiP mode
-        if (!(prefConfig.videoScaleMode == PreferenceConfiguration.ScaleMode.STRETCH || aspectRatioMatch)) {
+        if (prefConfig.videoScaleMode != PreferenceConfiguration.ScaleMode.STRETCH) {
             // Set the surface to scale based on the aspect ratio of the stream
             streamContainer.setDesiredAspectRatio((double)displayWidth / (double)displayHeight);
             streamContainer.setFillDisplay(prefConfig.videoScaleMode == PreferenceConfiguration.ScaleMode.FILL);

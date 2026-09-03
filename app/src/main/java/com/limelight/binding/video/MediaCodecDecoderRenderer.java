@@ -41,11 +41,8 @@ import android.view.Choreographer;
 import android.view.Surface;
 
 public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements Choreographer.FrameCallback {
-    private static final boolean USE_FRAME_RENDER_TIME = false;
-    private static final boolean FRAME_RENDER_TIME_ONLY = USE_FRAME_RENDER_TIME && false;
 
     // Used on versions < 5.0
-    private ByteBuffer[] legacyInputBuffers;
 
     private MediaCodecInfo avcDecoder;
     private MediaCodecInfo hevcDecoder;
@@ -683,20 +680,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }
         }
 
-        if (USE_FRAME_RENDER_TIME) {
-            videoDecoder.setOnFrameRenderedListener(new MediaCodec.OnFrameRenderedListener() {
-                @Override
-                public void onFrameRendered(MediaCodec mediaCodec, long presentationTimeUs, long renderTimeNanos) {
-                    long delta = (renderTimeNanos / 1000000L) - (presentationTimeUs / 1000);
-                    if (delta >= 0 && delta < 1000) {
-                        if (USE_FRAME_RENDER_TIME) {
-                            activeWindowVideoStats.totalTimeMs += delta;
-                        }
-                    }
-                }
-            }, null);
-        }
-
         return 0;
     }
 
@@ -1114,9 +1097,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                             long delta = SystemClock.uptimeMillis() - (presentationTimeUs / 1000);
                             if (delta >= 0 && delta < 1000) {
                                 activeWindowVideoStats.decoderTimeMs += delta;
-                                if (!USE_FRAME_RENDER_TIME) {
-                                    activeWindowVideoStats.totalTimeMs += delta;
-                                }
+                                activeWindowVideoStats.totalTimeMs += delta;
                             }
                         } else {
                             switch (outIndex) {
@@ -1366,11 +1347,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             sps.constraintSet4Flag = true;
             sps.constraintSet5Flag = true;
         }
-        else {
-            // Force the constraints unset otherwise (some may be set by default)
-            sps.constraintSet4Flag = false;
-            sps.constraintSet5Flag = false;
-        }
+        // Upstream (68adf9ec) no longer clears the flags on Oreo+, so leave them as sent by the host.
     }
 
     @SuppressWarnings("deprecation")
@@ -1526,31 +1503,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 // Annex B NALUs (including NALUs with escape sequences)
                 SeqParameterSet sps = H264Utils.readSPS(spsBuf);
 
-                // Some decoders rely on H264 level to decide how many buffers are needed
-                // Since we only need one frame buffered, we'll set the level as low as we can
-                // for known resolution combinations. Reference frame invalidation may need
-                // these, so leave them be for those decoders.
-                if (!refFrameInvalidationActive) {
-                    if (initialWidth <= 720 && initialHeight <= 480 && refreshRate <= 60) {
-                        // Max 5 buffered frames at 720x480x60
-                        LimeLog.info("Patching level_idc to 31");
-                        sps.levelIdc = 31;
-                    }
-                    else if (initialWidth <= 1280 && initialHeight <= 720 && refreshRate <= 60) {
-                        // Max 5 buffered frames at 1280x720x60
-                        LimeLog.info("Patching level_idc to 32");
-                        sps.levelIdc = 32;
-                    }
-                    else if (initialWidth <= 1920 && initialHeight <= 1080 && refreshRate <= 60) {
-                        // Max 4 buffered frames at 1920x1080x64
-                        LimeLog.info("Patching level_idc to 42");
-                        sps.levelIdc = 42;
-                    }
-                    else {
-                        // Leave the profile alone (currently 5.0)
-                    }
-                }
-
+                // Upstream (68adf9ec) stopped patching level_idc on Oreo and later: modern decoders
+                // size their buffers from the stream, not from the level.
                 // TI OMAP4 requires a reference frame count of 1 to decode successfully. Exynos 4
                 // also requires this fixup.
                 //
@@ -1705,12 +1659,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         activeWindowVideoStats.totalFramesReceived++;
         activeWindowVideoStats.totalFrames++;
 
-        if (!FRAME_RENDER_TIME_ONLY) {
-            // Count time from first packet received to enqueue time as receive time
-            // We will count DU queue time as part of decoding, because it is directly
-            // caused by a slow decoder.
-            activeWindowVideoStats.totalTimeMs += (enqueueTimeUs - receiveTimeUs) / 1000;
-        }
+        // Count time from first packet received to enqueue time as receive time
+        // We will count DU queue time as part of decoding, because it is directly
+        // caused by a slow decoder.
+        activeWindowVideoStats.totalTimeMs += (enqueueTimeUs - receiveTimeUs) / 1000;
 
         if (!fetchNextInputBuffer()) {
             return MoonBridge.DR_NEED_IDR;

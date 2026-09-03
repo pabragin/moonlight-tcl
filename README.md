@@ -72,7 +72,8 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    without the ENet lock, RTSP hardening) plus the two Apollo protocol patches, from
    [pabragin/moonlight-common-c](https://github.com/pabragin/moonlight-common-c) branch `tcl`. Small things: no `setFrameRate()`
    request when the display already runs at the stream rate, launcher-shortcut bookkeeping off the connect path, native library
-   exports only its JNI symbols.
+   exports only its JNI symbols. tcl6 sweeps the last leftovers (unused frame-render-time path, dead fields, the ENet Win32 source
+   in the native build) and, like upstream on Oreo+, stops rewriting H.264 SPS constraint flags and level_idc.
 
 ## Download and install
 
