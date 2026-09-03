@@ -1106,6 +1106,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                     else {
                                         videoDecoder.releaseOutputBuffer(lastIndex, true);
                                     }
+                                    com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                                 }
                                 else {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -1116,6 +1117,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                     else {
                                         videoDecoder.releaseOutputBuffer(lastIndex, true);
                                     }
+                                    com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                                 }
 
                                 activeWindowVideoStats.totalFramesRendered++;
@@ -1805,6 +1807,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             timestampUs = lastTimestampUs + 1;
         }
         lastTimestampUs = timestampUs;
+
+        // Latency test mode: frame sizes reveal the host's reaction, the PTS lets us match the
+        // moment this frame is handed to the display surface
+        com.limelight.utils.LatencyTester.onFrameReceived(decodeUnitLength, timestampUs);
 
         numFramesIn++;
 
