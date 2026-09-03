@@ -310,6 +310,11 @@
     <string name="summary_tv_compositor_workaround">Keeps a tiny invisible UI layer above the video and removes the video before leaving the stream. Works around TV firmware (e.g. TCL on Android 14) that freezes the whole TV when the video is the only layer on screen and the volume OSD or another app appears. Enabled automatically on known affected TVs.</string>
     <string name="title_tv_block_rumble">Block gamepad rumble on this TV</string>
     <string name="summary_tv_block_rumble">Blocks only rumble sent through the Android input stack (Bluetooth and system-managed gamepads), which crashes the system on some Android TV firmwares (TCL on Android 14) and restarts the TV mid-game. Gamepads driven by Moonlight\'s own USB driver keep rumbling. Enabled automatically on known affected TVs.</string>
+    <string name="title_latency_test">Latency test mode</string>
+    <string name="summary_latency_test">Measures button-to-frame latency for comparing builds. On the PC open tools/latency-test.html from the Moonlight TCL repository full screen (black page that turns white while a button is held), start the stream and press A/B/X/Y. The result excludes the TV panel\'s own delay, so different app versions can be compared on the same TV.</string>
+    <string name="latency_test_waiting">Latency test: press A/B/X/Y on the black test page</string>
+    <string name="latency_test_timeout">no reaction within 2 s (is the test page on screen?)</string>
+    <string name="latency_test_overlay">Latency: last %1$d ms · avg %2$d · min %3$d · max %4$d · n=%5$d\ninput→app %6$d ms</string>
     <string name="title_enable_post_stream_toast">Show latency message after streaming</string>
     <string name="summary_enable_post_stream_toast">Display a latency information message after the stream ends</string>
 

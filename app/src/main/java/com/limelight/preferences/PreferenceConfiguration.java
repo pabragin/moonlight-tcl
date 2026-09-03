@@ -75,6 +75,7 @@ public class PreferenceConfiguration {
     private static final String ENABLE_PERF_OVERLAY_STRING = "checkbox_enable_perf_overlay";
     private static final String TV_COMPOSITOR_WORKAROUND_PREF_STRING = "checkbox_tv_compositor_workaround";
     private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
+    private static final String LATENCY_TEST_PREF_STRING = "checkbox_latency_test";
     private static final String ENABLE_PERF_LOGGING = "checkbox_enable_perf_logging";
     private static final String BIND_ALL_USB_STRING = "checkbox_usb_bind_all";
     private static final String MOUSE_EMULATION_STRING = "checkbox_mouse_emulation";
@@ -263,6 +264,7 @@ public class PreferenceConfiguration {
     // Android TV firmware workarounds (see isTvWithBrokenCompositor()/isTvWithBrokenInputRumble())
     public boolean tvCompositorWorkaround;
     public boolean tvBlockRumble;
+    public boolean latencyTest;
     public boolean enablePerfLogging;
     //简化版性能信息
     public boolean enablePerfOverlayLite;
@@ -940,6 +942,7 @@ public class PreferenceConfiguration {
         // Default to "on" only on TVs known to need the workarounds; the user can override either way
         config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
         config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
+        config.latencyTest = prefs.getBoolean(LATENCY_TEST_PREF_STRING, false);
         config.enablePerfLogging = prefs.getBoolean(ENABLE_PERF_LOGGING, DEFAULT_ENABLE_PERF_LOGGING);
         config.enablePerfOverlayLite = prefs.getBoolean("checkbox_enable_perf_overlay_lite",DEFAULT_ENABLE_PERF_OVERLAY);
         config.enablePerfOverlayBottom = prefs.getBoolean("checkbox_enable_perf_overlay_bottom",DEFAULT_PERF_OVERLAY_BOTTOM);

@@ -242,6 +242,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private boolean floatingButtonShown;
     private boolean overlayToggleZoomButtonShown;
     private TextView notificationOverlayView;
+    private TextView latencyOverlayView;
     private int requestedNotificationOverlayVisibility = View.GONE;
     private View performanceOverlayView;
 
@@ -513,6 +514,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
 
         notificationOverlayView = findViewById(R.id.notificationOverlay);
+        latencyOverlayView = findViewById(R.id.latencyOverlay);
 
         performanceOverlayView = findViewById(R.id.performanceOverlay);
 
@@ -772,6 +774,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 httpsPort, uniqueId, config,
                 PlatformBinding.getCryptoProvider(this), serverCert);
         controllerHandler = new ControllerHandler(this, conn, this, prefConfig);
+
+        if (prefConfig.latencyTest && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            com.limelight.utils.LatencyTester.start(this, streamView, latencyOverlayView);
+        }
         keyboardTranslator = new KeyboardTranslator(prefConfig);
 
         InputManager inputManager = (InputManager) getSystemService(Context.INPUT_SERVICE);
@@ -1617,6 +1623,9 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         instance = null;
         workaroundHandler.removeCallbacksAndMessages(null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            com.limelight.utils.LatencyTester.stop();
+        }
 
         if (prefConfig.enableFullExDisplay) handleDisplayRemoved();
 

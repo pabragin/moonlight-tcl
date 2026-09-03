@@ -2717,6 +2717,21 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             return true;
         }
 
+        // Latency test mode: time face-button presses against the stream's reaction
+        if (event.getRepeatCount() == 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                && com.limelight.utils.LatencyTester.isEnabled()) {
+            switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_BUTTON_A:
+                case KeyEvent.KEYCODE_BUTTON_B:
+                case KeyEvent.KEYCODE_BUTTON_X:
+                case KeyEvent.KEYCODE_BUTTON_Y:
+                    com.limelight.utils.LatencyTester.onButtonDown(event.getEventTime());
+                    break;
+                default:
+                    break;
+            }
+        }
+
         int keyCode = handleRemapping(context, event);
         if (keyCode < 0) {
             return (keyCode == REMAP_CONSUME);

@@ -27,6 +27,19 @@ Added on top of 20.2.6:
 Both workarounds turn themselves on for TCL/MediaTek TVs on Android 14 or newer and can be toggled by hand.
 Background: [moonlight-stream/moonlight-android#1533](https://github.com/moonlight-stream/moonlight-android/issues/1533).
 
+## Measuring latency (built in)
+
+Since tcl9 the app can measure button-to-frame latency itself, so builds can be compared without filming the screen:
+
+1. On the PC open [`tools/latency-test.html`](tools/latency-test.html) in a browser and press **F** for full screen. The page is black
+   and turns white while any gamepad button (or mouse button / key) is held.
+2. On the TV enable *Settings → Advanced Settings → Latency test mode*, start the stream so the test page fills the picture,
+   and press A/B/X/Y a few times. An overlay shows the last, average, min and max latency and how long the button event took
+   to reach the app from the Android input stack. Every sample is also written to logcat (`Latency test: ...`).
+
+The value is input stack + network + host + decode, i.e. up to the frame being available on the stream surface. The TV panel's
+own processing delay is not included, which is exactly what makes two app versions comparable on the same TV.
+
 ## Download
 
 APKs are on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page. Install with a file manager, the Downloader

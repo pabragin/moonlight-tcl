@@ -51,6 +51,20 @@
         android:preferKeepClear="true"
         android:visibility="gone" />
 
+    <!-- Latency test mode results (see LatencyTester) -->
+    <TextView
+        android:id="@+id/latencyOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="24dp"
+        android:padding="6dp"
+        android:textSize="14sp"
+        android:textColor="#FFFFFFFF"
+        android:background="#A0000000"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/performanceOverlay"
         android:orientation="vertical"
