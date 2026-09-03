@@ -523,6 +523,32 @@ public class MediaCodecHelper {
                 !isAdreno620;
     }
 
+    // Human readable summary of the low-latency options the decoder actually kept in its input format,
+    // shown in the performance overlay so users can check what their decoder accepted without adb.
+    public static String describeLowLatencyOptions(MediaCodecInfo decoderInfo, String mimeType, MediaFormat inputFormat) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("feature=").append(decoderInfo != null && mimeType != null &&
+                decoderSupportsAndroidRLowLatency(decoderInfo, mimeType) ? "yes" : "no");
+        if (inputFormat != null) {
+            for (String key : new String[] { "low-latency", "vdec-lowlatency", MediaFormat.KEY_OPERATING_RATE, MediaFormat.KEY_PRIORITY }) {
+                if (inputFormat.containsKey(key)) {
+                    String value;
+                    try {
+                        value = String.valueOf(inputFormat.getInteger(key));
+                    } catch (Exception e) {
+                        try {
+                            value = String.valueOf(inputFormat.getFloat(key));
+                        } catch (Exception e2) {
+                            value = "set";
+                        }
+                    }
+                    sb.append(' ').append(key).append('=').append(value);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     public static boolean setDecoderLowLatencyOptions(MediaFormat videoFormat, MediaCodecInfo decoderInfo, boolean ultraLowLatency, int tryNumber) {
         // Options here should be tried in the order of most to least risky. The decoder will use
         // the first MediaFormat that doesn't fail in configure().
@@ -579,6 +605,14 @@ public class MediaCodecHelper {
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 videoFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
                 setNewOption = true;
+
+                // "Ultra low latency" on MediaTek: also ask for the maximum operating rate so the
+                // decoder doesn't pace itself for the nominal frame rate. Upstream only does this
+                // for Qualcomm; if the MediaTek decoder rejects it, the next configure() attempt
+                // (tryNumber >= 3) drops it again.
+                if (ultraLowLatency && isDecoderInList(mtkDecoderPrefixes, decoderInfo.getName())) {
+                    videoFormat.setInteger(MediaFormat.KEY_OPERATING_RATE, Short.MAX_VALUE);
+                }
             }
         }
 

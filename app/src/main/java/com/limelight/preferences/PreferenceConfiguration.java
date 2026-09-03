@@ -617,6 +617,11 @@ public class PreferenceConfiguration {
                 && isTclDevice();
     }
 
+    // MediaTek (incl. TCL) TVs: the extra decoder low-latency hints are on by default here
+    public static boolean isMediaTekTv(Context context) {
+        return isTvDevice(context) && (isMediaTekSoc() || isTclDevice());
+    }
+
     public static boolean getDefaultSmallMode(Context context) {
         PackageManager manager = context.getPackageManager();
         if (manager != null) {
@@ -941,7 +946,7 @@ private static int getFramePacingValue(Context context) {
         config.disableWarnings = prefs.getBoolean(DISABLE_TOASTS_PREF_STRING, DEFAULT_DISABLE_TOASTS);
         config.enforceDisplayMode = prefs.getBoolean(ENFORCE_DISPLAY_MODE_PREF_STRING, DEFAULT_ENFORCE_DISPLAY_MODE);
         config.useVirtualDisplay = prefs.getBoolean(USE_VIRTUAL_DISPLAY_PREF_STRING, DEFAULT_USE_VIRTUAL_DISPLAY);
-        config.enableUltraLowLatency = prefs.getBoolean(ENABLE_ULTRA_LOW_LATENCY_PREF_STRING, DEFAULT_ENABLE_ULTRA_LOW_LATENCY);
+        config.enableUltraLowLatency = prefs.getBoolean(ENABLE_ULTRA_LOW_LATENCY_PREF_STRING, DEFAULT_ENABLE_ULTRA_LOW_LATENCY || isMediaTekTv(context));
         config.enableSops = prefs.getBoolean(SOPS_PREF_STRING, DEFAULT_SOPS);
         config.playHostAudio = prefs.getBoolean(HOST_AUDIO_PREF_STRING, DEFAULT_HOST_AUDIO);
         config.smallIconMode = prefs.getBoolean(SMALL_ICONS_PREF_STRING, getDefaultSmallMode(context));

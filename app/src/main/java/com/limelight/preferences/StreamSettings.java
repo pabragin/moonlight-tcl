@@ -352,6 +352,7 @@ public class StreamSettings extends AppCompatActivity {
             // matches what PreferenceConfiguration.readPreferences() uses when the key is absent.
             applyDeviceDefault("checkbox_tv_compositor_workaround", PreferenceConfiguration.isTvWithBrokenCompositor(activity));
             applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
+            applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
 
             // hide on-screen controls category on non touch screen devices
             if (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {

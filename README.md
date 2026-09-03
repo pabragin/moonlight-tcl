@@ -39,6 +39,9 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    automatically; AV1 remains available via "Force AV1".
 4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 100 Mbps, HEVC and "Prefer lowest latency" frame pacing
    (Artemis defaults to 1280x720 and 80 Mbps at 4K). Everything is still adjustable in Settings.
+5. **Decoder tuning that can be checked.** "Ultra Low Latency" is on by default on MediaTek TVs and now also requests the maximum
+   operating rate from the MediaTek decoder; the video renderer thread runs at display priority. The performance overlay shows a
+   "Low-latency mode" line with the options the decoder actually kept, so the effect of a setting can be verified without adb.
 
 
 ## Download and install

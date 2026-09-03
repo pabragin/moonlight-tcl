@@ -199,6 +199,7 @@
     <string name="title_tv_block_rumble">Блокировать вибрацию геймпада на этом ТВ</string>
     <string name="summary_tv_block_rumble">Блокирует только вибрацию через системный стек ввода Android (Bluetooth и системные геймпады), которая на некоторых прошивках Android TV (TCL на Android 14) роняет систему и перезагружает телевизор посреди игры. Геймпады, подключённые через собственный USB-драйвер Moonlight, продолжают вибрировать. На известных проблемных ТВ включается автоматически.</string>
     <string name="perf_overlay_decoder">Декодер: %1$s</string>
+    <string name="perf_overlay_lowlatency">Режим низкой задержки: %1$s</string>
     <string name="perf_overlay_incomingfps">Входящая частота кадров из сети: %1$.2f FPS</string>
     <string name="perf_overlay_renderingfps">Частота кадров при рендеринге: %1$.2f FPS</string>
     <string name="perf_overlay_netdrops">Кадры, пропущенные вашим сетевым подключением: %1$.2f%%</string>
@@ -505,7 +506,7 @@
     <string name="title_checkbox_enforce_display_mode">Принудительный режим дисплея</string>
     <string name="summary_checkbox_enforce_display_mode">Принудительно использовать оптимальный режим отображения.\nТребуется в некоторых системах (например, ColorOS) для корректной установки частоты/разрешения.\nНе включайте на ChromeCast 4K может вызвать ошибки.</string>
     <string name="title_checkbox_ultra_low_latency">Сверхнизкая задержка (экспериментально)</string>
-    <string name="summary_checkbox_ultra_low_latency">Эффективно только на SD8Gen2 / 8(s)Gen3 / 8Elite</string>
+    <string name="summary_checkbox_ultra_low_latency">Добавляет дополнительные подсказки низкой задержки, даже если декодер заявляет официальный режим Android: на MediaTek это ключ vdec-lowlatency, приоритет реального времени и максимальная частота работы, на Snapdragon 8 Gen 2/3/Elite — расширения Qualcomm. Если декодер их отвергает, откат происходит автоматически. На телевизорах MediaTek включено по умолчанию.</string>
     <string name="summary_checkbox_forceTightThresholds">Более строгие пороги вертикальной синхронизации для снижения задержки; может увеличить количество сбоев.</string>
     <string name="title_checkbox_use_virtual_display">Использовать виртуальный дисплей</string>
     <string name="summary_checkbox_use_virtual_display">Использовать виртуальный дисплей по умолчанию.\nВиртуальный дисплей автоматически подбирает клиентское разрешение и частоту, обеспечивая плавный стрим.\nТребует Apollo на хосте.</string>

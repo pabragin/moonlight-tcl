@@ -102,6 +102,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private int codecRecoveryAttempts = 0;
 
     private MediaFormat inputFormat;
+    private String lowLatencyInfo;
     private MediaFormat outputFormat;
     private MediaFormat configuredFormat;
 
@@ -570,6 +571,14 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             // This will contain the actual accepted input format attributes
             inputFormat = videoDecoder.getInputFormat();
             LimeLog.info("Input format: "+inputFormat);
+
+            try {
+                lowLatencyInfo = MediaCodecHelper.describeLowLatencyOptions(videoDecoder.getCodecInfo(),
+                        format.getString(MediaFormat.KEY_MIME), inputFormat);
+                LimeLog.info("Low latency options kept by decoder: " + lowLatencyInfo);
+            } catch (Throwable t) {
+                lowLatencyInfo = null;
+            }
         }
 
         videoDecoder.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
@@ -1082,6 +1091,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         rendererThread = new Thread() {
             @Override
             public void run() {
+                // Same priority the system gives its display threads: this thread hands decoded
+                // frames to the compositor, so it shouldn't wait behind ordinary app work.
+                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+
                 BufferInfo info = new BufferInfo();
                 while (!stopping) {
                     try {
@@ -1533,6 +1546,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     }
                     sb.append('\n');
                     sb.append(context.getString(R.string.perf_overlay_decoder, decoder)).append('\n');
+                    if (lowLatencyInfo != null) {
+                        sb.append(context.getString(R.string.perf_overlay_lowlatency, lowLatencyInfo)).append('\n');
+                    }
                     sb.append(context.getString(R.string.perf_overlay_incomingfps, fps.receivedFps)).append('\n');
                     sb.append(context.getString(R.string.perf_overlay_renderingfps, fps.renderedFps)).append('\n');
                     sb.append(context.getString(R.string.perf_overlay_netdrops,
