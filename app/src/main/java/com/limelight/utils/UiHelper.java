@@ -37,20 +37,18 @@ public class UiHelper {
     private static final int TV_HORIZONTAL_PADDING_DP = 15;
 
     private static void setGameModeStatus(Context context, boolean streaming, boolean interruptible) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            GameManager gameManager = context.getSystemService(GameManager.class);
+        GameManager gameManager = context.getSystemService(GameManager.class);
 
-            if (gameManager == null) {
-                LimeLog.warning("GameManager is null, maybe your system does not support it?");
-                return;
-            }
+        if (gameManager == null) {
+            LimeLog.warning("GameManager is null, maybe your system does not support it?");
+            return;
+        }
 
-            if (streaming) {
-                gameManager.setGameState(new GameState(false, interruptible ? GameState.MODE_GAMEPLAY_INTERRUPTIBLE : GameState.MODE_GAMEPLAY_UNINTERRUPTIBLE));
-            }
-            else {
-                gameManager.setGameState(new GameState(false, GameState.MODE_NONE));
-            }
+        if (streaming) {
+            gameManager.setGameState(new GameState(false, interruptible ? GameState.MODE_GAMEPLAY_INTERRUPTIBLE : GameState.MODE_GAMEPLAY_UNINTERRUPTIBLE));
+        }
+        else {
+            gameManager.setGameState(new GameState(false, GameState.MODE_NONE));
         }
     }
 
@@ -79,13 +77,11 @@ public class UiHelper {
         String locale = PreferenceConfiguration.readPreferences(activity).language;
         Configuration config = new Configuration(activity.getResources().getConfiguration());
         if (locale.equals(PreferenceConfiguration.DEFAULT_LANGUAGE)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                // On Android 13, migrate this non-default language setting into the OS native API
-                LocaleManager localeManager = activity.getSystemService(LocaleManager.class);
-                LocaleList systemLocales = localeManager.getSystemLocales();
-                if (!systemLocales.isEmpty()) {
-                    config.locale = systemLocales.get(0);
-                }
+            // On Android 13, migrate this non-default language setting into the OS native API
+            LocaleManager localeManager = activity.getSystemService(LocaleManager.class);
+            LocaleList systemLocales = localeManager.getSystemLocales();
+            if (!systemLocales.isEmpty()) {
+                config.locale = systemLocales.get(0);
             }
         } else {
             // We're handling some nasty non-standard devices which cannot set locale using system config correctly
@@ -106,20 +102,18 @@ public class UiHelper {
     }
 
     public static void applyStatusBarPadding(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // This applies the padding that we omitted in notifyNewRootView() on Q
-            view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-                @Override
-                public WindowInsets onApplyWindowInsets(View view, WindowInsets windowInsets) {
-                    view.setPadding(view.getPaddingLeft(),
-                            view.getPaddingTop(),
-                            view.getPaddingRight(),
-                            windowInsets.getTappableElementInsets().bottom);
-                    return windowInsets;
-                }
-            });
-            view.requestApplyInsets();
-        }
+        // This applies the padding that we omitted in notifyNewRootView() on Q
+        view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View view, WindowInsets windowInsets) {
+                view.setPadding(view.getPaddingLeft(),
+                        view.getPaddingTop(),
+                        view.getPaddingRight(),
+                        windowInsets.getTappableElementInsets().bottom);
+                return windowInsets;
+            }
+        });
+        view.requestApplyInsets();
     }
 
     public static void notifyNewRootView(final Activity activity)
@@ -130,15 +124,13 @@ public class UiHelper {
         // Set GameState.MODE_NONE initially for all activities
         setGameModeStatus(activity, false, false);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // Allow this non-streaming activity to layout under notches.
-            //
-            // We should NOT do this for the Game activity unless
-            // the user specifically opts in, because it can obscure
-            // parts of the streaming surface.
-            activity.getWindow().getAttributes().layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        }
+        // Allow this non-streaming activity to layout under notches.
+        //
+        // We should NOT do this for the Game activity unless
+        // the user specifically opts in, because it can obscure
+        // parts of the streaming surface.
+        activity.getWindow().getAttributes().layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
         if (modeMgr.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
             // Increase view padding on TVs
@@ -149,7 +141,7 @@ public class UiHelper {
             rootView.setPadding(horizontalPaddingPixels, verticalPaddingPixels,
                     horizontalPaddingPixels, verticalPaddingPixels);
         }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        else {
             // Draw under the status bar on Android Q devices
 
             // Using getDecorView() here breaks the translucent status/navigation bar when gestures are disabled

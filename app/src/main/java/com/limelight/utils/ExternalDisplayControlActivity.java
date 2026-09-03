@@ -115,7 +115,7 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
                 finish();
             } else {
                 Display secondaryDisplay = getSecondaryDisplay(this);
-                if (secondaryDisplay != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (secondaryDisplay != null) {
                     ActivityOptions options = ActivityOptions.makeBasic();
                     options.setLaunchDisplayId(secondaryDisplay.getDisplayId());
                     Toast.makeText(this,
@@ -158,14 +158,12 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
         windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars());
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(), (v, insets) -> {
-                boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
-                updateKeyboardVisibility(imeVisible);
-                return androidx.core.view.ViewCompat.onApplyWindowInsets(v, insets);
-            });
-        }
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(), (v, insets) -> {
+            boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+            updateKeyboardVisibility(imeVisible);
+            return androidx.core.view.ViewCompat.onApplyWindowInsets(v, insets);
+        });
 
         initializeComponents();
         createProgrammaticUI();
@@ -375,9 +373,7 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         rootLayout.setFocusable(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            rootLayout.setFocusedByDefault(true);
-        }
+        rootLayout.setFocusedByDefault(true);
 
         rootLayout.setInputCallbacks(Game.instance);
         rootLayout.setCommitTextEnabled(prefConfig.enableCommitText);
@@ -475,22 +471,18 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
     // --- Notification Management ---
 
     private void checkNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERMISSION_REQUEST_CODE);
-                return;
-            }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERMISSION_REQUEST_CODE);
+            return;
         }
         showStickyNotification();
     }
 
     private void showStickyNotification() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW);
-            channel.setShowBadge(false);
-            notificationManager.createNotificationChannel(channel);
-        }
+        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW);
+        channel.setShowBadge(false);
+        notificationManager.createNotificationChannel(channel);
 
         Intent broadcastIntent = new Intent(this, StartExternalDisplayControlReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);

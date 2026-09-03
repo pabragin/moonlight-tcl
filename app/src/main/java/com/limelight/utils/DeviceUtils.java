@@ -24,7 +24,6 @@ import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.CHANGE_WIFI_STATE;
 import static android.content.Context.WIFI_SERVICE;
 
-import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 
 public final class DeviceUtils {
@@ -56,7 +55,6 @@ public final class DeviceUtils {
      *
      * @return {@code true}: yes<br>{@code false}: no
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static boolean isAdbEnabled(Context context) {
         return Settings.Secure.getInt(
                 context.getContentResolver(),
@@ -297,14 +295,7 @@ public final class DeviceUtils {
      * @return an ordered list of ABIs supported by this device
      */
     public static String[] getABIs() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return Build.SUPPORTED_ABIS;
-        } else {
-            if (!TextUtils.isEmpty(Build.CPU_ABI2)) {
-                return new String[]{Build.CPU_ABI, Build.CPU_ABI2};
-            }
-            return new String[]{Build.CPU_ABI};
-        }
+        return Build.SUPPORTED_ABIS;
     }
 
     /**
@@ -401,7 +392,6 @@ public final class DeviceUtils {
      *
      * @return whether user has enabled development settings.
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static boolean isDevelopmentSettingsEnabled(Context context) {
         return Settings.Global.getInt(
                 context.getContentResolver(),

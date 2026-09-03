@@ -129,91 +129,61 @@ public class NvConnection {
 
     private int detectServerConnectionType() {
         ConnectivityManager connMgr = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Network activeNetwork = connMgr.getActiveNetwork();
-            if (activeNetwork != null) {
-                NetworkCapabilities netCaps = connMgr.getNetworkCapabilities(activeNetwork);
-                if (netCaps != null) {
-                    if (netCaps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ||
-                            !netCaps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
-                        // VPNs are treated as remote connections
-                        return StreamConfiguration.STREAM_CFG_REMOTE;
-                    }
-                    else if (netCaps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                        // Cellular is always treated as remote to avoid any possible
-                        // issues with 464XLAT or similar technologies.
-                        return StreamConfiguration.STREAM_CFG_REMOTE;
-                    }
+        Network activeNetwork = connMgr.getActiveNetwork();
+        if (activeNetwork != null) {
+            NetworkCapabilities netCaps = connMgr.getNetworkCapabilities(activeNetwork);
+            if (netCaps != null) {
+                if (netCaps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ||
+                        !netCaps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                    // VPNs are treated as remote connections
+                    return StreamConfiguration.STREAM_CFG_REMOTE;
                 }
-
-                // Check if the server address is on-link
-                LinkProperties linkProperties = connMgr.getLinkProperties(activeNetwork);
-                if (linkProperties != null) {
-                    InetAddress serverAddress;
-                    try {
-                        serverAddress = resolveServerAddress();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-
-                        // We can't decide without being able to resolve the server address
-                        return StreamConfiguration.STREAM_CFG_AUTO;
-                    }
-
-                    // If the address is in the NAT64 prefix, always treat it as remote
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        IpPrefix nat64Prefix = linkProperties.getNat64Prefix();
-                        if (nat64Prefix != null && nat64Prefix.contains(serverAddress)) {
-                            return StreamConfiguration.STREAM_CFG_REMOTE;
-                        }
-                    }
-
-                    for (RouteInfo route : linkProperties.getRoutes()) {
-                        // Skip non-unicast routes (which are all we get prior to Android 13)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && route.getType() != RouteInfo.RTN_UNICAST) {
-                            continue;
-                        }
-
-                        // Find the first route that matches this address
-                        if (route.matches(serverAddress)) {
-                            // If there's no gateway, this is an on-link destination
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                // We want to use hasGateway() because getGateway() doesn't adhere
-                                // to documented behavior of returning null for on-link addresses.
-                                if (!route.hasGateway()) {
-                                    return StreamConfiguration.STREAM_CFG_LOCAL;
-                                }
-                            }
-                            else {
-                                // getGateway() is documented to return null for on-link destinations,
-                                // but it actually returns the unspecified address (0.0.0.0 or ::).
-                                InetAddress gateway = route.getGateway();
-                                if (gateway == null || gateway.isAnyLocalAddress()) {
-                                    return StreamConfiguration.STREAM_CFG_LOCAL;
-                                }
-                            }
-
-                            // We _should_ stop after the first matching route, but for some reason
-                            // Android doesn't always report IPv6 routes in descending order of
-                            // specificity and metric. To handle that case, we enumerate all matching
-                            // routes, assuming that an on-link route will always be preferred.
-                        }
-                    }
+                else if (netCaps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    // Cellular is always treated as remote to avoid any possible
+                    // issues with 464XLAT or similar technologies.
+                    return StreamConfiguration.STREAM_CFG_REMOTE;
                 }
             }
-        }
-        else {
-            NetworkInfo activeNetworkInfo = connMgr.getActiveNetworkInfo();
-            if (activeNetworkInfo != null) {
-                switch (activeNetworkInfo.getType()) {
-                    case ConnectivityManager.TYPE_VPN:
-                    case ConnectivityManager.TYPE_MOBILE:
-                    case ConnectivityManager.TYPE_MOBILE_DUN:
-                    case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                    case ConnectivityManager.TYPE_MOBILE_MMS:
-                    case ConnectivityManager.TYPE_MOBILE_SUPL:
-                    case ConnectivityManager.TYPE_WIMAX:
-                        // VPNs and cellular connections are always remote connections
-                        return StreamConfiguration.STREAM_CFG_REMOTE;
+
+            // Check if the server address is on-link
+            LinkProperties linkProperties = connMgr.getLinkProperties(activeNetwork);
+            if (linkProperties != null) {
+                InetAddress serverAddress;
+                try {
+                    serverAddress = resolveServerAddress();
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                    // We can't decide without being able to resolve the server address
+                    return StreamConfiguration.STREAM_CFG_AUTO;
+                }
+
+                // If the address is in the NAT64 prefix, always treat it as remote
+                IpPrefix nat64Prefix = linkProperties.getNat64Prefix();
+                if (nat64Prefix != null && nat64Prefix.contains(serverAddress)) {
+                    return StreamConfiguration.STREAM_CFG_REMOTE;
+                }
+
+                for (RouteInfo route : linkProperties.getRoutes()) {
+                    // Skip non-unicast routes (which are all we get prior to Android 13)
+                    if (route.getType() != RouteInfo.RTN_UNICAST) {
+                        continue;
+                    }
+
+                    // Find the first route that matches this address
+                    if (route.matches(serverAddress)) {
+                        // If there's no gateway, this is an on-link destination
+                        // We want to use hasGateway() because getGateway() doesn't adhere
+                        // to documented behavior of returning null for on-link addresses.
+                        if (!route.hasGateway()) {
+                            return StreamConfiguration.STREAM_CFG_LOCAL;
+                        }
+
+                        // We _should_ stop after the first matching route, but for some reason
+                        // Android doesn't always report IPv6 routes in descending order of
+                        // specificity and metric. To handle that case, we enumerate all matching
+                        // routes, assuming that an on-link route will always be preferred.
+                    }
                 }
             }
         }

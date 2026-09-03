@@ -307,9 +307,7 @@ public class AppView extends AppCompatActivity implements AdapterFragmentCallbac
         setContentView(R.layout.activity_app_view);
 
         // Allow floating expanded PiP overlays while browsing apps
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            setShouldDockBigOverlays(false);
-        }
+        setShouldDockBigOverlays(false);
 
         UiHelper.notifyNewRootView(this);
 
@@ -480,17 +478,15 @@ public class AppView extends AppCompatActivity implements AdapterFragmentCallbac
 
         menu.add(Menu.NONE, VIEW_DETAILS_ID, 4, getResources().getString(R.string.applist_menu_details));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Only add an option to create shortcut if box art is loaded
-            // and when we're in grid-mode (not list-mode).
-            ImageView appImageView = info.targetView.findViewById(R.id.grid_image);
-            if (appImageView != null) {
-                // We have a grid ImageView, so we must be in grid-mode
-                BitmapDrawable drawable = (BitmapDrawable)appImageView.getDrawable();
-                if (drawable != null && drawable.getBitmap() != null) {
-                    // We have a bitmap loaded too
-                    menu.add(Menu.NONE, CREATE_SHORTCUT_ID, 5, getResources().getString(R.string.applist_menu_scut));
-                }
+        // Only add an option to create shortcut if box art is loaded
+        // and when we're in grid-mode (not list-mode).
+        ImageView appImageView = info.targetView.findViewById(R.id.grid_image);
+        if (appImageView != null) {
+            // We have a grid ImageView, so we must be in grid-mode
+            BitmapDrawable drawable = (BitmapDrawable)appImageView.getDrawable();
+            if (drawable != null && drawable.getBitmap() != null) {
+                // We have a bitmap loaded too
+                menu.add(Menu.NONE, CREATE_SHORTCUT_ID, 5, getResources().getString(R.string.applist_menu_scut));
             }
         }
 

@@ -352,12 +352,7 @@ public class ComputerManagerService extends Service {
                             !netCaps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
                         // This network looks like an underlying multicast-capable transport,
                         // so let's guess that it's probably where our mDNS response came from.
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            if (connMgr.bindProcessToNetwork(net)) {
-                                boundToNetwork = true;
-                                break;
-                            }
-                        } else if (ConnectivityManager.setProcessDefaultNetwork(net)) {
+                        if (connMgr.bindProcessToNetwork(net)) {
                             boundToNetwork = true;
                             break;
                         }
@@ -377,11 +372,7 @@ public class ComputerManagerService extends Service {
 
             // Unbind from the network
             if (boundToNetwork) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    connMgr.bindProcessToNetwork(null);
-                } else {
-                    ConnectivityManager.setProcessDefaultNetwork(null);
-                }
+                connMgr.bindProcessToNetwork(null);
             }
 
             // Unlock the network state
@@ -739,46 +730,42 @@ public class ComputerManagerService extends Service {
         releaseLocalDatabaseReference();
 
         // Monitor for network changes to invalidate our PC state
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            networkCallback = new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(Network network) {
-                    LimeLog.info("Resetting PC state for new available network");
-                    synchronized (pollingTuples) {
-                        for (PollingTuple tuple : pollingTuples) {
-                            tuple.computer.state = ComputerDetails.State.UNKNOWN;
-                            if (listener != null) {
-                                listener.notifyComputerUpdated(tuple.computer);
-                            }
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                LimeLog.info("Resetting PC state for new available network");
+                synchronized (pollingTuples) {
+                    for (PollingTuple tuple : pollingTuples) {
+                        tuple.computer.state = ComputerDetails.State.UNKNOWN;
+                        if (listener != null) {
+                            listener.notifyComputerUpdated(tuple.computer);
                         }
                     }
                 }
+            }
 
-                @Override
-                public void onLost(Network network) {
-                    LimeLog.info("Offlining PCs due to network loss");
-                    synchronized (pollingTuples) {
-                        for (PollingTuple tuple : pollingTuples) {
-                            tuple.computer.state = ComputerDetails.State.OFFLINE;
-                            if (listener != null) {
-                                listener.notifyComputerUpdated(tuple.computer);
-                            }
+            @Override
+            public void onLost(Network network) {
+                LimeLog.info("Offlining PCs due to network loss");
+                synchronized (pollingTuples) {
+                    for (PollingTuple tuple : pollingTuples) {
+                        tuple.computer.state = ComputerDetails.State.OFFLINE;
+                        if (listener != null) {
+                            listener.notifyComputerUpdated(tuple.computer);
                         }
                     }
                 }
-            };
+            }
+        };
 
-            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            connMgr.registerDefaultNetworkCallback(networkCallback);
-        }
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        connMgr.registerDefaultNetworkCallback(networkCallback);
     }
 
     @Override
     public void onDestroy() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            connMgr.unregisterNetworkCallback(networkCallback);
-        }
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        connMgr.unregisterNetworkCallback(networkCallback);
 
         if (discoveryBinder != null) {
             // Unbind from the discovery service

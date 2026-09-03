@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-@Config(sdk = {33})
+@Config(sdk = {34})
 @RunWith(RobolectricTestRunner.class)
 public class LayoutInflationTest {
     @BeforeClass

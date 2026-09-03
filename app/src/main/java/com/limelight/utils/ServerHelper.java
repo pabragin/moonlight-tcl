@@ -8,8 +8,6 @@ import android.os.Build;
 import android.view.Display;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-
 import com.limelight.AppView;
 import com.limelight.Game;
 import com.limelight.LimeLog;
@@ -96,7 +94,7 @@ public class ServerHelper {
         Intent gameIntent = null;
         PreferenceConfiguration prefConfig = PreferenceConfiguration.readPreferences(parent);
         // Try to add secondary DisplayContext if supported and connected
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && prefConfig.enableFullExDisplay && getSecondaryDisplay(parent) != null) {
+        if (prefConfig.enableFullExDisplay && getSecondaryDisplay(parent) != null) {
             Context displayContext = parent.createDisplayContext(getSecondaryDisplay(parent)); // use secondary display
             gameIntent = new Intent(displayContext, Game.class);
             gameIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -137,7 +135,6 @@ public class ServerHelper {
         return gameIntent;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static void doStart(
             Activity parent,
             NvApp app,

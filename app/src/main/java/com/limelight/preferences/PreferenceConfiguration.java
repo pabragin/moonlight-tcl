@@ -410,14 +410,8 @@ public class PreferenceConfiguration {
     public static boolean isSquarishScreen(Display display) {
         int width, height;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            width = display.getMode().getPhysicalWidth();
-            height = display.getMode().getPhysicalHeight();
-        }
-        else {
-            width = display.getWidth();
-            height = display.getHeight();
-        }
+        width = display.getMode().getPhysicalWidth();
+        height = display.getMode().getPhysicalHeight();
 
         return isSquarishScreen(width, height);
     }
@@ -544,8 +538,7 @@ public class PreferenceConfiguration {
             }
 
             // API 21 uses LEANBACK instead of TELEVISION
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 &&
-                    manager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            if (manager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
                 return true;
             }
         }
@@ -561,9 +554,7 @@ public class PreferenceConfiguration {
 
     private static boolean isMediaTekSoc() {
         String hw = (Build.HARDWARE + " " + Build.BOARD).toLowerCase(Locale.ROOT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            hw += " " + Build.SOC_MANUFACTURER.toLowerCase(Locale.ROOT);
-        }
+        hw += " " + Build.SOC_MANUFACTURER.toLowerCase(Locale.ROOT);
         return hw.contains("mediatek") || hw.contains("mtk") || Build.HARDWARE.toLowerCase(Locale.ROOT).startsWith("mt");
     }
 
@@ -574,8 +565,7 @@ public class PreferenceConfiguration {
     // before leaving the activity avoids the freeze.
     // See https://github.com/moonlight-stream/moonlight-android/issues/1533
     public static boolean isTvWithBrokenCompositor(Context context) {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                && isTvDevice(context)
+        return isTvDevice(context)
                 && (isTclDevice() || isMediaTekSoc());
     }
 
@@ -583,8 +573,7 @@ public class PreferenceConfiguration {
     // triggered by InputDevice vibrations (gamepad rumble) and crashes system_server, which shows up
     // as the TV rebooting mid-game (SIGABRT in QueuedInputListener::flush on the InputReader thread).
     public static boolean isTvWithBrokenInputRumble(Context context) {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                && isTvDevice(context)
+        return isTvDevice(context)
                 && isTclDevice();
     }
 
@@ -602,10 +591,8 @@ public class PreferenceConfiguration {
             }
 
             // API 21 uses LEANBACK instead of TELEVISION
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                if (manager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                    return false;
-                }
+            if (manager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                return false;
             }
         }
 
@@ -850,15 +837,6 @@ private static int getFramePacingValue(Context context) {
             // We need to write small icon mode's default to disk for the settings page to display
             // the current state of the option properly
             prefs.edit().putBoolean(SMALL_ICONS_PREF_STRING, getDefaultSmallMode(context)).apply();
-        }
-
-        if (!prefs.contains(GAMEPAD_MOTION_SENSORS_PREF_STRING) && Build.VERSION.SDK_INT == Build.VERSION_CODES.S) {
-            // Android 12 has a nasty bug that causes crashes when the app touches the InputDevice's
-            // associated InputDeviceSensorManager (just calling getSensorManager() is enough).
-            // As a workaround, we will override the default value for the gamepad motion sensor
-            // option to disabled on Android 12 to reduce the impact of this bug.
-            // https://cs.android.com/android/_/android/platform/frameworks/base/+/8970010a5e9f3dc5c069f56b4147552accfcbbeb
-            prefs.edit().putBoolean(GAMEPAD_MOTION_SENSORS_PREF_STRING, false).apply();
         }
 
         // This must happen after the preferences migration to ensure the preferences are populated

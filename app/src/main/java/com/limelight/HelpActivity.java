@@ -25,18 +25,16 @@ public class HelpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            onBackInvokedCallback = new OnBackInvokedCallback() {
-                @Override
-                public void onBackInvoked() {
-                    // We should always be able to go back because we unregister our callback
-                    // when we can't go back. Nonetheless, we will still check anyway.
-                    if (webView.canGoBack()) {
-                        webView.goBack();
-                    }
+        onBackInvokedCallback = new OnBackInvokedCallback() {
+            @Override
+            public void onBackInvoked() {
+                // We should always be able to go back because we unregister our callback
+                // when we can't go back. Nonetheless, we will still check anyway.
+                if (webView.canGoBack()) {
+                    webView.goBack();
                 }
-            };
-        }
+            }
+        };
 
         webView = new WebView(this);
         setContentView(webView);
@@ -79,25 +77,21 @@ public class HelpActivity extends AppCompatActivity {
     }
 
     private void refreshBackDispatchState() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (webView.canGoBack() && !backCallbackRegistered) {
-                getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        OnBackInvokedDispatcher.PRIORITY_DEFAULT, onBackInvokedCallback);
-                backCallbackRegistered = true;
-            }
-            else if (!webView.canGoBack() && backCallbackRegistered) {
-                getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(onBackInvokedCallback);
-                backCallbackRegistered = false;
-            }
+        if (webView.canGoBack() && !backCallbackRegistered) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, onBackInvokedCallback);
+            backCallbackRegistered = true;
+        }
+        else if (!webView.canGoBack() && backCallbackRegistered) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(onBackInvokedCallback);
+            backCallbackRegistered = false;
         }
     }
 
     @Override
     protected void onDestroy() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (backCallbackRegistered) {
-                getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(onBackInvokedCallback);
-            }
+        if (backCallbackRegistered) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(onBackInvokedCallback);
         }
 
         super.onDestroy();

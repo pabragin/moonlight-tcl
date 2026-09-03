@@ -180,17 +180,7 @@ public class DebugInfoActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void rumble(Vibrator vibrator) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createWaveform(new long[]{1000}, new int[]{simulatedAmplitude}, 0));
-        } else {
-            long pwmPeriod = 20;
-            long onTime = (long) ((simulatedAmplitude / 255.0) * pwmPeriod);
-            long offTime = pwmPeriod - onTime;
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_GAME)
-                    .build();
-            vibrator.vibrate(new long[]{0, onTime, offTime}, 0, audioAttributes);
-        }
+        vibrator.vibrate(VibrationEffect.createWaveform(new long[]{1000}, new int[]{simulatedAmplitude}, 0));
     }
 
     @Override
@@ -218,24 +208,19 @@ public class DebugInfoActivity extends AppCompatActivity implements View.OnClick
                     sb.append(getString(R.string.debug_info_name) + dev.getName());
                     sb.append("\n");
                     sb.append(getString(R.string.debug_info_sensors));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        String sensor = "";
-                        if (dev.getSensorManager().getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-                            sensor += getString(R.string.debug_info_accelerometer);
-                        }
-                        if (dev.getSensorManager().getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-                            sensor += getString(R.string.debug_info_gyroscope);
-                        }
-                        if (sensor.length() == 0) {
-                            sb.append(getString(R.string.debug_info_no_relevant_driver));
-                        } else {
-                            sb.append(sensor);
-                        }
-                        sb.append("\n");
-                    } else {
-                        sb.append(getString(R.string.debug_info_no_api_below_android12));
-                        sb.append("\n");
+                    String sensor = "";
+                    if (dev.getSensorManager().getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+                        sensor += getString(R.string.debug_info_accelerometer);
                     }
+                    if (dev.getSensorManager().getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
+                        sensor += getString(R.string.debug_info_gyroscope);
+                    }
+                    if (sensor.length() == 0) {
+                        sb.append(getString(R.string.debug_info_no_relevant_driver));
+                    } else {
+                        sb.append(sensor);
+                    }
+                    sb.append("\n");
                     sb.append(getString(R.string.debug_info_vid_pid) + dev.getVendorId() + "_" + dev.getProductId()
                             + "\t    [" + String.format("%04x", dev.getVendorId()) + "_" + String.format("%04x", dev.getProductId()) + "]");
                     sb.append("\n");

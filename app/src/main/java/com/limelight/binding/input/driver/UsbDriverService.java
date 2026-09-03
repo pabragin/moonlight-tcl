@@ -157,10 +157,8 @@ public class UsbDriverService extends Service implements UsbDriverListener {
                     }
 
                     int intentFlags = 0;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        // This PendingIntent must be mutable to allow the framework to populate EXTRA_DEVICE and EXTRA_PERMISSION_GRANTED.
-                        intentFlags |= PendingIntent.FLAG_MUTABLE;
-                    }
+                    // This PendingIntent must be mutable to allow the framework to populate EXTRA_DEVICE and EXTRA_PERMISSION_GRANTED.
+                    intentFlags |= PendingIntent.FLAG_MUTABLE;
 
                     // This function is not documented as throwing any exceptions (denying access
                     // is indicated by calling the PendingIntent with a false result). However,
@@ -306,12 +304,7 @@ public class UsbDriverService extends Service implements UsbDriverListener {
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(ACTION_USB_PERMISSION);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED);
-        }
-        else {
-            registerReceiver(receiver, filter);
-        }
+        registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED);
 
         // Enumerate existing devices
         for (UsbDevice dev : usbManager.getDeviceList().values()) {

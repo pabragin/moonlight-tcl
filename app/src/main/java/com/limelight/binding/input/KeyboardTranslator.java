@@ -1,6 +1,5 @@
 package com.limelight.binding.input;
 
-import android.annotation.TargetApi;
 import android.hardware.input.InputManager;
 import android.os.Build;
 import android.util.SparseArray;
@@ -112,7 +111,6 @@ public class KeyboardTranslator implements InputManager.InputDeviceListener {
         private final InputDevice device;
         private final int[] deviceKeyCodeToQwertyKeyCode;
 
-        @TargetApi(33)
         public KeyboardMapping(InputDevice device) {
             int maxKeyCode = KeyEvent.getMaxKeyCode();
 
@@ -130,7 +128,6 @@ public class KeyboardTranslator implements InputManager.InputDeviceListener {
             }
         }
 
-        @TargetApi(33)
         public int getDeviceKeyCodeForQwertyKeyCode(int qwertyKeyCode) {
             return device.getKeyCodeForKeyLocation(qwertyKeyCode);
         }
@@ -148,12 +145,10 @@ public class KeyboardTranslator implements InputManager.InputDeviceListener {
 
     public KeyboardTranslator(PreferenceConfiguration prefConfig) {
         this.prefConfig = prefConfig;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            for (int deviceId : InputDevice.getDeviceIds()) {
-                InputDevice device = InputDevice.getDevice(deviceId);
-                if (device != null && device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
-                    keyboardMappings.set(deviceId, new KeyboardMapping(device));
-                }
+        for (int deviceId : InputDevice.getDeviceIds()) {
+            InputDevice device = InputDevice.getDevice(deviceId);
+            if (device != null && device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+                keyboardMappings.set(deviceId, new KeyboardMapping(device));
             }
         }
     }
@@ -427,11 +422,9 @@ public class KeyboardTranslator implements InputManager.InputDeviceListener {
 
     @Override
     public void onInputDeviceAdded(int index) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            InputDevice device = InputDevice.getDevice(index);
-            if (device != null && device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
-                keyboardMappings.put(index, new KeyboardMapping(device));
-            }
+        InputDevice device = InputDevice.getDevice(index);
+        if (device != null && device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+            keyboardMappings.put(index, new KeyboardMapping(device));
         }
     }
 
@@ -444,11 +437,9 @@ public class KeyboardTranslator implements InputManager.InputDeviceListener {
     public void onInputDeviceChanged(int index) {
         keyboardMappings.remove(index);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            InputDevice device = InputDevice.getDevice(index);
-            if (device != null && device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
-                keyboardMappings.set(index, new KeyboardMapping(device));
-            }
+        InputDevice device = InputDevice.getDevice(index);
+        if (device != null && device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+            keyboardMappings.set(index, new KeyboardMapping(device));
         }
     }
 }

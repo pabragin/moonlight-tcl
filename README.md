@@ -64,6 +64,15 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    phone or tablet (on-screen controls and keyboard, touch/trackpad, screen orientation, external display, PiP, zoom/pan) are
    hidden on TV. Gamepad battery polling is off by default on TV. The thread that feeds video NALUs to the decoder runs at
    display priority like the renderer.
+10. **Leaner, newer core (tcl5).** The on-screen gamepad and virtual keyboard are gone (a TV has no touchscreen), together with
+   jmDNS (NsdManager does discovery on Android 14), the SHIELD/ChromeOS/Samsung manifest leftovers, pre-Android-14 code paths and
+   a few orphaned classes and drawables; the release build strips unused resources. Input fixes from moonlight-stream are ported
+   (rumble through `VibratorManager`, controller LED requests off the main thread, Xbox Series X|S / Elite 2 / 8BitDo ids in the USB
+   driver). `moonlight-common-c` now tracks moonlight-stream master (NEON Reed-Solomon FEC, batched gamepad input, RTT queries
+   without the ENet lock, RTSP hardening) plus the two Apollo protocol patches, from
+   [pabragin/moonlight-common-c](https://github.com/pabragin/moonlight-common-c) branch `tcl`. Small things: no `setFrameRate()`
+   request when the display already runs at the stream rate, launcher-shortcut bookkeeping off the connect path, native library
+   exports only its JNI symbols.
 
 ## Download and install
 
@@ -83,7 +92,8 @@ reboot, the output of `adb shell dumpsys dropbox --print system_server_native_cr
 ## Building
 
 - Install a JDK 17 and the Android SDK with NDK `27.0.12077973` (see `app/build.gradle`).
-- Run `git submodule update --init --recursive`.
+- Run `git submodule update --init --recursive` (the `moonlight-common-c` submodule comes from
+  [pabragin/moonlight-common-c](https://github.com/pabragin/moonlight-common-c), branch `tcl`).
 - Point Gradle at the SDK with `ANDROID_HOME` or a `local.properties` file containing `sdk.dir=`.
 - Build with `./gradlew :app:assembleRelease` (do not use `-Pandroid.injected.build.abi`: it marks the APK `testOnly`, which the
   TV's installer rejects as invalid), then `zipalign` and `apksigner sign` the APK from

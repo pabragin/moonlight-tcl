@@ -74,10 +74,8 @@ public class StreamSettings extends AppCompatActivity {
     static DisplayCutout displayCutoutP;
 
     void reloadSettings() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Display.Mode mode = getActiveDisplay(StreamSettings.this, previousPrefs).getMode();
-            previousDisplayPixelCount = mode.getPhysicalWidth() * mode.getPhysicalHeight();
-        }
+        Display.Mode mode = getActiveDisplay(StreamSettings.this, previousPrefs).getMode();
+        previousDisplayPixelCount = mode.getPhysicalWidth() * mode.getPhysicalHeight();
         prefsFragment = new SettingsFragment(PreferenceConfiguration.readPreferences(
                 this,
                 PreferenceManager.getDefaultSharedPreferences(this)
@@ -105,17 +103,6 @@ public class StreamSettings extends AppCompatActivity {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        // We have to use this hack on Android 9 because we don't have Display.getCutout()
-        // which was added in Android 10.
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-            // Insets can be null when the activity is recreated on screen rotation
-            // https://stackoverflow.com/questions/61241255/windowinsets-getdisplaycutout-is-null-everywhere-except-within-onattachedtowindo
-            WindowInsets insets = getWindow().getDecorView().getRootWindowInsets();
-            if (insets != null) {
-                displayCutoutP = insets.getDisplayCutout();
-            }
-        }
-
         reloadSettings();
     }
 
@@ -123,17 +110,15 @@ public class StreamSettings extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Display.Mode mode = getActiveDisplay(StreamSettings.this, previousPrefs).getMode();
+        Display.Mode mode = getActiveDisplay(StreamSettings.this, previousPrefs).getMode();
 
-            // If the display's physical pixel count has changed, we consider that it's a new display
-            // and we should reload our settings (which include display-dependent values).
-            //
-            // NB: We aren't using displayId here because that stays the same (DEFAULT_DISPLAY) when
-            // switching between screens on a foldable device.
-            if (mode.getPhysicalWidth() * mode.getPhysicalHeight() != previousDisplayPixelCount) {
-                reloadSettings();
-            }
+        // If the display's physical pixel count has changed, we consider that it's a new display
+        // and we should reload our settings (which include display-dependent values).
+        //
+        // NB: We aren't using displayId here because that stays the same (DEFAULT_DISPLAY) when
+        // switching between screens on a foldable device.
+        if (mode.getPhysicalWidth() * mode.getPhysicalHeight() != previousDisplayPixelCount) {
+            reloadSettings();
         }
     }
 
@@ -146,16 +131,9 @@ public class StreamSettings extends AppCompatActivity {
         // so manual activity relaunching is no longer required.
         PreferenceConfiguration newPrefs = PreferenceConfiguration.readPreferences(this);
         if (!newPrefs.language.equals(previousPrefs.language)) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                // Restart the PC view to apply UI changes
-                Intent intent = new Intent(this, PcView.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent, null);
-            } else {
-                if (newPrefs.language == PreferenceConfiguration.DEFAULT_LANGUAGE) {
-                    Toast.makeText(this, "Language has been reset to default, please restart the app!", Toast.LENGTH_LONG).show();
-                    System.exit(0);
-                }
+            if (newPrefs.language == PreferenceConfiguration.DEFAULT_LANGUAGE) {
+                Toast.makeText(this, "Language has been reset to default, please restart the app!", Toast.LENGTH_LONG).show();
+                System.exit(0);
             }
         }
     }
@@ -375,14 +353,6 @@ public class StreamSettings extends AppCompatActivity {
                 }
             }
 
-            // Hide gamepad motion sensor option when running on OSes before Android 12.
-            // Support for motion, LED, battery, and other extensions were introduced in S.
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                PreferenceCategory category =
-                        (PreferenceCategory) findPreference("category_gamepad_settings");
-                category.removePreference(findPreference("checkbox_gamepad_motion_sensors"));
-            }
-
             // Hide gamepad motion sensor fallback option if the device has no gyro or accelerometer
             if (!pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) &&
                     !activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE)) {
@@ -422,8 +392,7 @@ public class StreamSettings extends AppCompatActivity {
                 category_gamepad_settings.removePreference(findPreference("seekbar_vibrate_fallback_strength"));
                 removePreferenceIfPresent("checkbox_enable_device_rumble");
             }
-            else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
-                    !((Vibrator)getActivity().getSystemService(Context.VIBRATOR_SERVICE)).hasAmplitudeControl()) {
+            else if (!((Vibrator)getActivity().getSystemService(Context.VIBRATOR_SERVICE)).hasAmplitudeControl()) {
                 // Remove the vibration strength selector of the device doesn't have amplitude control
                 category_gamepad_settings.removePreference(findPreference("seekbar_vibrate_fallback_strength"));
             }
@@ -458,149 +427,130 @@ public class StreamSettings extends AppCompatActivity {
             float maxSupportedFps = display.getRefreshRate();
 
             // Hide non-supported resolution/FPS combinations
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                int maxSupportedResW = 0;
+            int maxSupportedResW = 0;
 
-                // Add a native resolution with any insets included for users that don't want content
-                // behind the notch of their display
-                boolean hasInsets = false;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    DisplayCutout cutout;
+            // Add a native resolution with any insets included for users that don't want content
+            // behind the notch of their display
+            boolean hasInsets = false;
+            DisplayCutout cutout;
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // Use the much nicer Display.getCutout() API on Android 10+
-                        cutout = display.getCutout();
-                    }
-                    else {
-                        // Android 9 only
-                        cutout = displayCutoutP;
-                    }
+            // Use the much nicer Display.getCutout() API on Android 10+
+            cutout = display.getCutout();
 
-                    if (cutout != null) {
-                        int widthInsets = cutout.getSafeInsetLeft() + cutout.getSafeInsetRight();
-                        int heightInsets = cutout.getSafeInsetBottom() + cutout.getSafeInsetTop();
+            if (cutout != null) {
+                int widthInsets = cutout.getSafeInsetLeft() + cutout.getSafeInsetRight();
+                int heightInsets = cutout.getSafeInsetBottom() + cutout.getSafeInsetTop();
 
-                        if (widthInsets != 0 || heightInsets != 0) {
-                            DisplayMetrics metrics = new DisplayMetrics();
-                            display.getRealMetrics(metrics);
+                if (widthInsets != 0 || heightInsets != 0) {
+                    DisplayMetrics metrics = new DisplayMetrics();
+                    display.getRealMetrics(metrics);
 
-                            int width = Math.max(metrics.widthPixels - widthInsets, metrics.heightPixels - heightInsets);
-                            int height = Math.min(metrics.widthPixels - widthInsets, metrics.heightPixels - heightInsets);
+                    int width = Math.max(metrics.widthPixels - widthInsets, metrics.heightPixels - heightInsets);
+                    int height = Math.min(metrics.widthPixels - widthInsets, metrics.heightPixels - heightInsets);
 
-                            addNativeResolutionEntries(width, height, false, false);
-                            hasInsets = true;
-                        }
-                    }
-                }
-
-                // Always allow resolutions that are smaller or equal to the active
-                // display resolution because decoders can report total non-sense to us.
-                // For example, a p201 device reports:
-                // AVC Decoder: OMX.amlogic.avc.decoder.awesome
-                // HEVC Decoder: OMX.amlogic.hevc.decoder.awesome
-                // AVC supported width range: 64 - 384
-                // HEVC supported width range: 64 - 544
-                for (Display.Mode candidate : display.getSupportedModes()) {
-                    // Some devices report their dimensions in the portrait orientation
-                    // where height > width. Normalize these to the conventional width > height
-                    // arrangement before we process them.
-
-                    int width = Math.max(candidate.getPhysicalWidth(), candidate.getPhysicalHeight());
-                    int height = Math.min(candidate.getPhysicalWidth(), candidate.getPhysicalHeight());
-
-                    // Some TVs report strange values here, so let's avoid native resolutions on a TV
-                    // unless they report greater than 4K resolutions.
-                    if (!activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION) ||
-                            (width > 3840 || height > 2160)) {
-                        addNativeResolutionEntries(width, height, hasInsets, false);
-                    }
-
-                    if ((width >= 3840 || height >= 2160) && maxSupportedResW < 3840) {
-                        maxSupportedResW = 3840;
-                    }
-                    else if ((width >= 2560 || height >= 1440) && maxSupportedResW < 2560) {
-                        maxSupportedResW = 2560;
-                    }
-                    else if ((width >= 1920 || height >= 1080) && maxSupportedResW < 1920) {
-                        maxSupportedResW = 1920;
-                    }
-
-                    if (candidate.getRefreshRate() > maxSupportedFps) {
-                        maxSupportedFps = candidate.getRefreshRate();
-                    }
-                }
-
-                // This must be called to do runtime initialization before calling functions that evaluate
-                // decoder lists.
-                MediaCodecHelper.initialize(getContext(), GlPreferences.readPreferences(requireContext()).glRenderer);
-
-                MediaCodecInfo avcDecoder = MediaCodecHelper.findProbableSafeDecoder("video/avc", -1);
-                MediaCodecInfo hevcDecoder = MediaCodecHelper.findProbableSafeDecoder("video/hevc", -1);
-
-                if (avcDecoder != null) {
-                    Range<Integer> avcWidthRange = avcDecoder.getCapabilitiesForType("video/avc").getVideoCapabilities().getSupportedWidths();
-
-                    LimeLog.info("AVC supported width range: "+avcWidthRange.getLower()+" - "+avcWidthRange.getUpper());
-
-                    // If 720p is not reported as supported, ignore all results from this API
-                    if (avcWidthRange.contains(1280)) {
-                        if (avcWidthRange.contains(3840) && maxSupportedResW < 3840) {
-                            maxSupportedResW = 3840;
-                        }
-                        else if (avcWidthRange.contains(1920) && maxSupportedResW < 1920) {
-                            maxSupportedResW = 1920;
-                        }
-                        else if (maxSupportedResW < 1280) {
-                            maxSupportedResW = 1280;
-                        }
-                    }
-                }
-
-                if (hevcDecoder != null) {
-                    Range<Integer> hevcWidthRange = hevcDecoder.getCapabilitiesForType("video/hevc").getVideoCapabilities().getSupportedWidths();
-
-                    LimeLog.info("HEVC supported width range: "+hevcWidthRange.getLower()+" - "+hevcWidthRange.getUpper());
-
-                    // If 720p is not reported as supported, ignore all results from this API
-                    if (hevcWidthRange.contains(1280)) {
-                        if (hevcWidthRange.contains(3840) && maxSupportedResW < 3840) {
-                            maxSupportedResW = 3840;
-                        }
-                        else if (hevcWidthRange.contains(1920) && maxSupportedResW < 1920) {
-                            maxSupportedResW = 1920;
-                        }
-                        else if (maxSupportedResW < 1280) {
-                            maxSupportedResW = 1280;
-                        }
-                    }
-                }
-
-                LimeLog.info("Maximum resolution slot: "+maxSupportedResW);
-
-                if (maxSupportedResW != 0) {
-                    if (maxSupportedResW < 3840) {
-                        // 4K is unsupported
-                        removeEntryFromListAndSetValue(PreferenceConfiguration.RESOLUTION_PREF_STRING, PreferenceConfiguration.RES_4K, PreferenceConfiguration.RES_1440P);
-                    }
-                    if (maxSupportedResW < 2560) {
-                        // 1440p is unsupported
-                        removeEntryFromListAndSetValue(PreferenceConfiguration.RESOLUTION_PREF_STRING, PreferenceConfiguration.RES_1440P, PreferenceConfiguration.RES_1080P);
-                    }
-                    if (maxSupportedResW < 1920) {
-                        // 1080p is unsupported
-                        removeEntryFromListAndSetValue(PreferenceConfiguration.RESOLUTION_PREF_STRING, PreferenceConfiguration.RES_1080P, PreferenceConfiguration.RES_720P);
-                    }
-                    // Never remove 720p
+                    addNativeResolutionEntries(width, height, false, false);
+                    hasInsets = true;
                 }
             }
-            else {
-                // We can get the true metrics via the getRealMetrics() function (unlike the lies
-                // that getWidth() and getHeight() tell to us).
-                DisplayMetrics metrics = new DisplayMetrics();
-                display.getRealMetrics(metrics);
-                int width = Math.max(metrics.widthPixels, metrics.heightPixels);
-                int height = Math.min(metrics.widthPixels, metrics.heightPixels);
-                addNativeResolutionEntries(width, height, false, false);
+
+            // Always allow resolutions that are smaller or equal to the active
+            // display resolution because decoders can report total non-sense to us.
+            // For example, a p201 device reports:
+            // AVC Decoder: OMX.amlogic.avc.decoder.awesome
+            // HEVC Decoder: OMX.amlogic.hevc.decoder.awesome
+            // AVC supported width range: 64 - 384
+            // HEVC supported width range: 64 - 544
+            for (Display.Mode candidate : display.getSupportedModes()) {
+                // Some devices report their dimensions in the portrait orientation
+                // where height > width. Normalize these to the conventional width > height
+                // arrangement before we process them.
+
+                int width = Math.max(candidate.getPhysicalWidth(), candidate.getPhysicalHeight());
+                int height = Math.min(candidate.getPhysicalWidth(), candidate.getPhysicalHeight());
+
+                // Some TVs report strange values here, so let's avoid native resolutions on a TV
+                // unless they report greater than 4K resolutions.
+                if (!activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION) ||
+                        (width > 3840 || height > 2160)) {
+                    addNativeResolutionEntries(width, height, hasInsets, false);
+                }
+
+                if ((width >= 3840 || height >= 2160) && maxSupportedResW < 3840) {
+                    maxSupportedResW = 3840;
+                }
+                else if ((width >= 2560 || height >= 1440) && maxSupportedResW < 2560) {
+                    maxSupportedResW = 2560;
+                }
+                else if ((width >= 1920 || height >= 1080) && maxSupportedResW < 1920) {
+                    maxSupportedResW = 1920;
+                }
+
+                if (candidate.getRefreshRate() > maxSupportedFps) {
+                    maxSupportedFps = candidate.getRefreshRate();
+                }
+            }
+
+            // This must be called to do runtime initialization before calling functions that evaluate
+            // decoder lists.
+            MediaCodecHelper.initialize(getContext(), GlPreferences.readPreferences(requireContext()).glRenderer);
+
+            MediaCodecInfo avcDecoder = MediaCodecHelper.findProbableSafeDecoder("video/avc", -1);
+            MediaCodecInfo hevcDecoder = MediaCodecHelper.findProbableSafeDecoder("video/hevc", -1);
+
+            if (avcDecoder != null) {
+                Range<Integer> avcWidthRange = avcDecoder.getCapabilitiesForType("video/avc").getVideoCapabilities().getSupportedWidths();
+
+                LimeLog.info("AVC supported width range: "+avcWidthRange.getLower()+" - "+avcWidthRange.getUpper());
+
+                // If 720p is not reported as supported, ignore all results from this API
+                if (avcWidthRange.contains(1280)) {
+                    if (avcWidthRange.contains(3840) && maxSupportedResW < 3840) {
+                        maxSupportedResW = 3840;
+                    }
+                    else if (avcWidthRange.contains(1920) && maxSupportedResW < 1920) {
+                        maxSupportedResW = 1920;
+                    }
+                    else if (maxSupportedResW < 1280) {
+                        maxSupportedResW = 1280;
+                    }
+                }
+            }
+
+            if (hevcDecoder != null) {
+                Range<Integer> hevcWidthRange = hevcDecoder.getCapabilitiesForType("video/hevc").getVideoCapabilities().getSupportedWidths();
+
+                LimeLog.info("HEVC supported width range: "+hevcWidthRange.getLower()+" - "+hevcWidthRange.getUpper());
+
+                // If 720p is not reported as supported, ignore all results from this API
+                if (hevcWidthRange.contains(1280)) {
+                    if (hevcWidthRange.contains(3840) && maxSupportedResW < 3840) {
+                        maxSupportedResW = 3840;
+                    }
+                    else if (hevcWidthRange.contains(1920) && maxSupportedResW < 1920) {
+                        maxSupportedResW = 1920;
+                    }
+                    else if (maxSupportedResW < 1280) {
+                        maxSupportedResW = 1280;
+                    }
+                }
+            }
+
+            LimeLog.info("Maximum resolution slot: "+maxSupportedResW);
+
+            if (maxSupportedResW != 0) {
+                if (maxSupportedResW < 3840) {
+                    // 4K is unsupported
+                    removeEntryFromListAndSetValue(PreferenceConfiguration.RESOLUTION_PREF_STRING, PreferenceConfiguration.RES_4K, PreferenceConfiguration.RES_1440P);
+                }
+                if (maxSupportedResW < 2560) {
+                    // 1440p is unsupported
+                    removeEntryFromListAndSetValue(PreferenceConfiguration.RESOLUTION_PREF_STRING, PreferenceConfiguration.RES_1440P, PreferenceConfiguration.RES_1080P);
+                }
+                if (maxSupportedResW < 1920) {
+                    // 1080p is unsupported
+                    removeEntryFromListAndSetValue(PreferenceConfiguration.RESOLUTION_PREF_STRING, PreferenceConfiguration.RES_1080P, PreferenceConfiguration.RES_720P);
+                }
+                // Never remove 720p
             }
 
             if (!PreferenceConfiguration.readPreferences(this.getActivity()).unlockFps) {
@@ -630,34 +580,25 @@ public class StreamSettings extends AppCompatActivity {
                 }
             });
 
-            // Remove HDR preference for devices below Nougat
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                LimeLog.info("Excluding HDR toggle based on OS");
+            Display.HdrCapabilities hdrCaps = display.getHdrCapabilities();
+            Log.d("HDR CAP", display + "");
+            // We must now ensure our display is compatible with HDR10
+            boolean foundHdr10 = false;
+            if (hdrCaps != null) {
+                // getHdrCapabilities() returns null on Lenovo Lenovo Mirage Solo (vega), Android 8.0
+                for (int hdrType : hdrCaps.getSupportedHdrTypes()) {
+                    if (hdrType == Display.HdrCapabilities.HDR_TYPE_HDR10) {
+                        foundHdr10 = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!foundHdr10) {
+                LimeLog.info("Excluding HDR toggle based on display capabilities");
                 PreferenceCategory category =
                         (PreferenceCategory) findPreference("category_video_settings");
                 category.removePreference(findPreference("checkbox_enable_hdr"));
-            }
-            else {
-                Display.HdrCapabilities hdrCaps = display.getHdrCapabilities();
-                Log.d("HDR CAP", display + "");
-                // We must now ensure our display is compatible with HDR10
-                boolean foundHdr10 = false;
-                if (hdrCaps != null) {
-                    // getHdrCapabilities() returns null on Lenovo Lenovo Mirage Solo (vega), Android 8.0
-                    for (int hdrType : hdrCaps.getSupportedHdrTypes()) {
-                        if (hdrType == Display.HdrCapabilities.HDR_TYPE_HDR10) {
-                            foundHdr10 = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!foundHdr10) {
-                    LimeLog.info("Excluding HDR toggle based on display capabilities");
-                    PreferenceCategory category =
-                            (PreferenceCategory) findPreference("category_video_settings");
-                    category.removePreference(findPreference("checkbox_enable_hdr"));
-                }
             }
 
             // Add a listener to the FPS and resolution preference

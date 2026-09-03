@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 
 import com.limelight.TestLogSuppressor;
 
-@Config(sdk = {33}, shadows = {com.limelight.shadows.ShadowMoonBridge.class, com.limelight.shadows.ShadowGameManager.class})
+@Config(sdk = {34}, shadows = {com.limelight.shadows.ShadowMoonBridge.class, com.limelight.shadows.ShadowGameManager.class})
 @RunWith(RobolectricTestRunner.class)
 public class StartupTest {
     private Context context;

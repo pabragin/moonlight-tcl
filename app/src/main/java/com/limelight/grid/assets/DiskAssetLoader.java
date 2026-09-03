@@ -75,72 +75,36 @@ public class DiskAssetLoader {
 
         Bitmap bmp;
 
-        // For OSes prior to P, we have to use the ugly BitmapFactory API
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            // Lookup bounds of the downloaded image
-            BitmapFactory.Options decodeOnlyOptions = new BitmapFactory.Options();
-            decodeOnlyOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(file.getAbsolutePath(), decodeOnlyOptions);
-            if (decodeOnlyOptions.outWidth <= 0 || decodeOnlyOptions.outHeight <= 0) {
-                // Dimensions set to -1 on error. Return value always null.
-                return null;
-            }
+        // On P, we can get a bitmap back in one step with ImageDecoder
+        final ScaledBitmap scaledBitmap = new ScaledBitmap();
+        try {
+            scaledBitmap.bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(file), new ImageDecoder.OnHeaderDecodedListener() {
+                @Override
+                public void onHeaderDecoded(ImageDecoder imageDecoder, ImageDecoder.ImageInfo imageInfo, ImageDecoder.Source source) {
+                    scaledBitmap.originalWidth = imageInfo.getSize().getWidth();
+                    scaledBitmap.originalHeight = imageInfo.getSize().getHeight();
 
-            LimeLog.info("Tuple "+tuple+" has cached art of size: "+decodeOnlyOptions.outWidth+"x"+decodeOnlyOptions.outHeight);
+                    float aspectRatio = (float) scaledBitmap.originalWidth / scaledBitmap.originalHeight;
+                    float standardAspectRatio = (float) STANDARD_ASSET_WIDTH / STANDARD_ASSET_HEIGHT;
+                    int targetWidth = STANDARD_ASSET_WIDTH;
+                    int targetHeight = STANDARD_ASSET_HEIGHT;
 
-            // Load the image scaled to the appropriate size
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = calculateInSampleSize(decodeOnlyOptions,
-                    STANDARD_ASSET_WIDTH / sampleSize,
-                    STANDARD_ASSET_HEIGHT / sampleSize);
-            if (isLowRamDevice) {
-                options.inPreferredConfig = Bitmap.Config.RGB_565;
-                options.inDither = true;
-            }
-            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                options.inPreferredConfig = Bitmap.Config.HARDWARE;
-            }
-
-            bmp = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-            if (bmp != null) {
-                LimeLog.info("Tuple "+tuple+" decoded from disk cache with sample size: "+options.inSampleSize);
-                return new ScaledBitmap(decodeOnlyOptions.outWidth, decodeOnlyOptions.outHeight, bmp);
-            }
-        }
-        else {
-            // On P, we can get a bitmap back in one step with ImageDecoder
-            final ScaledBitmap scaledBitmap = new ScaledBitmap();
-            try {
-                scaledBitmap.bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(file), new ImageDecoder.OnHeaderDecodedListener() {
-                    @Override
-                    public void onHeaderDecoded(ImageDecoder imageDecoder, ImageDecoder.ImageInfo imageInfo, ImageDecoder.Source source) {
-                        scaledBitmap.originalWidth = imageInfo.getSize().getWidth();
-                        scaledBitmap.originalHeight = imageInfo.getSize().getHeight();
-
-                        float aspectRatio = (float) scaledBitmap.originalWidth / scaledBitmap.originalHeight;
-                        float standardAspectRatio = (float) STANDARD_ASSET_WIDTH / STANDARD_ASSET_HEIGHT;
-                        int targetWidth = STANDARD_ASSET_WIDTH;
-                        int targetHeight = STANDARD_ASSET_HEIGHT;
-
-                        if (aspectRatio < standardAspectRatio) {
-                            targetHeight = (int) (standardAspectRatio / aspectRatio * targetHeight);
-                        } else {
-                            targetWidth = (int) (aspectRatio / standardAspectRatio * targetWidth);
-                        }
-                        imageDecoder.setTargetSize(targetWidth, targetHeight);
-                        if (isLowRamDevice) {
-                            imageDecoder.setMemorySizePolicy(ImageDecoder.MEMORY_POLICY_LOW_RAM);
-                        }
+                    if (aspectRatio < standardAspectRatio) {
+                        targetHeight = (int) (standardAspectRatio / aspectRatio * targetHeight);
+                    } else {
+                        targetWidth = (int) (aspectRatio / standardAspectRatio * targetWidth);
                     }
-                });
-                return scaledBitmap;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
+                    imageDecoder.setTargetSize(targetWidth, targetHeight);
+                    if (isLowRamDevice) {
+                        imageDecoder.setMemorySizePolicy(ImageDecoder.MEMORY_POLICY_LOW_RAM);
+                    }
+                }
+            });
+            return scaledBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-
-        return null;
     }
 
     public File getFile(String computerUuid, int appId) {

@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = {33})
+@Config(sdk = {34})
 public class StreamViewCommitTextTest {
     private Context ctx;
 
