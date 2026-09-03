@@ -577,12 +577,6 @@
     <string name="error_msg_timeout">Délai de connexion dépassé</string>
     <string name="permission_launch_app">Lancer les applications</string>
     <string name="permission_sync_clipboard">Synchroniser le presse-papiers</string>
-    <string name="searchpreference_search">Rechercher…</string>
-    <string name="searchpreference_clear">Effacer</string>
-    <string name="searchpreference_history_entry">Entrée de l\'historique</string>
-    <string name="searchpreference_more">Plus</string>
-    <string name="searchpreference_clear_history">Effacer l\'historique</string>
-    <string name="searchpreference_no_results">Aucun résultat</string>
     <string name="title_enable_commit_text">Activer la saisie commit-text (gestes/voix)</string>
     <string name="summary_enable_commit_text">Transfère le texte multi-caractères des claviers virtuels (saisie gestuelle, suggestions, dictée vocale). Peut perturber les jeux qui attendent des frappes une par une.</string>
     <string name="title_show_overlay_zoom_toggle_button">Afficher le bouton de bascule du zoom de superposition</string>

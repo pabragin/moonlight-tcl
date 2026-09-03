@@ -662,12 +662,6 @@
     <string name="permission_launch_app">Launch Apps</string>
     <string name="permission_sync_clipboard">Sync Clipboard</string>
 
-    <string name="searchpreference_search">Search…</string>
-    <string name="searchpreference_clear">Clear</string>
-    <string name="searchpreference_history_entry">History entry</string>
-    <string name="searchpreference_more">More</string>
-    <string name="searchpreference_clear_history">Clear history</string>
-    <string name="searchpreference_no_results">No results</string>
 
     <!-- Keyboard -->
     <string name="keyboard_clear_all">Clear All</string>

@@ -46,7 +46,6 @@ import com.limelight.GameMenu;
 import com.limelight.LimeLog;
 import com.limelight.R;
 import com.limelight.StartExternalDisplayControlReceiver;
-import com.limelight.binding.input.virtual_controller.keyboard.KeyBoardLayoutController;
 import com.limelight.preferences.PreferenceConfiguration;
 import com.limelight.ui.ExternalControllerView;
 
@@ -54,7 +53,7 @@ import com.limelight.ui.ExternalControllerView;
  * A standalone Activity providing a full-screen touchpad controller for the secondary display.
  * It creates its own UI programmatically and hosts the GameMenu for in-game options.
  */
-public class ExternalDisplayControlActivity extends AppCompatActivity implements View.OnKeyListener, KeyBoardLayoutController.ViewCallbacks {
+public class ExternalDisplayControlActivity extends AppCompatActivity implements View.OnKeyListener {
 
     public static String EXTRA_LAUNCH_INTENT = "launchIntent";
 
@@ -65,7 +64,6 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
 
     private ExternalControllerView rootLayout;
     private ImageButton zoomButton;
-    private KeyBoardLayoutController keyBoardLayoutController;
 
     private boolean isKeyboardVisible = false;
 
@@ -93,12 +91,6 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
     public static void toggleKeyboard() {
         if (instance != null) {
             instance._toggleKeyboard();
-        }
-    }
-
-    public static void toggleFullKeyboard() {
-        if (instance != null) {
-            instance._toggleFullKeyboard();
         }
     }
 
@@ -170,7 +162,7 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
             WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
             androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(), (v, insets) -> {
                 boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
-                updateKeyboardVisibility(imeVisible || (keyBoardLayoutController != null && keyBoardLayoutController.isKeyboardVisible()));
+                updateKeyboardVisibility(imeVisible);
                 return androidx.core.view.ViewCompat.onApplyWindowInsets(v, insets);
             });
         }
@@ -215,11 +207,6 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         instance = null;
-    }
-
-    @Override
-    public void onKeyboardControllerVisibilityChange(boolean visible) {
-        updateKeyboardVisibility(visible);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -287,9 +274,7 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        if (Game.instance != null && Game.instance.isKeyboardLayoutVisible()) {
-            toggleFullKeyboard();
-        } else if (gameMenu != null && !gameMenu.isMenuOpen() && Game.instance != null)
+        if (gameMenu != null && !gameMenu.isMenuOpen() && Game.instance != null)
             Game.instance.onBackPressed();
         else {
             super.onBackPressed();
@@ -434,12 +419,6 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
 //        LinearLayout bottomCenterButtons = createButtonContainer(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
 //        bottomCenterButtons.setFocusable(false);
 //        rootLayout.addView(bottomCenterButtons);
-
-        // Bottom-right button: Custom keyboard toggle
-        LinearLayout bottomRightButton = createButtonContainer(Gravity.BOTTOM | Gravity.END);
-        bottomRightButton.setFocusable(false);
-        bottomRightButton.addView(createImageButton(R.drawable.ic_fullscreen_keyboard, v -> _toggleFullKeyboard()));
-        rootLayout.addView(bottomRightButton);
     }
 
     /**
@@ -449,24 +428,6 @@ public class ExternalDisplayControlActivity extends AppCompatActivity implements
         LimeLog.info("Toggling keyboard overlay on ExternalDisplayControlActivity");
         InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.toggleSoftInput(0, 0);
-    }
-
-    private void initFullKeyboard(PreferenceConfiguration prefConfig) {
-        keyBoardLayoutController = new KeyBoardLayoutController(rootLayout, this, prefConfig);
-        keyBoardLayoutController.setViewCallbacks(this);
-        keyBoardLayoutController.refreshLayout();
-        keyBoardLayoutController.show();
-    }
-
-    /**
-     * Toggles the visibility of the full screen keyboard
-     */
-    private void _toggleFullKeyboard() {
-        if (keyBoardLayoutController == null) {
-            initFullKeyboard(prefConfig);
-            return;
-        }
-        keyBoardLayoutController.toggleVisibility();
     }
 
     public void toggleZoomMode(boolean callGame) {

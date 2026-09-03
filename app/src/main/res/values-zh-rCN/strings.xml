@@ -607,12 +607,6 @@
     <string name="permission_launch_app">启动APP</string>
     <string name="permission_sync_clipboard">同步剪贴板</string>
 
-    <string name="searchpreference_search">搜索…</string>
-    <string name="searchpreference_clear">清除</string>
-    <string name="searchpreference_history_entry">历史条目</string>
-    <string name="searchpreference_more">更多</string>
-    <string name="searchpreference_clear_history">清除历史</string>
-    <string name="searchpreference_no_results">无结果</string>
     <string name="game_menu_toggle_mouse_on">启用手柄鼠标模拟</string>
     <string name="summary_performance_link">查看其他设备的性能数据</string>
     <string name="email_chooser_title">发送性能统计...</string>

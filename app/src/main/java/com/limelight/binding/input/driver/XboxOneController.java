@@ -25,6 +25,7 @@ public class XboxOneController extends AbstractXboxController {
             0x20d6, // PowerA
             0x24c6, // PowerA
             0x2e24, // Hyperkin
+            0x2dc8, // 8BitDo (upstream 583f662a)
             0x3537, // GameSir
             0x2dc8, // 8BitDo
     };
@@ -55,6 +56,8 @@ public class XboxOneController extends AbstractXboxController {
             new InitPacket(0x24c6, 0x542a, RUMBLE_INIT2),
             new InitPacket(0x24c6, 0x543a, RUMBLE_INIT2),
             new InitPacket(0x045e, 0x0b12, ONE_S_INIT),//Xbox Wireless Controller, HWID Model 1914
+            new InitPacket(0x045e, 0x0b05, ONE_S_INIT),//Xbox Elite Series 2 (upstream 280454fd)
+            new InitPacket(0x045e, 0x0b13, ONE_S_INIT),//Xbox Series X|S (upstream 280454fd)
             new InitPacket(0x045e, 0x02fe, ONE_S_INIT),//Xbox Wireless Controller, HWID Model 1914
             new InitPacket(0x3537, 0x1012, ONE_S_INIT),//小鸡影舞者
 

@@ -622,12 +622,6 @@
     <string name="permission_launch_app">Khởi chạy ứng dụng</string>
     <string name="permission_sync_clipboard">Đồng bộ bảng tạm</string>
 
-    <string name="searchpreference_search">Tìm kiếm…</string>
-    <string name="searchpreference_clear">Xóa</string>
-    <string name="searchpreference_history_entry">Mục lịch sử</string>
-    <string name="searchpreference_more">Thêm</string>
-    <string name="searchpreference_clear_history">Xóa lịch sử</string>
-    <string name="searchpreference_no_results">Không có kết quả</string>
 
     <!-- Compliance -->
     <string name="category_basic_settings">Cài đặt cơ bản</string>

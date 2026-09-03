@@ -598,12 +598,6 @@
     <string name="error_msg_timeout">Таймаут соединения</string>
     <string name="permission_launch_app">Запустить приложения</string>
     <string name="permission_sync_clipboard">Синхр. буфера обмена</string>
-    <string name="searchpreference_search">Поиск…</string>
-    <string name="searchpreference_clear">Очистить</string>
-    <string name="searchpreference_history_entry">Запись истории</string>
-    <string name="searchpreference_more">Ещё</string>
-    <string name="searchpreference_clear_history">Очистить историю</string>
-    <string name="searchpreference_no_results">Нет результатов</string>
     <string name="keyboard_clear_all">Очистить всё</string>
     <string name="keyboard_add_keys">Добавить клавиши</string>
     <string name="keyboard_select_keys">Выберите клавиши для добавления</string>

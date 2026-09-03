@@ -21,9 +21,6 @@ import com.limelight.binding.input.driver.UsbDriverService;
 import com.limelight.binding.input.evdev.EvdevListener;
 import com.limelight.binding.input.touch.TouchContext;
 import com.limelight.binding.input.touch.TrackpadContext;
-import com.limelight.binding.input.virtual_controller.VirtualController;
-import com.limelight.binding.input.virtual_controller.keyboard.KeyBoardController;
-import com.limelight.binding.input.virtual_controller.keyboard.KeyBoardLayoutController;
 import com.limelight.binding.video.CrashListener;
 import com.limelight.binding.video.MediaCodecDecoderRenderer;
 import com.limelight.binding.video.MediaCodecHelper;
@@ -170,11 +167,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
     private ControllerHandler controllerHandler;
     private KeyboardTranslator keyboardTranslator;
-    private VirtualController virtualController;
-
-    private KeyBoardController keyBoardController;
-
-    private KeyBoardLayoutController keyBoardLayoutController;
 
     private PreferenceConfiguration prefConfig;
     private SharedPreferences tombstonePrefs;
@@ -736,10 +728,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             // of gamepads removed and replugged at runtime.
             gamepadMask = 1;
         }
-        if (prefConfig.onscreenController) {
-            // If we're using OSC, always set at least gamepad 1.
-            gamepadMask |= 1;
-        }
 
         // Set to the optimal mode for streaming
         float displayRefreshRate = prepareDisplayForRendering(currentDisplay);
@@ -839,22 +827,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             // Initialize touch contexts based on preferences
             // The mouse mode preference is also read in PreferenceConfiguration to set the boolean flags
             initMouseMode();
-        }
-
-        if (prefConfig.onscreenController) {
-            // create virtual onscreen controller
-            if (prefConfig.hideOSCWhenHasGamepad) {
-                if (!controllerHandler.hasController()) {
-                    initVirtualController();
-                }
-            } else {
-                initVirtualController();
-            }
-        }
-
-        //特殊按键屏幕布局
-        if(prefConfig.enableKeyboard){
-            initKeyboardController();
         }
 
         if (!decoderRenderer.isAvcSupported()) {
@@ -1051,70 +1023,12 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
     }
 
-    private void initKeyboardController(){
-        keyBoardController = new KeyBoardController(conn,(FrameLayout)rootView, this);
-        keyBoardController.refreshLayout();
-        keyBoardController.show();
-    }
-
-    public Boolean isKeyboardLayoutVisible() {
-        return keyBoardLayoutController != null && keyBoardLayoutController.shown;
-    }
-
-    private void initVirtualController(){
-        virtualController = new VirtualController(controllerHandler, (FrameLayout)rootView, this);
-        virtualController.refreshLayout();
-        virtualController.show();
-    }
-
-    private void initkeyBoardLayoutController(){
-        keyBoardLayoutController = new KeyBoardLayoutController((FrameLayout)rootView, this, prefConfig);
-        keyBoardLayoutController.refreshLayout();
-        keyBoardLayoutController.show();
-    }
-
-    //显示隐藏虚拟特殊按键
-    public void toggleKeyboardController(){
-        if (keyBoardController==null) {
-            initKeyboardController();
-            return;
-        }
-        keyBoardController.toggleVisibility();
-    }
-
-    public void toggleFullKeyboard() {
-        if (isOnExternalDisplay()) {
-            ExternalDisplayControlActivity.toggleFullKeyboard();
-            return;
-        }
-        if (keyBoardLayoutController == null) {
-            initkeyBoardLayoutController();
-            return;
-        }
-        keyBoardLayoutController.toggleVisibility();
-    }
-
-    //显示隐藏虚拟手柄控制器
-    public void toggleVirtualController(){
-        if (virtualController==null) {
-            initVirtualController();
-            prefConfig.onscreenController=true;
-            return;
-        }
-        prefConfig.onscreenController= virtualController.switchShowHide() != 0;
-    }
-
     private void setPreferredOrientationForActivity() {
         Display display = getActiveDisplay(Game.this, prefConfig);
 
         // For semi-square displays, we use more complex logic to determine which orientation to use (if any)
         if (PreferenceConfiguration.isSquarishScreen(display)) {
             int desiredOrientation = Configuration.ORIENTATION_UNDEFINED;
-
-            // OSC doesn't properly support portrait displays, so don't use it in portrait mode by default
-            if (prefConfig.onscreenController) {
-                desiredOrientation = Configuration.ORIENTATION_LANDSCAPE;
-            }
 
             // For native resolution, we will lock the orientation to the one that matches the specified resolution
             if (PreferenceConfiguration.isNativeResolution(prefConfig.width, prefConfig.height)) {
@@ -1154,19 +1068,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         // Set requested orientation for possible new screen size
         setPreferredOrientationForActivity();
 
-        if (virtualController != null) {
-            // Refresh layout of OSC for possible new screen size
-            virtualController.refreshLayout();
-        }
-
-        if(keyBoardController != null){
-            keyBoardController.refreshLayout();
-        }
-
-        if(keyBoardLayoutController != null){
-            keyBoardLayoutController.refreshLayout();
-        }
-
         // Hide on-screen overlays in PiP mode
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (isInPictureInPictureMode()) {
@@ -1182,18 +1083,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
                 if (overlayToggleZoomButtonShown) {
                     overlayToggleButton.setVisibility(View.GONE);
-                }
-
-                if (virtualController != null) {
-                    virtualController.hide();
-                }
-
-                if (keyBoardController != null && keyBoardController.shown) {
-                    keyBoardController.hide(true);
-                }
-
-                if (keyBoardLayoutController!=null && keyBoardLayoutController.shown) {
-                    keyBoardLayoutController.hide(true);
                 }
 
                 hideGameMenu();
@@ -1219,18 +1108,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 }
 
                 // Restore overlays to previous state when leaving PiP
-
-                if (virtualController != null) {
-                    virtualController.show();
-                }
-
-                if (keyBoardController != null && keyBoardController.shown) {
-                    keyBoardController.show();
-                }
-
-                if(keyBoardLayoutController!=null && keyBoardLayoutController.shown){
-                    keyBoardLayoutController.show();
-                }
 
                 if (prefConfig.enablePerfOverlay) {
                     performanceOverlayView.setVisibility(View.VISIBLE);
@@ -1305,30 +1182,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
         else {
             autoEnterPip = autoEnter;
-        }
-    }
-
-    public void setMetaKeyCaptureState(boolean enabled) {
-        // This uses custom APIs present on some Samsung devices to allow capture of
-        // meta key events while streaming.
-        try {
-            Class<?> semWindowManager = Class.forName("com.samsung.android.view.SemWindowManager");
-            Method getInstanceMethod = semWindowManager.getMethod("getInstance");
-            Object manager = getInstanceMethod.invoke(null);
-
-            if (manager != null) {
-                Class<?>[] parameterTypes = new Class<?>[2];
-                parameterTypes[0] = ComponentName.class;
-                parameterTypes[1] = boolean.class;
-                Method requestMetaKeyEventMethod = semWindowManager.getDeclaredMethod("requestMetaKeyEvent", parameterTypes);
-                requestMetaKeyEventMethod.invoke(manager, this.getComponentName(), enabled);
-            }
-            else {
-                LimeLog.warning("SemWindowManager.getInstance() returned null");
-            }
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                 IllegalAccessException e) {
-            e.printStackTrace();
         }
     }
 
@@ -1744,17 +1597,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         SpinnerDialog.closeDialogs(this);
         Dialog.closeDialogs();
 
-        if (virtualController != null) {
-            virtualController.hide();
-        }
-        if (keyBoardController != null) {
-            keyBoardController.hide();
-        }
-
-        if(keyBoardLayoutController!=null){
-            keyBoardLayoutController.hide();
-        }
-
         if (conn != null) {
             int videoFormat = decoderRenderer.getActiveVideoFormat();
 
@@ -1857,7 +1699,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
 
         // Grab/ungrab system keyboard shortcuts
-        setMetaKeyCaptureState(grab);
 
         grabbedInput = grab;
     }
@@ -2745,13 +2586,14 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
 
         int eventSource = event.getSource();
-        int deviceSources = event.getDevice() != null ? event.getDevice().getSources() : 0;
         if ((eventSource & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
             if (controllerHandler.handleMotionEvent(event)) {
                 return true;
             }
         }
-        else if ((deviceSources & InputDevice.SOURCE_CLASS_JOYSTICK) != 0 && controllerHandler.tryHandleTouchpadEvent(event)) {
+        // Only touchpad events need the InputDevice lookup, so keep it off the gamepad path above
+        else if (event.getDevice() != null && (event.getDevice().getSources() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0 &&
+                controllerHandler.tryHandleTouchpadEvent(event)) {
             return true;
         }
         else if ((eventSource & InputDevice.SOURCE_CLASS_POINTER) != 0 ||
@@ -3045,13 +2887,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 if (eventSource == InputDevice.SOURCE_TOUCHPAD) {
                     return handleTouchInput(event, trackpadContextMap, false);
                 } else {
-                    if (virtualController != null &&
-                            (virtualController.getControllerMode() == VirtualController.ControllerMode.MoveButtons ||
-                                    virtualController.getControllerMode() == VirtualController.ControllerMode.ResizeButtons)) {
-                        // Ignore presses when the virtual controller is being configured
-                        return true;
-                    }
-
                     if (isPanZoomMode) {
                         // panning the streamView
                         panZoomHandler.handleTouchEvent(event);
@@ -3216,9 +3051,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                             // This is a 3 finger tap to bring up the keyboard
                             toggleKeyboard();
                             return true;
-                        } else if (currentEventTime - fourFingerDownTime < FOUR_FINGER_TAP_THRESHOLD) {
-                            toggleFullKeyboard();
-                            return true;
                         } else if (currentEventTime - fiveFingerDownTime < FIVE_FINGER_TAP_THRESHOLD) {
                             if(prefConfig.enableBackMenu) {
                                 showGameMenu(null);
@@ -3289,10 +3121,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                         showGameMenu(null);
                     }
                     fiveFingerDownTime = 0;
-                    break;
-                } else if (pointerCount == 4 && fourFingerDownTime > 0 && currentEventTime - fourFingerDownTime < FOUR_FINGER_TAP_THRESHOLD) {
-                    toggleFullKeyboard();
-                    fourFingerDownTime = 0;
                     break;
                 } else if (pointerCount == 3 && threeFingerDownTime > 0 && currentEventTime - threeFingerDownTime < THREE_FINGER_TAP_THRESHOLD) {
                     toggleKeyboard();
@@ -3694,12 +3522,18 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         ComputerDetails computer = new ComputerDetails();
         computer.name = pcName;
         computer.uuid = Game.this.getIntent().getStringExtra(EXTRA_PC_UUID);
-        ShortcutHelper shortcutHelper = new ShortcutHelper(this);
-        shortcutHelper.reportComputerShortcutUsed(computer);
-        if (appName != null) {
-            // This may be null if launched from the "Resume Session" PC context menu item
-            shortcutHelper.reportGameLaunched(computer, app);
-        }
+        // Launcher shortcut / TV channel bookkeeping does binder and disk work; keep it off the
+        // main thread at the moment the stream starts.
+        final var shortcutComputer = computer;
+        final var shortcutApp = app;
+        new Thread(() -> {
+            ShortcutHelper shortcutHelper = new ShortcutHelper(Game.this);
+            shortcutHelper.reportComputerShortcutUsed(shortcutComputer);
+            if (shortcutApp != null && shortcutApp.getAppName() != null) {
+                // This may be null if launched from the "Resume Session" PC context menu item
+                shortcutHelper.reportGameLaunched(shortcutComputer, shortcutApp);
+            }
+        }, "ShortcutReport").start();
     }
 
     @Override
@@ -3793,18 +3627,21 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             desiredFrameRate = desiredRefreshRate;
         }
 
-        // Tell the OS about our frame rate to allow it to adapt the display refresh rate appropriately
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // We want to change frame rate even if it's not seamless, since prepareDisplayForRendering()
-            // will not set the display mode on S+ if it only differs by the refresh rate. It depends
-            // on us to trigger the frame rate switch here.
+        // Tell the OS about our frame rate to allow it to adapt the display refresh rate appropriately.
+        // We want to change frame rate even if it's not seamless, since prepareDisplayForRendering()
+        // will not set the display mode on S+ if it only differs by the refresh rate. It depends
+        // on us to trigger the frame rate switch here. When the display already runs at the desired
+        // rate there is nothing to switch, so skip the request: some TV firmwares treat it as a mode
+        // change and re-sync the panel.
+        Display frameRateDisplay = getActiveDisplay(Game.this, prefConfig);
+        float currentRefreshRate = frameRateDisplay != null ? frameRateDisplay.getMode().getRefreshRate() : 0;
+        if (Math.abs(currentRefreshRate - desiredFrameRate) > 0.01f) {
             holder.getSurface().setFrameRate(desiredFrameRate,
                     Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
                     Surface.CHANGE_FRAME_RATE_ALWAYS);
         }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            holder.getSurface().setFrameRate(desiredFrameRate,
-                    Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+        else {
+            LimeLog.info("Display already runs at " + currentRefreshRate + " Hz; not requesting a frame rate switch");
         }
     }
 

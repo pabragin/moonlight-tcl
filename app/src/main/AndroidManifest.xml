@@ -4,7 +4,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -26,17 +25,6 @@
     <uses-feature
         android:name="android.software.leanback"
         android:required="false" />
-    <uses-feature
-        android:name="android.hardware.sensor.accelerometer"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.sensor.gyroscope"
-        android:required="false" />
-
-    <!-- Disable legacy input emulation on ChromeOS -->
-    <uses-feature
-        android:name="android.hardware.type.pc"
-        android:required="false"/>
 
     <application
         android:name=".ArtemisApplication"
@@ -63,14 +51,6 @@
             android:exported="true">
         </provider>
         <receiver android:name=".StartExternalDisplayControlReceiver" />
-        <!-- Samsung multi-window support -->
-        <uses-library
-            android:name="com.sec.android.app.multiwindow"
-            android:required="false" />
-        <meta-data
-            android:name="com.sec.android.support.multiwindow"
-            android:value="true" />
-
         <!-- Disable Game Mode downscaling since it can break our UI dialogs and doesn't benefit
              performance much for us since we don't use GL/Vulkan for rendering anyway -->
         <meta-data
@@ -82,9 +62,6 @@
             android:name="android.game_mode_config"
             android:resource="@xml/game_mode_config" />
 
-        <!-- Samsung DeX support requires explicit placement of android:resizeableActivity="true"
-             in each activity even though it is implied by targeting API 24+ -->
-
         <activity
             android:name=".PcView"
             android:exported="true"
@@ -92,16 +69,11 @@
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
 
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-                <category android:name="tv.ouya.intent.category.APP" />
             </intent-filter>
         </activity>
         <!-- Small hack to support launcher shortcuts without relaunching over and over again when the back button is pressed -->
@@ -112,8 +84,6 @@
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -130,8 +100,6 @@
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
         </activity>
         <activity
             android:name=".ProfilesActivity"
@@ -139,8 +107,6 @@
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
             android:theme="@style/SettingsTheme">
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
         </activity>
         <activity
             android:name=".EditProfileActivity"
@@ -149,8 +115,6 @@
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
             android:label="@string/title_edit_profile"
             android:theme="@style/SettingsTheme">
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
         </activity>
         <activity android:name=".utils.ExternalDisplayControlActivity"
             android:exported="false"
@@ -167,8 +131,6 @@
             android:label="Streaming Settings"
             android:theme="@style/SettingsTheme"
             >
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
         </activity>
         <activity
             android:name=".preferences.AddComputerManually"
@@ -178,8 +140,6 @@
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
             android:label="Add Computer Manually">
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -200,17 +160,6 @@
             android:theme="@style/StreamTheme"
             android:preferMinimalPostProcessing="true">
 
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
-
-            <!-- Special metadata for NVIDIA Shield devices to prevent input buffering
-                 and most importantly, opt out of mouse acceleration while streaming -->
-            <meta-data
-                android:name="com.nvidia.immediateInput"
-                android:value="true" />
-            <meta-data
-                android:name="com.nvidia.rawCursorInput"
-                android:value="true" />
         </activity>
 
         <service
@@ -228,29 +177,10 @@
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
-            <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
-            <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
         </activity>
-
 
         <activity android:name=".DebugInfoActivity"
             android:launchMode="singleTask"/>
-
-        <!-- 无障碍 实体键盘 屏蔽某些快捷键 -->
-        <service
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:name="com.limelight.KeyboardAccessibilityService"
-            android:label="@string/keyboard_service_label"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/keyboard_accessibility_service" />
-        </service>
-
 
         <provider
             android:name="androidx.core.content.FileProvider"

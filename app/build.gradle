@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    ndkVersion "27.0.12077973"
+    ndkVersion "27.3.13750724"
 
     compileSdk = 36
 
@@ -18,8 +18,8 @@ android {
                 "obtainium_app_url",
                 "https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
 
-        versionName "20.2.7-tcl4"
-        versionCode = 71
+        versionName "20.2.7-tcl5"
+        versionCode = 72
 
         // Generate native debug symbols to allow Google Play to symbolicate our native crashes
         ndk.debugSymbolLevel = 'FULL'
@@ -60,6 +60,9 @@ android {
     packaging {
         resources {
             pickFirsts.add('META-INF/versions/9/OSGI-INF/MANIFEST.MF')
+            // BouncyCastle 1.85 ships the same LICENSE/NOTICE in bcprov, bcpkix and bcutil
+            pickFirsts.add('META-INF/LICENSE.md')
+            pickFirsts.add('META-INF/NOTICE.md')
         }
     }
 
@@ -108,6 +111,8 @@ android {
             resValue "string", "app_label", "Moonlight TCL"
 
             minifyEnabled true
+            // Drop resources nothing references any more (drawables, layouts, strings in every locale)
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -131,19 +136,17 @@ android {
 }
 
 dependencies {
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.81'
-    implementation 'org.bouncycastle:bcpkix-jdk18on:1.81'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.85.2'
+    implementation 'org.bouncycastle:bcpkix-jdk18on:1.85'
     implementation 'org.jcodec:jcodec:0.2.5'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'org.jmdns:jmdns:3.6.2'
-    implementation 'com.google.code.gson:gson:2.13.1'
-    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'com.google.code.gson:gson:2.14.0'
+    implementation 'androidx.annotation:annotation:1.10.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.google.android.material:material:1.13.0'
-    implementation 'com.github.ByteHamster:SearchPreference:v2.5.1'
 
     // Unit test dependencies
     testImplementation 'junit:junit:4.13.2'

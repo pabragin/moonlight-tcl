@@ -712,12 +712,6 @@
 	<string name="permission_launch_app">啟動應用程式</string>
 	<string name="permission_sync_clipboard">同步剪貼簿</string>
 	
-	<string name="searchpreference_search">搜尋…</string>
-	<string name="searchpreference_clear">清除</string>
-	<string name="searchpreference_history_entry">歷史紀錄項目</string>
-	<string name="searchpreference_more">更多</string>
-	<string name="searchpreference_clear_history">清除歷史紀錄</string>
-	<string name="searchpreference_no_results">沒有結果</string>
 
 	<!-- Keyboard -->
 	<string name="keyboard_clear_all">全部清除</string>

@@ -50,7 +50,6 @@ import com.limelight.GameMenu;
 import com.limelight.LimeLog;
 import com.limelight.PcView;
 import com.limelight.R;
-import com.limelight.binding.input.virtual_controller.keyboard.KeyBoardControllerConfigurationLoader;
 import com.limelight.binding.video.MediaCodecHelper;
 import com.limelight.utils.Dialog;
 import com.limelight.utils.FileUriUtils;
@@ -362,30 +361,15 @@ public class StreamSettings extends AppCompatActivity {
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
 
-            // hide on-screen controls category on non touch screen devices
-            if (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
-                PreferenceCategory category = findPreference("category_onscreen_controls");
-                if (category != null) {
-                    screen.removePreference(category);
-                }
-                category = findPreference("category_special_key_layout");
-                if (category != null) {
-                    screen.removePreference(category);
-                }
-            }
-
             // TV build: hide the phone/tablet-only options (touch input, on-screen keyboard, screen
             // orientation, external display, zoom/pan). Hiding only trims the list; defaults stay in effect.
             if (PreferenceConfiguration.isTvDevice(activity) || !pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
                 for (String key : new String[] {
-                        "category_onscreen_controls", "category_special_key_layout", "category_virtual_trackpad_settings",
+                        "category_virtual_trackpad_settings",
                         "checkbox_multi_touch_gestures", "seekbar_trackpad_sensitivity_x", "seekbar_trackpad_sensitivity_y",
                         "checkbox_trackpad_drag_drop_vibration", "seekbar_trackpad_drag_drop_threshold", "checkbox_trackpad_swap_axis",
                         "checkbox_auto_orientation", "checkbox_auto_invert_video_resolution", "checkbox_enable_view_top_center",
                         "checkbox_enable_fullexdisplay",
-                        "seekbar_keyboard_axi_opacity", "onscreen_keyboard_autofit", "seekbar_onscreen_keyboard_height",
-                        "seekbar_onscreen_keyboard_width", "list_onscreen_keyboard_align_mode",
-                        "checkbox_enable_sticky_modifier_key_virtual_keyboard",
                         "checkbox_show_overlay_zoom_toggle_button", "checkbox_remember_zoom_pan"}) {
                     removePreferenceIfPresent(key);
                 }
@@ -436,19 +420,7 @@ public class StreamSettings extends AppCompatActivity {
             if (!((Vibrator)getActivity().getSystemService(Context.VIBRATOR_SERVICE)).hasVibrator()) {
                 category_gamepad_settings.removePreference(findPreference("checkbox_vibrate_fallback"));
                 category_gamepad_settings.removePreference(findPreference("seekbar_vibrate_fallback_strength"));
-                // The entire OSC category may have already been removed by the touchscreen check above
-                PreferenceCategory category = findPreference("category_onscreen_controls");
-                if (category != null) {
-                    category.removePreference(findPreference("checkbox_vibrate_osc"));
-                }
-                category = findPreference("category_special_key_layout");
-                if (category != null) {
-                    category.removePreference(findPreference("checkbox_vibrate_keyboard"));
-                }
-                category = findPreference("category_gamepad_settings");
-                if (category != null) {
-                    category.removePreference(findPreference("checkbox_enable_device_rumble"));
-                }
+                removePreferenceIfPresent("checkbox_enable_device_rumble");
             }
             else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
                     !((Vibrator)getActivity().getSystemService(Context.VIBRATOR_SERVICE)).hasAmplitudeControl()) {
@@ -760,20 +732,6 @@ public class StreamSettings extends AppCompatActivity {
             });
 
             Preference _pref;
-            _pref = findPreference("import_keyboard_file");
-            if (_pref != null) {
-                _pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType("application/json");
-                        startActivityForResult(intent, READ_REQUEST_CODE);
-                        return false;
-                    }
-                });
-            }
-
             _pref = findPreference("import_special_button_file");
             if (_pref != null) {
                 _pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -834,33 +792,6 @@ public class StreamSettings extends AppCompatActivity {
                         } catch (android.content.ActivityNotFoundException ex) {
                             Toast.makeText(context, noEmailClientsMsg, Toast.LENGTH_SHORT).show();
                         }
-                        return false;
-                    }
-                });
-            }
-
-            _pref = findPreference("export_keyboard_file");
-            if (_pref != null) {
-                _pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        File file = new File(requireActivity().getExternalCacheDir(),"export_settings");
-                        if(!file.exists()){
-                            file.mkdir();
-                        }
-                        File file1= getJsonContent(requireActivity(),file);
-                        if(file1==null){
-                            Toast.makeText(requireActivity(),getString(R.string.pref_error_occurred),Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                        Uri uri;
-                        Intent intent = new Intent(Intent.ACTION_SEND);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        String authority= BuildConfig.APPLICATION_ID+".fileprovider";
-                        uri = FileProvider.getUriForFile(requireActivity(),authority,file1);
-                        intent.putExtra(Intent.EXTRA_STREAM, uri);
-                        intent.setType("application/json");
-                        startActivity(Intent.createChooser(intent,getString(R.string.pref_save_keyboard_profile)));
                         return false;
                     }
                 });
@@ -1018,33 +949,6 @@ public class StreamSettings extends AppCompatActivity {
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             super.onActivityResult(requestCode, resultCode, data);
-            if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data.getData() != null) {
-                try {
-                    Uri uri = data.getData();
-                    String json = FileUriUtils.openUriForRead(getActivity(), uri);
-                    if (TextUtils.isEmpty(json)) {
-                        Toast.makeText(getActivity(), getString(R.string.pref_empty_file), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    String name = getPrefs().getString(KeyBoardControllerConfigurationLoader.OSC_PREFERENCE, KeyBoardControllerConfigurationLoader.OSC_PREFERENCE_VALUE);
-                    SharedPreferences.Editor prefEditor = requireActivity().getSharedPreferences(name, Activity.MODE_PRIVATE).edit();
-                    JSONObject object = new JSONObject(json);
-                    Iterator it = object.keys();
-                    prefEditor.clear();
-                    while (it.hasNext()) {
-                        String key = (String) it.next();// 获得key
-                        String value = object.getString(key);// 获得value
-                        prefEditor.putString(key, value);
-                    }
-                    prefEditor.apply();
-                    Toast.makeText(getActivity(), getString(R.string.pref_import_success), Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), getString(R.string.pref_error_occurred) + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-                return;
-            }
-
             if (requestCode == READ_REQUEST_SPECIAL_CODE && resultCode == Activity.RESULT_OK && data.getData() != null) {
                 try {
                     Uri uri = data.getData();
@@ -1062,31 +966,6 @@ public class StreamSettings extends AppCompatActivity {
                     Toast.makeText(getActivity(), getString(R.string.pref_error_occurred) + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
-        }
-
-        @Override
-        public void onDisplayPreferenceDialog(@NonNull Preference preference) {
-            if (preference instanceof ConfirmDeleteOscPreference) {
-                DialogFragment dialogFragment = ConfirmDeleteOscPreference.DialogFragmentCompat.newInstance(preference.getKey());
-                dialogFragment.setTargetFragment(this, 0);
-                dialogFragment.show(getFragmentManager(), null);
-            } else if (preference instanceof ConfirmDeleteKeyboardPreference) {
-                DialogFragment dialogFragment = ConfirmDeleteKeyboardPreference.DialogFragmentCompat.newInstance(preference.getKey());
-                dialogFragment.setTargetFragment(this, 0);
-                dialogFragment.show(getFragmentManager(), null);
-            } else super.onDisplayPreferenceDialog(preference);
-        }
-
-        private File getJsonContent(Context context,File file){
-            String name = getPrefs().getString(KeyBoardControllerConfigurationLoader.OSC_PREFERENCE, KeyBoardControllerConfigurationLoader.OSC_PREFERENCE_VALUE);
-            SharedPreferences pref = context.getSharedPreferences(name, Activity.MODE_PRIVATE);
-            Map<String,?> map = pref.getAll();
-            File file1= new File(file,name+".json");
-            String jsonStr=new Gson().toJson(map);
-            if(!FileUriUtils.writerFileString(file1,jsonStr)){
-                return null;
-            }
-            return file1;
         }
 
         //获取所有设置项配置文件
