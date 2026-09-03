@@ -52,6 +52,10 @@
     <string name="conn_client_latency_hw">Задержка аппаратного декодирования:</string>
     <string name="conn_client_latency_compositor">Композитор (отдача → экран): средн. %1$d мс, макс. %2$d мс за %3$d кадров, обход для TV %4$s</string>
     <string name="conn_workaround_on">включён</string>
+    <string name="tv_block_rumble_warning_title">Вибрация перезагружает этот телевизор</string>
+    <string name="tv_block_rumble_warning_text">На этой прошивке (TCL, Android 14) первая же команда вибрации через системный стек ввода Android роняет систему и перезагружает телевизор. Безопасная вибрация возможна только с Xbox-геймпадом по USB-кабелю при включённом USB-драйвере.\n\nВсё равно выключить блокировку?</string>
+    <string name="tv_block_rumble_warning_disable">Всё равно выключить</string>
+    <string name="tv_block_rumble_warning_keep">Оставить блокировку</string>
     <string name="conn_workaround_off">выключен</string>
     <string name="conn_hardware_latency">Средняя задержка аппаратного декодирования:</string>
     <string name="conn_starting">Запуск</string>

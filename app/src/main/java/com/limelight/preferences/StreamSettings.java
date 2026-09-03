@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
@@ -337,6 +338,24 @@ public class StreamSettings extends AppCompatActivity {
             applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
+
+            // Turning the rumble block off on an affected TV reboots it on the first rumble command
+            // (confirmed on a TCL C8K, Android 14). Ask before applying.
+            final CheckBoxPreference blockRumblePref = findPreference("checkbox_tv_block_rumble");
+            if (blockRumblePref != null && PreferenceConfiguration.isTvWithBrokenInputRumble(activity)) {
+                blockRumblePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    if (Boolean.FALSE.equals(newValue)) {
+                        new AlertDialog.Builder(activity)
+                                .setTitle(R.string.tv_block_rumble_warning_title)
+                                .setMessage(R.string.tv_block_rumble_warning_text)
+                                .setPositiveButton(R.string.tv_block_rumble_warning_disable, (d, w) -> blockRumblePref.setChecked(false))
+                                .setNegativeButton(R.string.tv_block_rumble_warning_keep, null)
+                                .show();
+                        return false;
+                    }
+                    return true;
+                });
+            }
 
             // TV build: hide the phone/tablet-only options (touch input, on-screen keyboard, screen
             // orientation, external display, zoom/pan). Hiding only trims the list; defaults stay in effect.

@@ -31,7 +31,9 @@ What is changed compared to Artemis:
    *before* the activity transition starts.
 2. **Gamepad rumble block** (`Settings → Gamepad → Block gamepad rumble on this TV`). The firmware has a race in `system_server`'s
    InputReader that crashes when an `InputDevice` vibrates, which shows up as the TV rebooting mid-game. Rumble through the Android
-   input stack is blocked; USB gamepads driven by Moonlight's own USB driver still rumble.
+   input stack is blocked; USB gamepads driven by Moonlight's own USB driver still rumble. Confirmed on a C8K: turning the block
+   off reboots the TV on the first rumble command, so since tcl9 the block wins over every other rumble option and unchecking
+   it on an affected TV asks for confirmation.
 
 Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and stay off on other devices. They can be toggled by hand.
 
