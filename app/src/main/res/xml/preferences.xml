@@ -10,7 +10,7 @@
         app:initialExpandedChildrenCount="3"
         app:iconSpaceReserved="false">
         <ListPreference
-            android:defaultValue="1280x720"
+            android:defaultValue="3840x2160"
             android:entries="@array/resolution_names"
             android:entryValues="@array/resolution_values"
             android:key="list_resolution"

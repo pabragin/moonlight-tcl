@@ -37,17 +37,20 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    silently forced the *Balanced* frame pacing mode regardless of the setting. On TCL this showed up as a noticeably slower controller
    response. This build restores the previous renderer, honours the frame pacing setting (default: lowest latency) and picks HEVC
    automatically; AV1 remains available via "Force AV1".
+4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 100 Mbps, HEVC and "Prefer lowest latency" frame pacing
+   (Artemis defaults to 1280x720 and 80 Mbps at 4K). Everything is still adjustable in Settings.
+
 
 ## Download and install
 
-APKs are published on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page. Each release has one universal APK that
-contains both `armeabi-v7a` and `arm64-v8a` code, so it installs on any TCL/MediaTek TV.
+APKs are published on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page. Each release has one `armeabi-v7a` APK:
+TCL/MediaTek TVs run 32-bit apps, and 64-bit Android TVs install 32-bit APKs as well.
 
 - The app is called **Moonlight TCL** and uses its own package id `com.limelight.tcl`, so it installs next to official Artemis or
   Moonlight and is not replaced by their updates. Install it with a file manager, the Downloader app, or `adb install`.
 - Settings and PC pairings are per app, so pair with your PC again after installing.
 - The performance overlay no longer needs to be enabled.
-- Updates: [add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22universal%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D)
+- Updates: [add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D)
   or use the "Use Obtainium" entry in the app's settings.
 
 If the TV still freezes or reboots, open an issue with `adb logcat -v threadtime -b all` captured around the moment it happens, or, after a
@@ -59,7 +62,7 @@ reboot, the output of `adb shell dumpsys dropbox --print system_server_native_cr
 - Run `git submodule update --init --recursive`.
 - Point Gradle at the SDK with `ANDROID_HOME` or a `local.properties` file containing `sdk.dir=`.
 - Build with `./gradlew :app:assembleNonRoot_gameRelease` (do not use `-Pandroid.injected.build.abi`: it marks the APK `testOnly`, which the
-  TV's installer rejects as invalid), then `zipalign` and `apksigner sign` the universal APK from
+  TV's installer rejects as invalid), then `zipalign` and `apksigner sign` the APK from
   `app/build/outputs/apk/nonRoot_game/release/` with your own keystore.
 
 ## Credits and license

@@ -249,7 +249,7 @@
     <string name="title_checkbox_force_device_motion">Always use device\'s motion sensors</string>
     <string name="summary_checkbox_force_device_motion">Enforce using devices\'s built-in motion sensor even when the controller reported motion sensors are supported.</string>
     <string name="title_enable_rumble">Enable Rumble</string>
-    <string name="summary_enable_rumble">Enable rumble feedback on supported gamepads.</string>
+    <string name="summary_enable_rumble">Master switch for rumble: when off, rumble commands from the host are ignored for every gamepad.</string>
     <string name="category_input_settings">Input Settings</string>
     <string name="title_checkbox_touchscreen_trackpad">Use the touchscreen as a trackpad</string>
     <string name="summary_checkbox_touchscreen_trackpad">If enabled, the touchscreen acts like a trackpad. If disabled, the touchscreen directly controls the mouse cursor.</string>
@@ -315,7 +315,7 @@
     <string name="title_tv_compositor_workaround">Android TV compositor workaround</string>
     <string name="summary_tv_compositor_workaround">Keeps a tiny invisible UI layer above the video and removes the video before leaving the stream. Works around TV firmware (e.g. TCL on Android 14) that freezes the whole TV when the video is the only layer on screen and the volume OSD or another app appears. Enabled automatically on known affected TVs.</string>
     <string name="title_tv_block_rumble">Block gamepad rumble on this TV</string>
-    <string name="summary_tv_block_rumble">Some Android TV firmwares (TCL on Android 14) crash the system when a gamepad vibrates, which restarts the TV mid-game. Enabled automatically on known affected TVs.</string>
+    <string name="summary_tv_block_rumble">Blocks only rumble sent through the Android input stack (Bluetooth and system-managed gamepads), which crashes the system on some Android TV firmwares (TCL on Android 14) and restarts the TV mid-game. Gamepads driven by Moonlight\'s own USB driver keep rumbling. Enabled automatically on known affected TVs.</string>
     <string name="title_enable_post_stream_toast">Show latency message after streaming</string>
     <string name="summary_enable_post_stream_toast">Display a latency information message after the stream ends</string>
 

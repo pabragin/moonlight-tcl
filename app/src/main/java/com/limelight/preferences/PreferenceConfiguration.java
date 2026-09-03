@@ -143,7 +143,8 @@ public class PreferenceConfiguration {
 
     private static final String CHECKBOX_ENABLE_COMMIT_TEXT = "checkbox_enable_commit_text";
 
-    static final String DEFAULT_RESOLUTION = "1280x720";
+    // This build targets 4K TVs (TCL C8K and similar): default to 4K60 at 100 Mbps
+    static final String DEFAULT_RESOLUTION = "3840x2160";
     static final String DEFAULT_FPS = "60";
     private static final boolean DEFAULT_ENABLE_ULTRA_LOW_LATENCY = false;
     private static final boolean DEFAULT_ENFORCE_DISPLAY_MODE = false;
@@ -530,7 +531,7 @@ public class PreferenceConfiguration {
             5,
             10,
             20,
-            40,
+            50, // 4K60 -> 100 Mbps (upstream uses 40 -> 80 Mbps)
             -1
         };
 

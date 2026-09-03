@@ -11,14 +11,14 @@ android {
         minSdk 21
         targetSdk 34
 
-        versionName "20.2.6-tcl3"
-        versionCode = 59
+        versionName "20.2.6-tcl4"
+        versionCode = 60
 
         // Generate native debug symbols to allow Google Play to symbolicate our native crashes
         ndk.debugSymbolLevel = 'FULL'
 
-        // TVs are ARM only: keeps x86/x86_64 code out of the universal APK
-        ndk.abiFilters "armeabi-v7a", "arm64-v8a"
+        // TCL/MediaTek TVs run 32-bit userspace; a v7a APK also installs on 64-bit Android TVs
+        ndk.abiFilters "armeabi-v7a"
     }
 
     flavorDimensions.add("root")
@@ -57,7 +57,7 @@ android {
 
             resValue "string",
                     "obtainium_app_url",
-                    "https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22universal%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
+                    "https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
 
             applicationId "com.limelight"
             dimension "root"
@@ -157,11 +157,8 @@ android {
 
     splits {
         abi {
-            enable true
-            reset()
-            // TVs are ARM only; the universal APK (both ABIs in one file) is what gets published
-            include "armeabi-v7a", "arm64-v8a"
-            universalApk true
+            // Single armeabi-v7a APK (see ndk.abiFilters above)
+            enable false
         }
     }
 
