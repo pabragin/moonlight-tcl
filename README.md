@@ -4,6 +4,9 @@ A build of the [Artemis](https://github.com/ClassicOldSong/moonlight-android) ga
 (a fork of [Moonlight Android](https://github.com/moonlight-stream/moonlight-android)) with workarounds
 for TCL Google TVs running **Android 14 firmware**.
 
+**Android 14 only.** The APK declares `minSdk 34` and installs only on Android 14 (or newer) firmware. TVs still on the
+Android 12 firmware do not have the bugs this project works around and can keep using stock Artemis or Moonlight.
+
 ## Where this comes from
 
 - **Moonlight Android** by [moonlight-stream](https://github.com/moonlight-stream/moonlight-android): the original open source client for
@@ -56,6 +59,11 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    full screen on the PC (press **F**; a small square keeps the host capturing at full rate), start the stream and press A/B/X/Y.
    The overlay shows the button-to-frame latency (last/avg/min/max) and the averages of input→app, host+net and decode+present;
    the TV panel's own delay is excluded, so app versions can be compared on the same TV. Each sample is logged to logcat.
+9. **TV-only build.** The rooted flavor with its evdev mouse reader, the NVIDIA SHIELD controller extensions and the legacy
+   mouse-capture fallbacks are removed (Android 14 always has native pointer capture). Settings that only make sense on a
+   phone or tablet (on-screen controls and keyboard, touch/trackpad, screen orientation, external display, PiP, zoom/pan) are
+   hidden on TV. Gamepad battery polling is off by default on TV. The thread that feeds video NALUs to the decoder runs at
+   display priority like the renderer.
 
 ## Download and install
 
@@ -77,9 +85,9 @@ reboot, the output of `adb shell dumpsys dropbox --print system_server_native_cr
 - Install a JDK 17 and the Android SDK with NDK `27.0.12077973` (see `app/build.gradle`).
 - Run `git submodule update --init --recursive`.
 - Point Gradle at the SDK with `ANDROID_HOME` or a `local.properties` file containing `sdk.dir=`.
-- Build with `./gradlew :app:assembleNonRoot_gameRelease` (do not use `-Pandroid.injected.build.abi`: it marks the APK `testOnly`, which the
+- Build with `./gradlew :app:assembleRelease` (do not use `-Pandroid.injected.build.abi`: it marks the APK `testOnly`, which the
   TV's installer rejects as invalid), then `zipalign` and `apksigner sign` the APK from
-  `app/build/outputs/apk/nonRoot_game/release/` with your own keystore.
+  `app/build/outputs/apk/release/` with your own keystore.
 
 ## Credits and license
 
@@ -97,6 +105,7 @@ Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
 Это сборка [Artemis](https://github.com/ClassicOldSong/moonlight-android) (форк Moonlight Android) с обходами ошибок прошивки
 Android 14 на телевизорах TCL (C8K и похожие): зависание всего ТВ при регулировке громкости, смене приложения и выходе из
 стрима, а также перезагрузки из-за вибрации геймпада. Цель проекта — доработать клиент так, чтобы он стабильно работал на TCL.
+Сборка только для Android 14 (`minSdk 34`): на прошивку Android 12 она не установится, там этих ошибок нет и подходит обычный Artemis.
 Приложение называется Moonlight TCL и имеет свой идентификатор пакета `com.limelight.tcl`, поэтому ставится рядом с обычным Artemis
 и не затирается его обновлениями. APK на странице [Releases](https://github.com/pabragin/moonlight-tcl/releases); после установки
 спарьтесь с ПК заново.

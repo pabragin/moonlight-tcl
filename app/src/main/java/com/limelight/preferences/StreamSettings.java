@@ -340,6 +340,13 @@ public class StreamSettings extends AppCompatActivity {
             }
         }
 
+        private void removePreferenceIfPresent(String key) {
+            Preference pref = findPreference(key);
+            if (pref != null && pref.getParent() != null) {
+                pref.getParent().removePreference(pref);
+            }
+        }
+
         public void initializePreferences() {
             addPreferencesFromResource(R.xml.preferences);
             PreferenceScreen screen = getPreferenceScreen();
@@ -353,6 +360,7 @@ public class StreamSettings extends AppCompatActivity {
             applyDeviceDefault("checkbox_tv_compositor_workaround", PreferenceConfiguration.isTvWithBrokenCompositor(activity));
             applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
+            applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
 
             // hide on-screen controls category on non touch screen devices
             if (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
@@ -366,13 +374,21 @@ public class StreamSettings extends AppCompatActivity {
                 }
             }
 
-            // Hide remote desktop mouse mode on pre-Oreo (which doesn't have pointer capture)
-            // and NVIDIA SHIELD devices (which support raw mouse input in pointer capture mode)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
-                    getActivity().getPackageManager().hasSystemFeature("com.nvidia.feature.shield")) {
-                PreferenceCategory category =
-                        (PreferenceCategory) findPreference("category_input_settings");
-                category.removePreference(findPreference("checkbox_absolute_mouse_mode"));
+            // TV build: hide the phone/tablet-only options (touch input, on-screen keyboard, screen
+            // orientation, external display, zoom/pan). Hiding only trims the list; defaults stay in effect.
+            if (PreferenceConfiguration.isTvDevice(activity) || !pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
+                for (String key : new String[] {
+                        "category_onscreen_controls", "category_special_key_layout", "category_virtual_trackpad_settings",
+                        "checkbox_multi_touch_gestures", "seekbar_trackpad_sensitivity_x", "seekbar_trackpad_sensitivity_y",
+                        "checkbox_trackpad_drag_drop_vibration", "seekbar_trackpad_drag_drop_threshold", "checkbox_trackpad_swap_axis",
+                        "checkbox_auto_orientation", "checkbox_auto_invert_video_resolution", "checkbox_enable_view_top_center",
+                        "checkbox_enable_fullexdisplay",
+                        "seekbar_keyboard_axi_opacity", "onscreen_keyboard_autofit", "seekbar_onscreen_keyboard_height",
+                        "seekbar_onscreen_keyboard_width", "list_onscreen_keyboard_align_mode",
+                        "checkbox_enable_sticky_modifier_key_virtual_keyboard",
+                        "checkbox_show_overlay_zoom_toggle_button", "checkbox_remember_zoom_pan"}) {
+                    removePreferenceIfPresent(key);
+                }
             }
 
             // Hide gamepad motion sensor option when running on OSes before Android 12.
@@ -400,14 +416,12 @@ public class StreamSettings extends AppCompatActivity {
                 category.removePreference(findPreference("checkbox_usb_driver"));
             }
 
-            // Remove PiP mode on devices pre-Oreo, where the feature is not available (some low RAM devices),
-            // and on Fire OS where it violates the Amazon App Store guidelines for some reason.
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+            // Remove PiP mode on TVs, on devices without the feature, and on Fire OS where it
+            // violates the Amazon App Store guidelines for some reason.
+            if (PreferenceConfiguration.isTvDevice(activity) ||
                     !pm.hasSystemFeature("android.software.picture_in_picture") ||
                     pm.hasSystemFeature("com.amazon.software.fireos")) {
-                PreferenceCategory category =
-                        (PreferenceCategory) findPreference("category_ui_settings");
-                category.removePreference(findPreference("checkbox_enable_pip"));
+                removePreferenceIfPresent("checkbox_enable_pip");
             }
 
             // Fire TV apps are not allowed to use WebViews or browsers, so hide the Help category
@@ -671,15 +685,6 @@ public class StreamSettings extends AppCompatActivity {
                     PreferenceCategory category =
                             (PreferenceCategory) findPreference("category_video_settings");
                     category.removePreference(findPreference("checkbox_enable_hdr"));
-                }
-                else if (PreferenceConfiguration.isShieldAtvFirmwareWithBrokenHdr()) {
-                    LimeLog.info("Disabling HDR toggle on old broken SHIELD TV firmware");
-                    PreferenceCategory category =
-                            (PreferenceCategory) findPreference("category_video_settings");
-                    CheckBoxPreference hdrPref = (CheckBoxPreference) category.findPreference("checkbox_enable_hdr");
-                    hdrPref.setEnabled(false);
-                    hdrPref.setChecked(false);
-                    hdrPref.setSummary("Update the firmware on your NVIDIA SHIELD Android TV to enable HDR");
                 }
             }
 

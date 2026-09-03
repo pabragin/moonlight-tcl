@@ -47,10 +47,6 @@ import com.limelight.preferences.PreferenceConfiguration;
 import com.limelight.ui.GameGestures;
 import com.limelight.utils.Vector2d;
 
-import org.cgutman.shieldcontrollerextensions.SceChargingState;
-import org.cgutman.shieldcontrollerextensions.SceConnectionType;
-import org.cgutman.shieldcontrollerextensions.SceManager;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +119,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     private final Vibrator deviceVibrator;
     private final VibratorManager deviceVibratorManager;
     private final SensorManager deviceSensorManager;
-    private final SceManager sceManager;
     private final Handler mainThreadHandler;
     private final HandlerThread backgroundHandlerThread;
     private final Handler backgroundThreadHandler;
@@ -155,9 +150,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         else {
             this.deviceVibratorManager = null;
         }
-
-        this.sceManager = new SceManager(activityContext);
-        this.sceManager.start();
 
         int deadzonePercentage = prefConfig.deadzonePercentage;
 
@@ -297,7 +289,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             stop();
         }
 
-        sceManager.stop();
         backgroundHandlerThread.quit();
     }
 
@@ -1118,59 +1109,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         }
 
         if (!batteryPresent) {
-            if (sceManager.isRecognizedDevice(context.inputDevice)) {
-                // On the SHIELD Android TV, we can use a proprietary API to access battery/charge state.
-                // We will convert it to the same form used by BatteryState to share code.
-                int batteryPercentage = sceManager.getBatteryPercentage(context.inputDevice);
-                if (batteryPercentage < 0) {
-                    currentBatteryCapacity = Float.NaN;
-                }
-                else {
-                    currentBatteryCapacity = batteryPercentage / 100.f;
-                }
-
-                SceConnectionType connectionType = sceManager.getConnectionType(context.inputDevice);
-                SceChargingState chargingState = sceManager.getChargingState(context.inputDevice);
-
-                // We can make some assumptions about charge state based on the connection type
-                if (connectionType == SceConnectionType.WIRED || connectionType == SceConnectionType.BOTH) {
-                    if (batteryPercentage == 100) {
-                        currentBatteryStatus = BatteryState.STATUS_FULL;
-                    }
-                    else if (chargingState == SceChargingState.NOT_CHARGING) {
-                        currentBatteryStatus = BatteryState.STATUS_NOT_CHARGING;
-                    }
-                    else {
-                        currentBatteryStatus = BatteryState.STATUS_CHARGING;
-                    }
-                }
-                else if (connectionType == SceConnectionType.WIRELESS) {
-                    if (chargingState == SceChargingState.CHARGING) {
-                        currentBatteryStatus = BatteryState.STATUS_CHARGING;
-                    }
-                    else {
-                        currentBatteryStatus = BatteryState.STATUS_DISCHARGING;
-                    }
-                }
-                else {
-                    // If connection type is unknown, just use the charge state
-                    if (batteryPercentage == 100) {
-                        currentBatteryStatus = BatteryState.STATUS_FULL;
-                    }
-                    else if (chargingState == SceChargingState.NOT_CHARGING) {
-                        currentBatteryStatus = BatteryState.STATUS_DISCHARGING;
-                    }
-                    else if (chargingState == SceChargingState.CHARGING) {
-                        currentBatteryStatus = BatteryState.STATUS_CHARGING;
-                    }
-                    else {
-                        currentBatteryStatus = BatteryState.STATUS_UNKNOWN;
-                    }
-                }
-            }
-            else {
-                return;
-            }
+            return;
         }
 
         if (currentBatteryStatus != context.lastReportedBatteryStatus ||
@@ -2196,10 +2135,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                         rumbleDualVibrators(deviceContext.vibratorManager,
                                 deviceContext.lowFreqMotor, deviceContext.highFreqMotor);
                     }
-                }
-                // On Shield devices, we can use their special API to rumble Shield controllers
-                else if (sceManager.rumble(deviceContext.inputDevice, deviceContext.lowFreqMotor, deviceContext.highFreqMotor)) {
-                    vibrated = true;
                 }
                 // If all else fails, we have to try the old Vibrator API
                 else if (deviceContext.vibrator != null) {
@@ -3362,11 +3297,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             // We can perform basic rumble with any vibrator
             if (vibrator != null) {
                 capabilities |= MoonBridge.LI_CCAP_RUMBLE;
-            }
-
-            // Shield controllers use special APIs for rumble and battery state
-            if (sceManager.isRecognizedDevice(inputDevice)) {
-                capabilities |= MoonBridge.LI_CCAP_RUMBLE | MoonBridge.LI_CCAP_BATTERY_STATE;
             }
 
             if ((inputDevice.getSources() & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD) {

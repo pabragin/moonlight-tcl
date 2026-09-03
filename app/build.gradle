@@ -8,11 +8,18 @@ android {
     namespace 'com.limelight'
 
     defaultConfig {
-        minSdk 21
+        // Android 14 only: this build targets TCL C8K-class MediaTek TVs on their Android 14 firmware.
+        minSdk 34
         targetSdk 34
 
-        versionName "20.2.7-tcl3"
-        versionCode = 70
+        applicationId "com.limelight"
+
+        resValue "string",
+                "obtainium_app_url",
+                "https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
+
+        versionName "20.2.7-tcl4"
+        versionCode = 71
 
         // Generate native debug symbols to allow Google Play to symbolicate our native crashes
         ndk.debugSymbolLevel = 'FULL'
@@ -21,48 +28,8 @@ android {
         ndk.abiFilters "armeabi-v7a"
     }
 
-    flavorDimensions.add("root")
-
     buildFeatures {
         buildConfig = true
-    }
-
-    productFlavors {
-        root {
-            // Android O has native mouse capture, so don't show the rooted
-            // version to devices running O on the Play Store.
-            maxSdk 25
-
-            externalNativeBuild {
-                ndkBuild {
-                    arguments "PRODUCT_FLAVOR=root"
-                }
-            }
-
-            resValue "string",
-                    "obtainium_app_url",
-                    "data:text/html;base64,PGgxPlJvb3QgYnVpbGQgaXMgbm90IGF2YWlsYWJsZTwvaDE+"
-
-            applicationId "com.limelight.root"
-            dimension "root"
-            buildConfigField "boolean", "ROOT_BUILD", "true"
-        }
-
-        nonRoot_game {
-            externalNativeBuild {
-                ndkBuild {
-                    arguments "PRODUCT_FLAVOR=nonRoot"
-                }
-            }
-
-            resValue "string",
-                    "obtainium_app_url",
-                    "https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
-
-            applicationId "com.limelight"
-            dimension "root"
-            buildConfigField "boolean", "ROOT_BUILD", "false"
-        }
     }
 
     compileOptions {
@@ -100,8 +67,6 @@ android {
         debug {
             applicationIdSuffix ".tcldebug"
             resValue "string", "app_label", "Moonlight TCL (debug)"
-            resValue "string", "app_label_root", "Moonlight TCL (Root, debug)"
-            resValue "string", "app_label_game", "Moonlight TCL (Game, debug)"
 
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -141,8 +106,6 @@ android {
             // next to official Artemis (com.limelight.noir) and is not replaced by its updates.
             applicationIdSuffix ".tcl"
             resValue "string", "app_label", "Moonlight TCL"
-            resValue "string", "app_label_root", "Moonlight TCL (Root)"
-            resValue "string", "app_label_game", "Moonlight TCL (Game)"
 
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -173,7 +136,6 @@ dependencies {
     implementation 'org.jcodec:jcodec:0.2.5'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'org.jmdns:jmdns:3.6.2'
-    implementation 'com.github.cgutman:ShieldControllerExtensions:1.0.1'
     implementation 'com.google.code.gson:gson:2.13.1'
     implementation 'androidx.annotation:annotation:1.9.1'
     implementation 'androidx.cardview:cardview:1.0.0'

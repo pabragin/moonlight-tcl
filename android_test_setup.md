@@ -4,7 +4,7 @@ Quick-start guide: writing JVM/Robolectric unit tests for this repo
 0.  Where tests live  
     • Path: `app/src/test/java/com/limelight/...` (plain JVM tests, *not* instrumented).  
     • Build task:  
-      – Default flavour: `./gradlew :app:testNonRoot_gameDebugUnitTest`  
+      – Default flavour: `./gradlew :app:testDebugUnitTest`  
       – Root flavour:   `./gradlew :app:testRootDebugUnitTest`  
       – All:           `./gradlew :app:testDebugUnitTest`
 

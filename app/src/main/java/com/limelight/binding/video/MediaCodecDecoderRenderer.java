@@ -1085,6 +1085,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         });
     }
 
+    private boolean submitThreadPriorityApplied;
+
     private void startRendererThread()
     {
         rendererThread = new Thread() {
@@ -1447,6 +1449,14 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         if (stopping) {
             // Don't bother if we're stopping
             return MoonBridge.DR_OK;
+        }
+
+        if (!submitThreadPriorityApplied) {
+            // This runs on moonlight-common-c's video decoder thread, which hands every NALU to
+            // MediaCodec. Give it the same priority as the renderer thread so it is not scheduled
+            // behind ordinary app work on a busy TV SoC.
+            Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+            submitThreadPriorityApplied = true;
         }
 
         if (lastFrameNumber == 0) {

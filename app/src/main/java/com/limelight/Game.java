@@ -550,7 +550,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         performanceOverlayBig = findViewById(R.id.performanceOverlayBig);
 
-        inputCaptureProvider = InputCaptureManager.getInputCaptureProvider(this, this);
+        inputCaptureProvider = InputCaptureManager.getInputCaptureProvider(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             streamContainer.setOnCapturedPointerListener(new View.OnCapturedPointerListener() {
