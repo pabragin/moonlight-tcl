@@ -126,6 +126,16 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private static final int OUTPUT_BUFFER_QUEUE_LIMIT = 2;
     private long lastRenderedFrameTimeNanos;
     private HandlerThread choreographerHandlerThread;
+
+    // Actual on-screen presentation timing via MediaCodec.OnFrameRenderedListener: the time
+    // between our releaseOutputBuffer() and the display showing the frame is the compositor's
+    // share of the latency. Only tracked when the perf overlay or the latency test is on.
+    private HandlerThread frameRenderedThread;
+    private final Object presentLock = new Object();
+    private final long[] releasePtsUs = new long[64];
+    private final long[] releaseTimeNs = new long[64];
+    private int releaseRingPos;
+    private final long[] outputIndexPts = new long[256];
     private Handler choreographerHandler;
 
     private int numSpsIn;
@@ -542,6 +552,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         }
 
         videoDecoder.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+
+        startPresentTracking();
 
         // Start the decoder
         videoDecoder.start();
@@ -975,7 +987,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             Integer nextOutputBuffer = outputBufferQueue.poll();
             if (nextOutputBuffer != null) {
                 try {
+                    long queuedPtsUs = nextOutputBuffer < outputIndexPts.length ? outputIndexPts[nextOutputBuffer] : 0;
+                    recordFrameRelease(queuedPtsUs);
                     videoDecoder.releaseOutputBuffer(nextOutputBuffer, frameTimeNanos);
+                    com.limelight.utils.LatencyTester.onFrameRendered(queuedPtsUs);
 
                     lastRenderedFrameTimeNanos = frameTimeNanos;
                     activeWindowVideoStats.totalFramesRendered++;
@@ -1022,6 +1037,60 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     private boolean submitThreadPriorityApplied;
 
+    private void startPresentTracking() {
+        if (!(prefs.enablePerfOverlay || prefs.enablePerfOverlayLite || prefs.latencyTest)) {
+            return;
+        }
+        if (frameRenderedThread == null) {
+            frameRenderedThread = new HandlerThread("Video - FrameRendered");
+            frameRenderedThread.start();
+        }
+        videoDecoder.setOnFrameRenderedListener(new MediaCodec.OnFrameRenderedListener() {
+            @Override
+            public void onFrameRendered(MediaCodec codec, long presentationTimeUs, long renderTimeNanos) {
+                // renderTimeNanos is CLOCK_MONOTONIC like System.nanoTime(); on devices whose HWC
+                // reports present fences it is the moment the frame reached the panel.
+                long releaseNs = lookupFrameRelease(presentationTimeUs);
+                if (releaseNs == 0) {
+                    return;
+                }
+                long deltaMs = (renderTimeNanos - releaseNs) / 1000000L;
+                if (deltaMs < 0 || deltaMs > 1000) {
+                    return;
+                }
+                VideoStats stats = activeWindowVideoStats;
+                stats.presentTimeMs += deltaMs;
+                stats.framesPresented++;
+                if (deltaMs > stats.maxPresentTimeMs) {
+                    stats.maxPresentTimeMs = deltaMs;
+                }
+                com.limelight.utils.LatencyTester.onFramePresented(presentationTimeUs, renderTimeNanos / 1000000L);
+            }
+        }, new Handler(frameRenderedThread.getLooper()));
+    }
+
+    private void recordFrameRelease(long presentationTimeUs) {
+        if (frameRenderedThread == null) {
+            return;
+        }
+        synchronized (presentLock) {
+            releasePtsUs[releaseRingPos] = presentationTimeUs;
+            releaseTimeNs[releaseRingPos] = System.nanoTime();
+            releaseRingPos = (releaseRingPos + 1) % releasePtsUs.length;
+        }
+    }
+
+    private long lookupFrameRelease(long presentationTimeUs) {
+        synchronized (presentLock) {
+            for (int i = 0; i < releasePtsUs.length; i++) {
+                if (releasePtsUs[i] == presentationTimeUs && releaseTimeNs[i] != 0) {
+                    return releaseTimeNs[i];
+                }
+            }
+        }
+        return 0;
+    }
+
     private void startRendererThread()
     {
         rendererThread = new Thread() {
@@ -1058,12 +1127,14 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                         prefs.framePacing == PreferenceConfiguration.FRAME_PACING_CAP_FPS) {
                                     // In max smoothness or cap FPS mode, we want to never drop frames
                                     // Use a PTS that will cause this frame to never be dropped
+                                    recordFrameRelease(presentationTimeUs);
                                     videoDecoder.releaseOutputBuffer(lastIndex, 0);
                                     com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                                 }
                                 else {
                                     // Use a PTS that will cause this frame to be dropped if another comes in within
                                     // the same V-sync period
+                                    recordFrameRelease(presentationTimeUs);
                                     videoDecoder.releaseOutputBuffer(lastIndex, System.nanoTime());
                                     com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                                 }
@@ -1090,6 +1161,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                 }
 
                                 // Add this buffer
+                                if (lastIndex >= 0 && lastIndex < outputIndexPts.length) {
+                                    outputIndexPts[lastIndex] = presentationTimeUs;
+                                }
                                 outputBufferQueue.add(lastIndex);
                             }
 
@@ -1257,6 +1331,11 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             // handle that here, we will re-interrupt the thread to set the interrupt
             // status back to true.
             Thread.currentThread().interrupt();
+        }
+
+        if (frameRenderedThread != null) {
+            frameRenderedThread.quitSafely();
+            frameRenderedThread = null;
         }
     }
 
@@ -1467,6 +1546,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                 (float)lastTwo.totalHostProcessingLatency / 10 / lastTwo.framesWithHostProcessingLatency)).append('\n');
                     }
                     sb.append(context.getString(R.string.perf_overlay_dectime, decodeTimeMs));
+                    if (lastTwo.framesPresented > 0) {
+                        sb.append('\n').append(context.getString(R.string.perf_overlay_present,
+                                (float)lastTwo.presentTimeMs / lastTwo.framesPresented, lastTwo.maxPresentTimeMs));
+                    }
                 }
                 String fullLog = sb.toString();
                 if(prefs.enablePerfOverlay) {

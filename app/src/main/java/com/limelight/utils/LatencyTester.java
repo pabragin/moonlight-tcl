@@ -53,7 +53,10 @@ public final class LatencyTester {
     private final StatsProvider statsProvider;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private final ArrayDeque<long[]> samples = new ArrayDeque<>(); // {total, hostNet, decodePresent, inputStack}
+    private final ArrayDeque<long[]> samples = new ArrayDeque<>(); // {total, hostNet, decodeRelease, inputStack, compositor(-1 = unknown)}
+    // PTS of the reaction frame whose on-screen presentation we still wait for (guarded by samples)
+    private long pendingPresentPtsUs = -1;
+    private long pendingPresentReleaseUptime;
     private volatile String lastStats = "";
 
     // Running averages of frame size and inter-arrival interval (decoder thread)
@@ -214,10 +217,12 @@ public final class LatencyTester {
         }
         t.mainHandler.removeCallbacks(t.timeout);
         synchronized (t.samples) {
-            t.samples.addLast(new long[] { total, hostNet, decodePresent, inputStack });
+            t.samples.addLast(new long[] { total, hostNet, decodePresent, inputStack, -1 });
             while (t.samples.size() > MAX_SAMPLES) {
                 t.samples.removeFirst();
             }
+            t.pendingPresentPtsUs = presentationTimeUs;
+            t.pendingPresentReleaseUptime = SystemClock.uptimeMillis();
         }
         String stats = "";
         if (t.statsProvider != null) {
@@ -229,8 +234,30 @@ public final class LatencyTester {
         }
         t.lastStats = stats;
         LimeLog.info(String.format(Locale.ROOT,
-                "Latency test: button->frame %d ms (input stack %d, host+net %d, decode+present %d) [%s]",
+                "Latency test: button->frame %d ms (input stack %d, host+net %d, decode+release %d) [%s]",
                 total, inputStack, hostNet, decodePresent, stats));
+        t.publish(null);
+    }
+
+    /** Called from the decoder's frame-rendered callback with the display time of a frame (any thread). */
+    public static void onFramePresented(long presentationTimeUs, long presentUptimeMs) {
+        LatencyTester t = instance;
+        if (t == null) {
+            return;
+        }
+        long compositor, total;
+        synchronized (t.samples) {
+            if (t.pendingPresentPtsUs < 0 || presentationTimeUs < t.pendingPresentPtsUs || t.samples.isEmpty()) {
+                return;
+            }
+            long[] last = t.samples.getLast();
+            last[4] = Math.max(0, presentUptimeMs - t.pendingPresentReleaseUptime);
+            compositor = last[4];
+            total = last[0];
+            t.pendingPresentPtsUs = -1;
+        }
+        LimeLog.info(String.format(Locale.ROOT,
+                "Latency test: compositor +%d ms (button->display %d ms)", compositor, total + compositor));
         t.publish(null);
     }
 
@@ -242,6 +269,7 @@ public final class LatencyTester {
             } else {
                 long[] last = samples.getLast();
                 long min = Long.MAX_VALUE, max = 0, sum = 0, sumHostNet = 0, sumDecode = 0, sumInput = 0, nDecode = 0;
+                long sumCompositor = 0, nCompositor = 0;
                 for (long[] v : samples) {
                     min = Math.min(min, v[0]);
                     max = Math.max(max, v[0]);
@@ -252,10 +280,15 @@ public final class LatencyTester {
                         sumDecode += v[2];
                         nDecode++;
                     }
+                    if (v.length > 4 && v[4] >= 0) {
+                        sumCompositor += v[4];
+                        nCompositor++;
+                    }
                 }
                 int n = samples.size();
                 String stats = activity.getString(R.string.latency_test_overlay,
-                        last[0], sum / n, min, max, n, sumInput / n, sumHostNet / n, nDecode > 0 ? sumDecode / nDecode : 0);
+                        last[0], sum / n, min, max, n, sumInput / n, sumHostNet / n, nDecode > 0 ? sumDecode / nDecode : 0,
+                        nCompositor > 0 ? sumCompositor / nCompositor : 0);
                 if (!lastStats.isEmpty()) {
                     stats = stats + "\n" + lastStats;
                 }

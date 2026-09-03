@@ -134,6 +134,7 @@
     <string name="perf_overlay_netdrops">Frames dropped by your network connection: %1$.2f%%</string>
     <string name="perf_overlay_netlatency">Average network latency: %1$d ms (variance: %2$d ms)</string>
     <string name="perf_overlay_dectime">Average decoding time: %1$.2f ms</string>
+    <string name="perf_overlay_present">Present (compositor): avg %1$.1f ms · max %2$d ms</string>
     <string name="perf_overlay_drawdelay"> Delay: %1$.2f ms</string>
 
     <!-- Performance Report Sharing -->
@@ -322,7 +323,7 @@
     <string name="latency_test_waiting">Latency test: press A/B/X/Y on the black test page</string>
     <string name="latency_test_timeout">no reaction frame within 2 s (is the test page full screen? works with frame pacing "Prefer lowest latency")</string>
     <string name="latency_test_render_unmatched">reaction frame received but its render was not seen: value above is host+net only (set frame pacing to "Prefer lowest latency")</string>
-    <string name="latency_test_overlay">Latency: last %1$d ms · avg %2$d · min %3$d · max %4$d · n=%5$d\navg input→app %6$d ms · host+net %7$d ms · decode+present %8$d ms</string>
+    <string name="latency_test_overlay">Latency: last %1$d ms · avg %2$d · min %3$d · max %4$d · n=%5$d\navg input→app %6$d ms · host+net %7$d ms · decode+release %8$d ms · compositor %9$d ms</string>
     <string name="title_enable_post_stream_toast">Show latency message after streaming</string>
     <string name="summary_enable_post_stream_toast">Display a latency information message after the stream ends</string>
 

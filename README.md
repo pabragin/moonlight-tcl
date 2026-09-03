@@ -74,6 +74,11 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    request when the display already runs at the stream rate, launcher-shortcut bookkeeping off the connect path, native library
    exports only its JNI symbols. tcl6 sweeps the last leftovers (unused frame-render-time path, dead fields, the ENet Win32 source
    in the native build) and, like upstream on Oreo+, stops rewriting H.264 SPS constraint flags and level_idc.
+11. **Compositor latency in the overlay (tcl7).** With the performance overlay or the latency test enabled, the decoder
+   registers a frame-rendered listener and shows "Present (compositor)": the average and maximum time between
+   `releaseOutputBuffer()` and the moment the display actually showed the frame. The latency test gets the same value as a
+   separate "compositor" component. Compare it with the compositor workaround on and off to see what the 2x2 px keep-alive
+   layer costs, without `dumpsys SurfaceFlinger`. Nothing is tracked when both overlay and test are off.
 
 ## Download and install
 

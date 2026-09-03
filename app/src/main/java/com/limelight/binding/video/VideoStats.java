@@ -15,6 +15,10 @@ class VideoStats {
     char maxHostProcessingLatency;
     int totalHostProcessingLatency;
     int framesWithHostProcessingLatency;
+    // Release -> actual on-screen presentation (MediaCodec.OnFrameRenderedListener)
+    long presentTimeMs;
+    int framesPresented;
+    long maxPresentTimeMs;
     long measurementStartTimestamp;
 
     void add(VideoStats other) {
@@ -34,6 +38,9 @@ class VideoStats {
         this.maxHostProcessingLatency = (char) Math.max(this.maxHostProcessingLatency, other.maxHostProcessingLatency);
         this.totalHostProcessingLatency += other.totalHostProcessingLatency;
         this.framesWithHostProcessingLatency += other.framesWithHostProcessingLatency;
+        this.presentTimeMs += other.presentTimeMs;
+        this.framesPresented += other.framesPresented;
+        this.maxPresentTimeMs = Math.max(this.maxPresentTimeMs, other.maxPresentTimeMs);
 
         if (this.measurementStartTimestamp == 0) {
             this.measurementStartTimestamp = other.measurementStartTimestamp;
@@ -54,6 +61,9 @@ class VideoStats {
         this.maxHostProcessingLatency = other.maxHostProcessingLatency;
         this.totalHostProcessingLatency = other.totalHostProcessingLatency;
         this.framesWithHostProcessingLatency = other.framesWithHostProcessingLatency;
+        this.presentTimeMs = other.presentTimeMs;
+        this.framesPresented = other.framesPresented;
+        this.maxPresentTimeMs = other.maxPresentTimeMs;
         this.measurementStartTimestamp = other.measurementStartTimestamp;
     }
 
@@ -69,6 +79,9 @@ class VideoStats {
         this.maxHostProcessingLatency = 0;
         this.totalHostProcessingLatency = 0;
         this.framesWithHostProcessingLatency = 0;
+        this.presentTimeMs = 0;
+        this.framesPresented = 0;
+        this.maxPresentTimeMs = 0;
         this.measurementStartTimestamp = 0;
     }
 
