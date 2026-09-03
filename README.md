@@ -42,6 +42,10 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
 5. **Decoder tuning that can be checked.** "Ultra Low Latency" is on by default on MediaTek TVs and now also requests the maximum
    operating rate from the MediaTek decoder; the video renderer thread runs at display priority. The performance overlay shows a
    "Low-latency mode" line with the options the decoder actually kept, so the effect of a setting can be verified without adb.
+6. **Declared as a game.** The manifest carries `android:appCategory="game"` (plus the legacy `isGame` flag). Without the game
+   category Android ignores the app's `GameManager` state updates and game-mode config, and TV vendors' automatic game picture
+   mode keys off the category too. Together with `preferMinimalPostProcessing` this is everything an app can do to request the
+   TV's game mode; whether the TV honours it is up to the firmware.
 
 
 ## Download and install
