@@ -31,6 +31,13 @@ What is changed compared to Artemis:
 
 Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and stay off on other devices. They can be toggled by hand.
 
+3. **Video pipeline back to the proven one.** Artemis after August 2025 (commit `4de0227f`) gained an experimental renderer: a
+   "latest-frame" polling loop with adaptive frame dropping, a decoder watchdog that flushes the codec, a set of undocumented
+   `vendor.mtk.vdec.*` decoder keys, reference frame invalidation for MediaTek, three competing `setFrameRate()` calls, and code that
+   silently forced the *Balanced* frame pacing mode regardless of the setting. On TCL this showed up as a noticeably slower controller
+   response. This build restores the previous renderer, honours the frame pacing setting (default: lowest latency) and picks HEVC
+   automatically; AV1 remains available via "Force AV1".
+
 ## Download and install
 
 APKs are published on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page. Each release has one universal APK that

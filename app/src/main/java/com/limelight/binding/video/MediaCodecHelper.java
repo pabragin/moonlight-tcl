@@ -402,10 +402,6 @@ public class MediaCodecHelper {
                 refFrameInvalidationAvcPrefixes.add("c2.qti");
                 refFrameInvalidationHevcPrefixes.add("c2.qti");
 
-                refFrameInvalidationAvcPrefixes.add("c2.mtk"); //derflacco
-                refFrameInvalidationHevcPrefixes.add("c2.mtk"); //derflacco
-                refFrameInvalidationAvcPrefixes.add("omx.mtk"); //derflacco
-                refFrameInvalidationHevcPrefixes.add("omx.mtk"); //derflacco
                 refFrameInvalidationHevcPrefixes.add("c2.qcom"); //derflacco
             }
 
@@ -523,11 +519,8 @@ public class MediaCodecHelper {
         // NB: Even on Android 10, this optimization still provides significant
         // performance gains on Pixel 2.
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                (
-                        isDecoderInList(qualcommDecoderPrefixes, decoderName)
-                                || isDecoderInList(refFrameInvalidationHevcPrefixes, decoderName) ||
-                                isDecoderInList(refFrameInvalidationAvcPrefixes,  decoderName)
-                ) && !isAdreno620;
+                isDecoderInList(qualcommDecoderPrefixes, decoderName) &&
+                !isAdreno620;
     }
 
     public static boolean setDecoderLowLatencyOptions(MediaFormat videoFormat, MediaCodecInfo decoderInfo, boolean ultraLowLatency, int tryNumber) {
@@ -625,53 +618,6 @@ public class MediaCodecHelper {
                     setNewOption = true;
                 }
             }
-            // ALONSOJR1980
-//            else if (isDecoderInList(mtkDecoderPrefixes, decoderInfo.getName())) {
-//                if (tryNumber < 4) {
-//
-//                    videoFormat.setInteger("vendor.mtk.vdec.cpu.boost.mode.value", 2);
-//                    videoFormat.setInteger("vendor.mtk.ext.dolby.vision.cpu-boost", 1);
-//                    videoFormat.setInteger("vendor.mtk.vdec.bq.guard.interval.time.value", 2);
-//                    videoFormat.setInteger("vendor.mtk.vdec.buffer.fetch.timeout.ms.value", 2);
-            else if (isDecoderInList(mtkDecoderPrefixes, decoderInfo.getName())) {
-                if (tryNumber < 4) {
-                    // --- PRESET: MTK Low-Latency (safe & balanced, no duplicates) ---
-
-                    // Boost/DVFS: moderate profile
-                    safeSet(videoFormat, "vdec-lowlatency", 1);
-                    safeSet(videoFormat, "vendor.mtk.vdec.cpu.boost.mode", 1);
-                    safeSet(videoFormat, "vendor.mtk.vdec.cpu.boost.mode.value", 1);
-                    safeSet(videoFormat, "vendor.mtk.vdec.dvfs.mode", 1);
-                    safeSet(videoFormat, "vendor.mtk.vdec.dvfs.level", 1);
-
-                    // Pipeline / code path
-                    safeSet(videoFormat, "vendor.mtk.vdec.low-latency.mode", 1);    // Enable low-latency path
-                    safeSet(videoFormat, "vendor.mtk.vdec.ultra-low-latency", 0);   // ULL off for stability
-                    safeSet(videoFormat, "vendor.mtk.vdec.disable-idle", 1);        // Prevent clock downscaling
-                    safeSet(videoFormat, "vendor.mtk.vdec.preload.frame.count", 1); // Light prebuffering
-
-                    // Queue / timeouts (moderate)
-                    safeSet(videoFormat, "vendor.mtk.vdec.buffer.fetch.timeout.ms", 4);
-                    safeSet(videoFormat, "vendor.mtk.vdec.bq.guard.interval.time", 4);
-                    safeSet(videoFormat, "vendor.mtk.vdec.input.max.queue.depth", 3);
-                    safeSet(videoFormat, "vendor.mtk.vdec.output.max.queue.depth", 3);
-
-                    // Pacing: controlled by the app
-                    safeSet(videoFormat, "vendor.mtk.vdec.vsync.adjust.enable", 0);
-
-                    // Skip/drop: only NVOP
-                    safeSet(videoFormat, "vendor.mtk.vdec.nvop.skip", 1);
-                    safeSet(videoFormat, "vendor.mtk.vdec.skip.mode", 0);
-                    safeSet(videoFormat, "vendor.mtk.vdec.drop.nonref.frame", 0);
-                    safeSet(videoFormat, "vendor.mtk.vdec.frame-drop.policy", 0);
-
-                    // Standard Android hints
-                    safeSet(videoFormat, MediaFormat.KEY_OPERATING_RATE, (int) Short.MAX_VALUE);
-                    safeSet(videoFormat, MediaFormat.KEY_PRIORITY, 0);
-                }
-                setNewOption = true;
-            }
-
             else if (isDecoderInList(kirinDecoderPrefixes, decoderInfo.getName())) {
                 if (tryNumber < 4) {
                     // Kirin low latency options
@@ -870,8 +816,9 @@ public class MediaCodecHelper {
             return false;
         }
 
-        // TODO: Test some AV1 decoders
-        return true;
+        // Only use AV1 when the user forces it: the MediaTek TV decoders this build targets are
+        // well proven for low-latency HEVC, AV1 is not. (Upstream Artemis allows AV1 by default.)
+        return false;
     }
 
     @SuppressWarnings("deprecation")

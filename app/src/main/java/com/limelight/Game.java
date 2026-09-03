@@ -696,41 +696,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 glPrefs.glRenderer,
                 this);
 
-// --- Force tight thresholds (prefConfig.forceTightThresholds) ---
-        try {
-            boolean forceTight = false;
-            if (prefConfig != null) {
-                try {
-                    java.lang.reflect.Field f = prefConfig.getClass().getDeclaredField("forceTightThresholds");
-                    f.setAccessible(true);
-                    Object v = f.get(prefConfig);
-                    if (v instanceof Boolean) forceTight = (Boolean) v;
-                } catch (Throwable ignored) {}
-            }
-            try { decoderRenderer.setForceTightThresholds(forceTight); } catch (Throwable ignored) {}
-            if (forceTight) {
-                LimeLog.info("ForceTightThresholds enabled: using vsync-based thresholds on all devices");
-            }
-        } catch (Throwable ignored) {}
-
-// --- latency profile selection ---
-        try {
-            if (prefConfig != null && prefConfig.preferLowerDelays) {
-                // Intermediate: more responsive than Balanced but not 0 µs
-                decoderRenderer.setPreferLowerDelays(true);
-                decoderRenderer.setPreferLowerDelaysTimeoutUs(500);  // 0.5 ms
-                prefConfig.framePacing = PreferenceConfiguration.FRAME_PACING_BALANCED;
-                LimeLog.info("PreferLowerDelays: preferLowerDelays=true, timeout=500us, pacing=BALANCED");
-            } else {
-                // Balanced default
-                decoderRenderer.setPreferLowerDelays(false);
-                decoderRenderer.setPreferLowerDelaysTimeoutUs(2000); // 2 ms
-                prefConfig.framePacing = PreferenceConfiguration.FRAME_PACING_BALANCED;
-                LimeLog.info("Balanced: preferLowerDelays=false, timeout=2000us, pacing=BALANCED");
-            }
-        } catch (Throwable ignored) {}
-
-// Don't stream HDR if the decoder can't support it
+        // Don't stream HDR if the decoder can't support it
         if (willStreamHdr && !decoderRenderer.isHevcMain10Hdr10Supported() && !decoderRenderer.isAv1Main10Supported()) {
             willStreamHdr = false;
             Toast.makeText(this, "Decoder does not support HDR10 profile", Toast.LENGTH_LONG).show();
@@ -913,51 +879,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         overlayToggleButton = findViewById(R.id.overlayToggleZoomButton);
         setupOverlayToggleButton();
 
-        //fixed size + pacing without back-pressure on MTK
-        try {
-            View root = findViewById(android.R.id.content);
-            // Niente getIdentifier: troviamo la prima SurfaceView nel layout
-            SurfaceView streamSurfaceView = findFirstSurfaceViewFrom(root);
-
-            if (streamSurfaceView != null) {
-                // Avoid resizes/glitches that break the compositor
-                int vw = (prefConfig != null && prefConfig.width > 0) ? prefConfig.width : displayWidth;
-                int vh = (prefConfig != null && prefConfig.height > 0) ? prefConfig.height : displayHeight;
-                try { streamSurfaceView.getHolder().setFixedSize(vw, vh); } catch (Throwable ignored) {}
-                try { streamSurfaceView.setZOrderOnTop(false); } catch (Throwable ignored) {}
-                try { streamSurfaceView.setZOrderMediaOverlay(false); } catch (Throwable ignored) {}
-
-                // 2) setFrameRate via reflection (compat < 30)
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                    float displayHz = 60f;
-                    try {
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            displayHz = currentDisplay.getMode().getRefreshRate();
-                        } else {
-                            displayHz = currentDisplay.getRefreshRate();
-                        }
-                    } catch (Throwable ignored) {}
-
-                    float targetFps = (prefConfig != null && prefConfig.fps > 0) ? prefConfig.fps : displayHz;
-
-                    boolean isMTKDevice;
-                    try {
-                        String sum = (android.os.Build.MANUFACTURER + " " + android.os.Build.HARDWARE + " " + android.os.Build.BOARD)
-                                .toLowerCase(java.util.Locale.US);
-                        isMTKDevice = sum.contains("mtk") || sum.contains("mediatek");
-                    } catch (Throwable t) { isMTKDevice = false; }
-
-                    int compat = isMTKDevice
-                            ? Surface.FRAME_RATE_COMPATIBILITY_DEFAULT
-                            : Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-
-                    try {
-                        java.lang.reflect.Method m = SurfaceView.class.getMethod("setFrameRate", float.class, int.class);
-                        m.invoke(streamSurfaceView, Math.min(targetFps, displayHz), compat);
-                    } catch (Throwable ignored) {}
-                }
-            }
-        } catch (Throwable ignored) {}
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -4436,19 +4357,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         if (commitTextQueue.size() == 1) {
             commitTextHandler.post(flushCommitTextQueue);
         }
-    }
-
-    /** Helper ricorsivo per trovare la prima SurfaceView nel layout corrente */
-    private SurfaceView findFirstSurfaceViewFrom(View v) {
-        if (v instanceof SurfaceView) return (SurfaceView) v;
-        if (v instanceof ViewGroup) {
-            ViewGroup g = (ViewGroup) v;
-            for (int i = 0; i < g.getChildCount(); i++) {
-                SurfaceView found = findFirstSurfaceViewFrom(g.getChildAt(i));
-                if (found != null) return found;
-            }
-        }
-        return null;
     }
 
 }
