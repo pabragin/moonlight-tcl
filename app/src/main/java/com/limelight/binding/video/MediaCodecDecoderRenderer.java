@@ -518,6 +518,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             format.removeKey(MediaFormat.KEY_HDR_STATIC_INFO);
         }
 
+        // MediaTek's Codec2 decoders default to a 4 MB input buffer; at 100-150 Mbps 4K HDR a single IDR
+        // frame can exceed that, which used to end the stream with "Decode unit length ... too large".
+        // Size the input buffers from the bitrate: half a second of stream, at least 8 MB, at most 32 MB.
+        int maxInputSize = (int)Math.min(32L << 20, Math.max(8L << 20, ((long)prefs.bitrate * 1000L / 8L) / 2L));
+        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, maxInputSize);
+
         LimeLog.info("Configuring with format: "+format);
 
         videoDecoder.configure(format, renderTarget, null, 0);
@@ -1036,6 +1042,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     private boolean submitThreadPriorityApplied;
+    private int oversizedDecodeUnits;
 
     private void startPresentTracking() {
         // The post-stream toast is the clean way to measure: nothing is drawn over the video during the
@@ -1792,13 +1799,24 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         numFramesIn++;
 
         if (decodeUnitLength > nextInputBuffer.limit() - nextInputBuffer.position()) {
-            IllegalArgumentException exception = new IllegalArgumentException(
-                    "Decode unit length "+decodeUnitLength+" too large for input buffer "+nextInputBuffer.limit());
-            if (!reportedCrash) {
-                reportedCrash = true;
-                crashListener.notifyCrash(exception);
+            // A frame larger than the codec's input buffer: drop it and ask the host for a fresh IDR frame
+            // instead of ending the stream. The held input buffer is reused for the next unit, so
+            // reset it (a fused IDR may already have put the parameter sets into it).
+            oversizedDecodeUnits++;
+            LimeLog.warning("Decode unit length " + decodeUnitLength + " too large for input buffer " +
+                    nextInputBuffer.limit() + " (" + oversizedDecodeUnits + " so far), requesting IDR");
+            nextInputBuffer.clear();
+            if (oversizedDecodeUnits >= 30) {
+                // The buffer never fits: report it the way upstream always did
+                IllegalArgumentException exception = new IllegalArgumentException(
+                        "Decode unit length "+decodeUnitLength+" too large for input buffer "+nextInputBuffer.limit());
+                if (!reportedCrash) {
+                    reportedCrash = true;
+                    crashListener.notifyCrash(exception);
+                }
+                throw new RendererException(this, exception);
             }
-            throw new RendererException(this, exception);
+            return MoonBridge.DR_NEED_IDR;
         }
 
         // Copy data from our buffer list into the input buffer
