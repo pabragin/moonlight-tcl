@@ -53,9 +53,15 @@
     <string name="conn_client_latency_compositor">Композитор (отдача → экран): средн. %1$d мс, макс. %2$d мс за %3$d кадров, обход для TV %4$s</string>
     <string name="conn_workaround_on">включён</string>
     <string name="tv_block_rumble_warning_title">Вибрация перезагружает этот телевизор</string>
-    <string name="tv_block_rumble_warning_text">На этой прошивке (TCL, Android 14) вибрация геймпада через системный стек ввода Android попадает в гонку в системном процессе: может работать час, а потом перезагрузить телевизор, иногда дважды подряд. Безопасная вибрация возможна только с Xbox-геймпадом по USB-кабелю при включённом USB-драйвере.\n\nВсё равно выключить блокировку?</string>
+    <string name="tv_block_rumble_warning_text">На этой прошивке (TCL, Android 14) вибрация геймпада через системный стек ввода Android попадает в гонку в системном процессе: может работать час, а потом перезагрузить телевизор, иногда дважды подряд. Безопасная вибрация возможна только с Xbox-геймпадом по USB-кабелю при включённом USB-драйвере; для Bluetooth оставьте блокировку и попробуйте экспериментальный пункт ниже.\n\nВсё равно выключить блокировку?</string>
     <string name="tv_block_rumble_warning_disable">Всё равно выключить</string>
     <string name="tv_block_rumble_warning_keep">Оставить блокировку</string>
+    <string name="title_tv_rumble_experimental">Вибрация по Bluetooth всё равно (эксперимент)</string>
+    <string name="summary_tv_rumble_experimental">Отправляет вибрацию через системный стек ввода несмотря на ошибку прошивки, но прореженно (не чаще 20 раз в секунду) и только сразу после события от этого геймпада, когда системный поток ввода простаивает. Сбой становится редким, но не невозможным: телевизор изредка может перезагрузиться.</string>
+    <string name="tv_rumble_experimental_warning_title">Редкие перезагрузки ТВ останутся</string>
+    <string name="tv_rumble_experimental_warning_text">Этот режим подгадывает момент и ограничивает частоту вибрации, чтобы уйти от гонки в прошивке (ошибка Android 14, исправлена в Android 15). Вероятность сбоя системы сильно снижается, но не до нуля: вместо перезагрузки раз в час ждите редкой.\n\nВсё равно включить?</string>
+    <string name="tv_rumble_experimental_warning_enable">Включить</string>
+    <string name="tv_rumble_experimental_warning_cancel">Отмена</string>
     <string name="conn_workaround_off">выключен</string>
     <string name="conn_hardware_latency">Средняя задержка аппаратного декодирования:</string>
     <string name="conn_starting">Запуск</string>
@@ -157,7 +163,7 @@
     <string name="title_checkbox_enable_pip">Включить просмотр в режиме \"Картинка в картинке\"</string>
     <string name="summary_checkbox_enable_pip">Позволяет просматривать трансляцию (но не управлять ей) во время работы в других приложениях</string>
     <string name="title_checkbox_usb_bind_all">Переопределить поддержку контроллеров Android</string>
-    <string name="summary_checkbox_usb_bind_all">Заставляет USB драйвер Artemis взять на себя работу со всеми поддерживаемыми Xbox геймпадами</string>
+    <string name="summary_checkbox_usb_bind_all">Заставляет USB драйвер Artemis взять на себя работу со всеми поддерживаемыми Xbox геймпадами. На TCL с Android 14 включено по умолчанию: геймпад по USB-кабелю ведёт сам Moonlight, и вибрация идёт мимо системного стека ввода, который роняет телевизор.</string>
     <string name="title_checkbox_mouse_emulation">Эмуляция мыши на геймпаде</string>
     <string name="summary_checkbox_mouse_emulation">Долгое нажатие кнопки Start переключит геймпад в режим мыши</string>
     <string name="summary_show_guide_button">Отобразить кнопку Guide на экране</string>

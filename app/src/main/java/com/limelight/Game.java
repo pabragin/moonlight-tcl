@@ -1790,6 +1790,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             // Always try the controller handler first, unless it's an alphanumeric keyboard device.
             // Otherwise, controller handler will eat keyboard d-pad events.
             handled = controllerHandler.handleButtonDown(event);
+            controllerHandler.flushDeferredRumbleForEvent(event);
         }
 
         // Try the keyboard handler if it wasn't handled as a game controller
@@ -1879,6 +1880,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             // Always try the controller handler first, unless it's an alphanumeric keyboard device.
             // Otherwise, controller handler will eat keyboard d-pad events.
             handled = controllerHandler.handleButtonUp(event);
+            controllerHandler.flushDeferredRumbleForEvent(event);
         }
 
         // Try the keyboard handler if it wasn't handled as a game controller
@@ -2480,7 +2482,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         int eventSource = event.getSource();
         if ((eventSource & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-            if (controllerHandler.handleMotionEvent(event)) {
+            boolean handledByController = controllerHandler.handleMotionEvent(event);
+            // Deferred rumble (TV workaround) is delivered right after the pad's own input, see ControllerHandler
+            controllerHandler.flushDeferredRumbleForEvent(event);
+            if (handledByController) {
                 return true;
             }
         }

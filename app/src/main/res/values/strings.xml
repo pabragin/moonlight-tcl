@@ -108,9 +108,15 @@
     <string name="conn_client_latency_compositor">Compositor (release → screen): avg %1$d ms, max %2$d ms over %3$d frames, TV workaround %4$s</string>
     <string name="conn_workaround_on">on</string>
     <string name="tv_block_rumble_warning_title">Rumble reboots this TV</string>
-    <string name="tv_block_rumble_warning_text">On this TV firmware (TCL, Android 14) gamepad rumble sent through the Android input stack hits a race in the system process: it can work for an hour and then reboot the TV, sometimes twice in a row. The only safe rumble is an Xbox controller on a USB cable with the USB driver enabled.\n\nTurn the block off anyway?</string>
+    <string name="tv_block_rumble_warning_text">On this TV firmware (TCL, Android 14) gamepad rumble sent through the Android input stack hits a race in the system process: it can work for an hour and then reboot the TV, sometimes twice in a row. The only safe rumble is an Xbox controller on a USB cable with the USB driver enabled; for Bluetooth keep the block on and try the experimental option below instead.\n\nTurn the block off anyway?</string>
     <string name="tv_block_rumble_warning_disable">Turn off anyway</string>
     <string name="tv_block_rumble_warning_keep">Keep blocking</string>
+    <string name="title_tv_rumble_experimental">Rumble over Bluetooth anyway (experimental)</string>
+    <string name="summary_tv_rumble_experimental">Sends rumble through the system input stack despite the firmware bug, but coalesced (at most 20 updates per second) and only right after this gamepad\'s own input, when the system\'s input thread is idle. Makes the crash rare, not impossible: the TV may still reboot occasionally.</string>
+    <string name="tv_rumble_experimental_warning_title">Rare TV reboots remain possible</string>
+    <string name="tv_rumble_experimental_warning_text">This mode times and rate-limits rumble to dodge the race in the TV firmware (an Android 14 bug, fixed in Android 15). It shrinks the chance of the system crash a lot but cannot remove it: expect an occasional reboot instead of one per hour.\n\nEnable anyway?</string>
+    <string name="tv_rumble_experimental_warning_enable">Enable</string>
+    <string name="tv_rumble_experimental_warning_cancel">Cancel</string>
     <string name="conn_workaround_off">off</string>
     <string name="conn_hardware_latency">Average hardware decoding latency:</string>
     <string name="conn_starting">Starting</string>
@@ -242,7 +248,7 @@
     <string name="title_checkbox_xb1_driver">Xbox 360/One/NintendoPro USB gamepad driver</string>
     <string name="summary_checkbox_xb1_driver">Enables a built-in USB driver for devices without native Xbox/Nintendo Pro controller support</string>
     <string name="title_checkbox_usb_bind_all">Override native Xbox gamepad support</string>
-    <string name="summary_checkbox_usb_bind_all">Use Artemis\'s USB driver for all supported gamepads, even if native Xbox/Nintendo Pro controller support is present</string>
+    <string name="summary_checkbox_usb_bind_all">Use Artemis\'s USB driver for all supported gamepads, even if native Xbox/Nintendo Pro controller support is present. On TCL TVs with Android 14 this is on by default: a gamepad on a USB cable is then driven by Moonlight itself and rumbles without touching the system input stack that crashes.</string>
     <string name="title_checkbox_mouse_emulation">Mouse emulation via gamepad</string>
     <string name="summary_checkbox_mouse_emulation">Long-press the Start button to toggle between gamepad and mouse mode</string>
     <string name="title_checkbox_remember_mouse_mode">Remember mouse mode</string>

@@ -101,6 +101,7 @@ public class PreferenceConfiguration {
     private static final String ENABLE_RUMBLE_PREF_STRING = "checkbox_enable_rumble";
     private static final String TV_COMPOSITOR_WORKAROUND_PREF_STRING = "checkbox_tv_compositor_workaround";
     private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
+    private static final String TV_RUMBLE_EXPERIMENTAL_PREF_STRING = "checkbox_tv_rumble_experimental";
     private static final String LATENCY_TEST_PREF_STRING = "checkbox_latency_test";
     private static final String PREVENT_PACKET_LOSS_PREF_STRING = "checkbox_prevent_packet_loss";
 
@@ -360,6 +361,7 @@ public class PreferenceConfiguration {
     // Android TV firmware workarounds (see isTvWithBrokenCompositor()/isTvWithBrokenInputRumble())
     public boolean tvCompositorWorkaround;
     public boolean tvBlockRumble;
+    public boolean tvRumbleExperimental;
     public boolean latencyTest;
 
     public boolean rememberZoomPan;
@@ -924,7 +926,9 @@ private static int getFramePacingValue(Context context) {
         config.enablePerfLogging = prefs.getBoolean(ENABLE_PERF_LOGGING, DEFAULT_ENABLE_PERF_LOGGING);
         config.enablePerfOverlayLite = prefs.getBoolean("checkbox_enable_perf_overlay_lite",DEFAULT_ENABLE_PERF_OVERLAY);
         config.enablePerfOverlayBottom = prefs.getBoolean("checkbox_enable_perf_overlay_bottom",DEFAULT_PERF_OVERLAY_BOTTOM);
-        config.bindAllUsb = prefs.getBoolean(BIND_ALL_USB_STRING, DEFAULT_BIND_ALL_USB);
+        // On TVs with the InputReader rumble crash, let Moonlight's own USB driver take a cabled gamepad so
+        // rumble goes over USB instead of the system input stack.
+        config.bindAllUsb = prefs.getBoolean(BIND_ALL_USB_STRING, DEFAULT_BIND_ALL_USB || isTvWithBrokenInputRumble(context));
         config.mouseEmulation = prefs.getBoolean(MOUSE_EMULATION_STRING, DEFAULT_MOUSE_EMULATION);
         config.mouseNavButtons = prefs.getBoolean(MOUSE_NAV_BUTTONS_STRING, DEFAULT_MOUSE_NAV_BUTTONS);
         config.rememberMouseMode = prefs.getBoolean(REMEMBER_MOUSE_MODE_PREF_STRING, DEFAULT_REMEMBER_MOUSE_MODE);
@@ -1015,6 +1019,7 @@ private static int getFramePacingValue(Context context) {
         // Default to "on" only on TVs known to need the workarounds; the user can override either way
         config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
         config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
+        config.tvRumbleExperimental = prefs.getBoolean(TV_RUMBLE_EXPERIMENTAL_PREF_STRING, false);
         config.latencyTest = prefs.getBoolean(LATENCY_TEST_PREF_STRING, false);
 
         // Read custom values

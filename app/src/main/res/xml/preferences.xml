@@ -296,6 +296,13 @@
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
+            android:dependency="checkbox_tv_block_rumble"
+            android:key="checkbox_tv_rumble_experimental"
+            android:summary="@string/summary_tv_rumble_experimental"
+            android:title="@string/title_tv_rumble_experimental"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:dependency="checkbox_enable_rumble"
             android:key="checkbox_vibrate_fallback"
             android:summary="@string/summary_checkbox_vibrate_fallback"

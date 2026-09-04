@@ -349,6 +349,28 @@ public class StreamSettings extends AppCompatActivity {
             applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
+            applyDeviceDefault("checkbox_usb_bind_all", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
+
+            // Experimental Bluetooth rumble exists only for the TVs with the InputReader race; enabling it asks first
+            final CheckBoxPreference expRumblePref = findPreference("checkbox_tv_rumble_experimental");
+            if (expRumblePref != null) {
+                if (!PreferenceConfiguration.isTvWithBrokenInputRumble(activity)) {
+                    removePreferenceIfPresent("checkbox_tv_rumble_experimental");
+                } else {
+                    expRumblePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                        if (Boolean.TRUE.equals(newValue)) {
+                            new AlertDialog.Builder(activity)
+                                    .setTitle(R.string.tv_rumble_experimental_warning_title)
+                                    .setMessage(R.string.tv_rumble_experimental_warning_text)
+                                    .setPositiveButton(R.string.tv_rumble_experimental_warning_enable, (d, w) -> expRumblePref.setChecked(true))
+                                    .setNegativeButton(R.string.tv_rumble_experimental_warning_cancel, null)
+                                    .show();
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+            }
 
             // Turning the rumble block off on an affected TV leads to reboots sooner or later (race in
             // system_server; confirmed on a TCL C8K, Android 14: an hour of play, then two reboots). Ask first.

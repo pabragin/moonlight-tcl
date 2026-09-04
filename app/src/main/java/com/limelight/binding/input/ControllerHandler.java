@@ -18,6 +18,7 @@ import android.media.AudioAttributes;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.VibrationAttributes;
@@ -58,6 +59,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     private static final int START_DOWN_TIME_MOUSE_MODE_MS = 750;
 
     private static final int MINIMUM_BUTTON_DOWN_TIME_MS = 25;
+
+    // Deferred rumble (Android TV workaround, experimental): never call the vibrator more often than
+    // this per gamepad, and flush a pending request from the main thread after this long without
+    // input from the pad.
+    private static final int RUMBLE_MIN_INTERVAL_MS = 50;
+    private static final int RUMBLE_IDLE_FLUSH_MS = 100;
 
     private static final int QUICK_MENU_FIRST_STAGE_MS = 200;
 
@@ -268,6 +275,18 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         for (int i = 0; i < inputDeviceContexts.size(); i++) {
             InputDeviceContext deviceContext = inputDeviceContexts.valueAt(i);
+            // Deferred mode skips the cancel in destroy(); at stream end one unaligned cancel is
+            // acceptable so the motors never keep spinning the 60 s one-shot.
+            if (deviceContext.deferredRumble) {
+                boolean running;
+                synchronized (deviceContext.rumbleLock) {
+                    running = deviceContext.sentLowFreqMotor != 0 || deviceContext.sentHighFreqMotor != 0 ||
+                            deviceContext.sentLeftTriggerMotor != 0 || deviceContext.sentRightTriggerMotor != 0;
+                }
+                if (running) {
+                    deliverRumble(deviceContext, (short)0, (short)0, (short)0, (short)0);
+                }
+            }
             deviceContext.destroy();
         }
 
@@ -661,7 +680,14 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         context.hasPaddles = MoonBridge.guessControllerHasPaddles(context.vendorId, context.productId);
         context.hasShare = MoonBridge.guessControllerHasShareButton(context.vendorId, context.productId);
 
-        if (prefConfig.tvBlockRumble) {
+        // Experimental mode: keep the block semantics but deliver rumble coalesced and timed right after
+        // this gamepad's own input events (see flushPendingRumble). Reduces the crash odds, not to zero.
+        context.deferredRumble = prefConfig.tvBlockRumble && prefConfig.tvRumbleExperimental;
+        if (context.deferredRumble) {
+            LimeLog.info("Gamepad rumble for " + devName + " is deferred/coalesced (Android TV experimental mode)");
+        }
+
+        if (prefConfig.tvBlockRumble && !prefConfig.tvRumbleExperimental) {
             // Vibrating an InputDevice is routed through system_server's InputReader thread, which
             // has a crashing data race on some Android TV firmwares (TCL on Android 14, confirmed:
             // an hour of play, then two reboots within minutes). Leave this gamepad without any vibrator,
@@ -2000,6 +2026,110 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         vibrator.vibrate(VibrationEffect.createWaveform(new long[]{0, onTime, offTime}, 0), vibrationAttributes);
     }
 
+    // Shared by the immediate and the deferred path: pick the right vibration API for this gamepad.
+    private void deliverRumble(InputDeviceContext deviceContext, short lowFreqMotor, short highFreqMotor,
+                               short leftTriggerMotor, short rightTriggerMotor) {
+        // Prefer the documented Android 12 rumble API which can handle dual vibrators on PS/Xbox controllers
+        if (deviceContext.vibratorManager != null) {
+            if (deviceContext.quadVibrators) {
+                rumbleQuadVibrators(deviceContext.vibratorManager, lowFreqMotor, highFreqMotor,
+                        leftTriggerMotor, rightTriggerMotor);
+            }
+            else {
+                rumbleDualVibrators(deviceContext.vibratorManager, lowFreqMotor, highFreqMotor);
+            }
+        }
+        // If all else fails, we have to try the old Vibrator API
+        else if (deviceContext.vibrator != null) {
+            rumbleSingleVibrator(deviceContext.vibrator, lowFreqMotor, highFreqMotor);
+        }
+    }
+
+    // ---- Deferred, coalesced rumble (Android TV workaround, experimental) ----
+    //
+    // On TCL Android 14 firmware InputReader::vibrate() pushes into the input reader thread's event
+    // queue from the binder thread while the reader may be iterating it in flush() (AOSP race, fixed
+    // in Android 15). We cannot fix the firmware, but we can make collisions rare: keep only the latest
+    // requested values, call the vibrator at most every RUMBLE_MIN_INTERVAL_MS, and do it from the
+    // main thread right after an input event from the same gamepad was delivered to us (the reader
+    // has just finished its flush and idles until the next report). A pending request on an idle pad
+    // is flushed after RUMBLE_IDLE_FLUSH_MS instead. Invariant: rumbleDirty => rumbleTimerArmed.
+
+    private void requestDeferredRumble(InputDeviceContext ctx, short lowFreqMotor, short highFreqMotor) {
+        synchronized (ctx.rumbleLock) {
+            ctx.lowFreqMotor = lowFreqMotor;
+            ctx.highFreqMotor = highFreqMotor;
+            ctx.rumbleDirty = true;
+            armRumbleTimerLocked(ctx, RUMBLE_IDLE_FLUSH_MS);
+        }
+    }
+
+    private void requestDeferredRumbleTriggers(InputDeviceContext ctx, short leftTrigger, short rightTrigger) {
+        synchronized (ctx.rumbleLock) {
+            ctx.leftTriggerMotor = leftTrigger;
+            ctx.rightTriggerMotor = rightTrigger;
+            if (ctx.quadVibrators) {
+                ctx.rumbleDirty = true;
+                armRumbleTimerLocked(ctx, RUMBLE_IDLE_FLUSH_MS);
+            }
+        }
+    }
+
+    // Must be called with ctx.rumbleLock held. Never re-posts an armed timer, so a stream of requests
+    // cannot starve the fallback flush.
+    private void armRumbleTimerLocked(InputDeviceContext ctx, long delayMs) {
+        if (!ctx.rumbleTimerArmed) {
+            ctx.rumbleTimerArmed = true;
+            mainThreadHandler.postDelayed(ctx.rumbleFlushRunnable, delayMs);
+        }
+    }
+
+    /** Called by Game right after an input event from a gamepad has been handled (main thread). */
+    public void flushDeferredRumbleForEvent(InputEvent event) {
+        if (stopped) {
+            return;
+        }
+        InputDeviceContext context = getContextForEvent(event);
+        if (context != null && context.deferredRumble) {
+            flushPendingRumble(context, true);
+        }
+    }
+
+    // Main thread only.
+    private void flushPendingRumble(InputDeviceContext ctx, boolean afterInputEvent) {
+        short low, high, leftTrigger, rightTrigger;
+        synchronized (ctx.rumbleLock) {
+            if (!ctx.rumbleDirty) {
+                return;
+            }
+            long now = SystemClock.uptimeMillis();
+            long sinceLastSend = now - ctx.rumbleSentAtMs;
+            if (sinceLastSend < RUMBLE_MIN_INTERVAL_MS) {
+                // Too soon: keep the request pending. On the timer path re-arm for the remainder of the
+                // interval; on the input path the armed timer guarantees the trailing flush.
+                if (!afterInputEvent) {
+                    armRumbleTimerLocked(ctx, RUMBLE_MIN_INTERVAL_MS - sinceLastSend);
+                }
+                return;
+            }
+            boolean triggersMatter = ctx.quadVibrators;
+            if (ctx.lowFreqMotor == ctx.sentLowFreqMotor && ctx.highFreqMotor == ctx.sentHighFreqMotor &&
+                    (!triggersMatter || (ctx.leftTriggerMotor == ctx.sentLeftTriggerMotor &&
+                            ctx.rightTriggerMotor == ctx.sentRightTriggerMotor))) {
+                // Same values already sent (including "still stopped"): nothing to do
+                ctx.rumbleDirty = false;
+                return;
+            }
+            low = ctx.sentLowFreqMotor = ctx.lowFreqMotor;
+            high = ctx.sentHighFreqMotor = ctx.highFreqMotor;
+            leftTrigger = ctx.sentLeftTriggerMotor = ctx.leftTriggerMotor;
+            rightTrigger = ctx.sentRightTriggerMotor = ctx.rightTriggerMotor;
+            ctx.rumbleSentAtMs = now;
+            ctx.rumbleDirty = false;
+        }
+        deliverRumble(ctx, low, high, leftTrigger, rightTrigger);
+    }
+
     public void handleRumble(short controllerNumber, short lowFreqMotor, short highFreqMotor) {
         boolean foundMatchingDevice = false;
         boolean vibrated = false;
@@ -2014,27 +2144,19 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             if (deviceContext.controllerNumber == controllerNumber) {
                 foundMatchingDevice = true;
 
+                if (deviceContext.vibratorManager != null || deviceContext.vibrator != null) {
+                    vibrated = true;
+                }
+
+                if (deviceContext.deferredRumble) {
+                    requestDeferredRumble(deviceContext, lowFreqMotor, highFreqMotor);
+                    continue;
+                }
+
                 deviceContext.lowFreqMotor = lowFreqMotor;
                 deviceContext.highFreqMotor = highFreqMotor;
-
-                // Prefer the documented Android 12 rumble API which can handle dual vibrators on PS/Xbox controllers
-                if (deviceContext.vibratorManager != null) {
-                    vibrated = true;
-                    if (deviceContext.quadVibrators) {
-                        rumbleQuadVibrators(deviceContext.vibratorManager,
-                                deviceContext.lowFreqMotor, deviceContext.highFreqMotor,
-                                deviceContext.leftTriggerMotor, deviceContext.rightTriggerMotor);
-                    }
-                    else {
-                        rumbleDualVibrators(deviceContext.vibratorManager,
-                                deviceContext.lowFreqMotor, deviceContext.highFreqMotor);
-                    }
-                }
-                // If all else fails, we have to try the old Vibrator API
-                else if (deviceContext.vibrator != null) {
-                    vibrated = true;
-                    rumbleSingleVibrator(deviceContext.vibrator, deviceContext.lowFreqMotor, deviceContext.highFreqMotor);
-                }
+                deliverRumble(deviceContext, deviceContext.lowFreqMotor, deviceContext.highFreqMotor,
+                        deviceContext.leftTriggerMotor, deviceContext.rightTriggerMotor);
             }
         }
 
@@ -2075,6 +2197,11 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             InputDeviceContext deviceContext = inputDeviceContexts.valueAt(i);
 
             if (deviceContext.controllerNumber == controllerNumber) {
+                if (deviceContext.deferredRumble) {
+                    requestDeferredRumbleTriggers(deviceContext, leftTrigger, rightTrigger);
+                    continue;
+                }
+
                 deviceContext.leftTriggerMotor = leftTrigger;
                 deviceContext.rightTriggerMotor = rightTrigger;
 
@@ -2949,6 +3076,23 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         public short lowFreqMotor, highFreqMotor;
         public short leftTriggerMotor, rightTriggerMotor;
 
+        // Deferred rumble state (Android TV experimental mode); everything except deferredRumble is
+        // guarded by rumbleLock. Invariant: rumbleDirty => rumbleTimerArmed.
+        public boolean deferredRumble;
+        final Object rumbleLock = new Object();
+        boolean rumbleDirty, rumbleTimerArmed;
+        short sentLowFreqMotor, sentHighFreqMotor, sentLeftTriggerMotor, sentRightTriggerMotor;
+        long rumbleSentAtMs = -RUMBLE_MIN_INTERVAL_MS;
+        final Runnable rumbleFlushRunnable = new Runnable() {
+            @Override
+            public void run() {
+                synchronized (rumbleLock) {
+                    rumbleTimerArmed = false;
+                }
+                flushPendingRumble(InputDeviceContext.this, false);
+            }
+        };
+
         public SensorManager sensorManager;
         public SensorEventListener gyroListener;
         public short gyroReportRateHz;
@@ -3042,11 +3186,21 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         public void destroy() {
             super.destroy();
 
-            if (vibratorManager != null) {
-                vibratorManager.cancel();
+            mainThreadHandler.removeCallbacks(rumbleFlushRunnable);
+            synchronized (rumbleLock) {
+                rumbleDirty = false;
+                rumbleTimerArmed = false;
             }
-            else if (vibrator != null) {
-                vibrator.cancel();
+
+            // In the deferred (TV workaround) mode the vibrator is only ever touched right after this
+            // gamepad's own input; a device going away must not trigger an unaligned call.
+            if (!deferredRumble) {
+                if (vibratorManager != null) {
+                    vibratorManager.cancel();
+                }
+                else if (vibrator != null) {
+                    vibrator.cancel();
+                }
             }
 
             backgroundThreadHandler.removeCallbacks(enableSensorRunnable);
@@ -3228,6 +3382,30 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             // Don't release the controller number, because we will carry it over if it is present.
             // We also want to make sure the change is invisible to the host PC to avoid an add/remove
             // cycle for the gamepad which may break some games.
+            // Carry the deferred rumble state over: same physical gamepad, no vibrator call needed
+            boolean pendingRumble;
+            short mLow, mHigh, mLeft, mRight, sLow, sHigh, sLeft, sRight;
+            long sentAt;
+            synchronized (oldContext.rumbleLock) {
+                pendingRumble = oldContext.rumbleDirty;
+                mLow = oldContext.lowFreqMotor; mHigh = oldContext.highFreqMotor;
+                mLeft = oldContext.leftTriggerMotor; mRight = oldContext.rightTriggerMotor;
+                sLow = oldContext.sentLowFreqMotor; sHigh = oldContext.sentHighFreqMotor;
+                sLeft = oldContext.sentLeftTriggerMotor; sRight = oldContext.sentRightTriggerMotor;
+                sentAt = oldContext.rumbleSentAtMs;
+            }
+            synchronized (this.rumbleLock) {
+                this.lowFreqMotor = mLow; this.highFreqMotor = mHigh;
+                this.leftTriggerMotor = mLeft; this.rightTriggerMotor = mRight;
+                this.sentLowFreqMotor = sLow; this.sentHighFreqMotor = sHigh;
+                this.sentLeftTriggerMotor = sLeft; this.sentRightTriggerMotor = sRight;
+                this.rumbleSentAtMs = sentAt;
+                this.rumbleDirty = pendingRumble;
+                if (pendingRumble) {
+                    armRumbleTimerLocked(this, RUMBLE_IDLE_FLUSH_MS);
+                }
+            }
+
             oldContext.destroy();
 
             // Copy over existing controller number state

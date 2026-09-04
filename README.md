@@ -34,6 +34,13 @@ What is changed compared to Artemis:
    input stack is blocked; USB gamepads driven by Moonlight's own USB driver still rumble. Confirmed on a C8K: with the block
    off the TV played for about an hour and then rebooted twice within minutes (it is a race, not a deterministic crash), so
    since tcl9 the block wins over every other rumble option and unchecking it on an affected TV asks for confirmation.
+   Root cause (from the TV's crash log and AOSP source): Android 14's `InputReader::vibrate()` pushes into the input reader
+   thread's event queue from the binder thread while the reader may be flushing it; Android 15 fixed this (`mPendingArgs`). So
+   the only race-free rumble is Moonlight's own USB driver: since 20.2.8-tcl3 "Override native Xbox gamepad support" is on
+   by default on affected TVs, so a gamepad on a USB cable rumbles through the app, not the system. For Bluetooth there is
+   an opt-in **experimental** mode (`Rumble over Bluetooth anyway`): rumble is coalesced to at most 20 updates per second
+   and sent only right after the pad's own input event, when the system's input thread is idle. That makes the crash rare,
+   not impossible; the option says so before it turns on.
 
 Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and stay off on other devices. They can be toggled by hand.
 
