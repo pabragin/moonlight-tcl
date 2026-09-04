@@ -144,6 +144,13 @@ public class StreamSettings extends AppCompatActivity {
 
         private PreferenceConfiguration prevPrefConfig;
 
+        // FragmentManager re-creates fragments through the no-arg constructor when the activity is
+        // restored with saved state (process killed in the background, configuration change). The
+        // fork only had the constructor below, so every restore of the settings screen crashed with
+        // Fragment$InstantiationException (seen on Artemis 20.2.6 and all TCL builds up to tcl8).
+        public SettingsFragment() {
+        }
+
         public SettingsFragment(PreferenceConfiguration prefCfg) {
             prevPrefConfig = prefCfg;
         }
@@ -325,6 +332,10 @@ public class StreamSettings extends AppCompatActivity {
         }
 
         public void initializePreferences() {
+            if (prevPrefConfig == null) {
+                // Restored by the FragmentManager: read the current preferences ourselves
+                prevPrefConfig = PreferenceConfiguration.readPreferences(requireContext());
+            }
             addPreferencesFromResource(R.xml.preferences);
             PreferenceScreen screen = getPreferenceScreen();
 

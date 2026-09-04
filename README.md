@@ -84,6 +84,10 @@ Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and 
    stream and the toast at the end reports the compositor average/maximum, the frame count and whether the TV workaround was
    on. Run one session with the workaround on and one with it off to see what the 2x2 px keep-alive layer costs, without
    `dumpsys SurfaceFlinger`. Nothing is tracked when overlay, test and toast are all off.
+12. **Settings screen no longer crashes on restore (20.2.8-tcl2).** Artemis' settings fragment had only a constructor with an
+   argument, so whenever Android re-created the Settings activity from saved state (process killed in the background, a
+   configuration change) the app crashed with `Fragment$InstantiationException`. The TV's crash log showed this on Artemis
+   20.2.6 and on every TCL build; a no-arg constructor that re-reads the preferences fixes it.
 
 ## Download and install
 
