@@ -350,6 +350,7 @@ public class StreamSettings extends AppCompatActivity {
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
             applyDeviceDefault("checkbox_usb_bind_all", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
+            applyDeviceDefault("checkbox_tv_rumble_experimental", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
 
             // Experimental Bluetooth rumble exists only for the TVs with the InputReader race; enabling it asks first
             final CheckBoxPreference expRumblePref = findPreference("checkbox_tv_rumble_experimental");

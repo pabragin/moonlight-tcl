@@ -43,9 +43,9 @@ What is changed compared to Artemis:
    thread's event queue from the binder thread while the reader may be flushing it; Android 15 fixed this (`mPendingArgs`). So
    the only race-free rumble is Moonlight's own USB driver: since 20.2.8-tcl3 "Override native Xbox gamepad support" is on
    by default on affected TVs, so a gamepad on a USB cable rumbles through the app, not the system. For Bluetooth there is
-   an opt-in **experimental** mode (`Rumble over Bluetooth anyway`): rumble is coalesced to at most 20 updates per second
-   and sent only right after the pad's own input event, when the system's input thread is idle. That makes the crash rare,
-   not impossible; the option says so before it turns on.
+   an **experimental** mode (`Rumble over Bluetooth anyway`, on by default on affected TVs since 20.2.8-tcl7): rumble is
+   coalesced to at most 20 updates per second and sent only right after the pad's own input event, when the system's input
+   thread is idle. That makes the crash rare, not impossible; if the TV still reboots during play, turn it off.
 
 Both workarounds turn themselves on for TCL/MediaTek TVs on Android 14 or newer and stay off on other devices. They can be toggled by hand.
 For experiments the keep-alive layer can be forced from adb without a rebuild: `adb shell settings put global moonlight_tcl_keepalive "32:opaque"` (or `off` / `default`).

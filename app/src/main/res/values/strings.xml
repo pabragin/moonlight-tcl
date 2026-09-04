@@ -112,7 +112,7 @@
     <string name="tv_block_rumble_warning_disable">Turn off anyway</string>
     <string name="tv_block_rumble_warning_keep">Keep blocking</string>
     <string name="title_tv_rumble_experimental">Rumble over Bluetooth anyway (experimental)</string>
-    <string name="summary_tv_rumble_experimental">Sends rumble through the system input stack despite the firmware bug, but coalesced (at most 20 updates per second) and only right after this gamepad\'s own input, when the system\'s input thread is idle. Makes the crash rare, not impossible: the TV may still reboot occasionally.</string>
+    <string name="summary_tv_rumble_experimental">On by default on affected TVs. Sends rumble through the system input stack despite the firmware bug, but coalesced (at most 20 updates per second) and only right after this gamepad\'s own input, when the system\'s input thread is idle. Makes the crash rare, not impossible: if the TV still reboots during play, turn this off.</string>
     <string name="tv_rumble_experimental_warning_title">Rare TV reboots remain possible</string>
     <string name="tv_rumble_experimental_warning_text">This mode times and rate-limits rumble to dodge the race in the TV firmware (an Android 14 bug, fixed in Android 15). It shrinks the chance of the system crash a lot but cannot remove it: expect an occasional reboot instead of one per hour.\n\nEnable anyway?</string>
     <string name="tv_rumble_experimental_warning_enable">Enable</string>

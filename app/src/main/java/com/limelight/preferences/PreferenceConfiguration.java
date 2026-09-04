@@ -1022,7 +1022,9 @@ private static int getFramePacingValue(Context context) {
         config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
         config.tvCompositorKeepAliveLayer = prefs.getBoolean(TV_COMPOSITOR_LAYER_PREF_STRING, false);
         config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
-        config.tvRumbleExperimental = prefs.getBoolean(TV_RUMBLE_EXPERIMENTAL_PREF_STRING, false);
+        // On the affected TVs the deferred/coalesced rumble is the only way to get Bluetooth rumble at all;
+        // it is on by default there (the user can turn it off), off everywhere else.
+        config.tvRumbleExperimental = prefs.getBoolean(TV_RUMBLE_EXPERIMENTAL_PREF_STRING, isTvWithBrokenInputRumble(context));
         config.latencyTest = prefs.getBoolean(LATENCY_TEST_PREF_STRING, false);
 
         // Read custom values
