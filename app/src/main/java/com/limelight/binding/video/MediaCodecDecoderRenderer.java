@@ -551,7 +551,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         try {
             lowLatencyInfo = MediaCodecHelper.describeLowLatencyOptions(videoDecoder.getCodecInfo(),
-                    format.getString(MediaFormat.KEY_MIME), inputFormat);
+                    format.getString(MediaFormat.KEY_MIME), format, inputFormat);
             LimeLog.info("Low latency options kept by decoder: " + lowLatencyInfo);
         } catch (Throwable t) {
             lowLatencyInfo = null;

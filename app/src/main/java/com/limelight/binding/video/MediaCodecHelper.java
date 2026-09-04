@@ -508,10 +508,25 @@ public class MediaCodecHelper {
 
     // Human readable summary of the low-latency options the decoder actually kept in its input format,
     // shown in the performance overlay so users can check what their decoder accepted without adb.
-    public static String describeLowLatencyOptions(MediaCodecInfo decoderInfo, String mimeType, MediaFormat inputFormat) {
+    public static String describeLowLatencyOptions(MediaCodecInfo decoderInfo, String mimeType, MediaFormat configuredFormat, MediaFormat inputFormat) {
         StringBuilder sb = new StringBuilder();
         sb.append("feature=").append(decoderInfo != null && mimeType != null &&
                 decoderSupportsAndroidRLowLatency(decoderInfo, mimeType) ? "yes" : "no");
+        // Codec2 decoders do not echo "low-latency" in getInputFormat(), so report what we configured first
+        if (configuredFormat != null) {
+            sb.append(" requested:");
+            boolean any = false;
+            for (String key : new String[] { "low-latency", "vdec-lowlatency", MediaFormat.KEY_OPERATING_RATE, MediaFormat.KEY_PRIORITY }) {
+                if (configuredFormat.containsKey(key)) {
+                    sb.append(' ').append(key).append('=').append(configuredFormat.getInteger(key));
+                    any = true;
+                }
+            }
+            if (!any) {
+                sb.append(" none");
+            }
+            sb.append(" echoed:");
+        }
         if (inputFormat != null) {
             for (String key : new String[] { "low-latency", "vdec-lowlatency", MediaFormat.KEY_OPERATING_RATE, MediaFormat.KEY_PRIORITY }) {
                 if (inputFormat.containsKey(key)) {
@@ -537,54 +552,72 @@ public class MediaCodecHelper {
         // the first MediaFormat that doesn't fail in configure().
 
         boolean setNewOption = false;
+        String mimeType = videoFormat.getString(MediaFormat.KEY_MIME);
 
-        if (tryNumber < 1) {
-            // Official Android 11+ low latency option (KEY_LOW_LATENCY).
-            videoFormat.setInteger("low-latency", 1);
-            setNewOption = true;
-
-            // If this decoder officially supports FEATURE_LowLatency, we will just use that alone
-            // for try 0. Otherwise, we'll include it as best effort with other options.
-            if (!ultraLowLatency && decoderSupportsAndroidRLowLatency(decoderInfo, videoFormat.getString(MediaFormat.KEY_MIME))) {
-                return true;
-            }
-
-            // ALONSOJR1980: "low-latency" is not enough, continuing to add specific extensions
-        }
-
-        if (tryNumber < 2) {
-            // MediaTek decoders don't use vendor-defined keys for low latency mode. Instead, they have a modified
-            // version of AOSP's ACodec.cpp which supports the "vdec-lowlatency" option. This option is passed down
-            // to the decoder as OMX.MTK.index.param.video.LowLatencyDecode.
-            //
-            // This option is also plumbed for Amazon Amlogic-based devices like the Fire TV 3. Not only does it
-            // reduce latency on Amlogic, it fixes the HEVC bug that causes the decoder to not output any frames.
-            // Unfortunately, it does the exact opposite for the Xiaomi MITV4-ANSM0, breaking it in the way that
-            // Fire TV was broken prior to vdec-lowlatency :(
-            //
-            // On Fire TV 3, vdec-lowlatency is translated to OMX.amazon.fireos.index.video.lowLatencyDecode.
-            //
-            // https://github.com/yuan1617/Framwork/blob/master/frameworks/av/media/libstagefright/ACodec.cpp
-            // https://github.com/iykex/vendor_mediatek_proprietary_hardware/blob/master/libomx/video/MtkOmxVdecEx/MtkOmxVdecEx.h
-            videoFormat.setInteger("vdec-lowlatency", 1);
-            setNewOption = true;
-        }
-
-        if (tryNumber < 3) {
-            if (MediaCodecHelper.decoderSupportsMaxOperatingRate(decoderInfo.getName())) {
-                videoFormat.setInteger(MediaFormat.KEY_OPERATING_RATE, Short.MAX_VALUE);
+        if (ultraLowLatency) {
+            // "Ultra low latency": start with everything and drop the exotic options first. The official
+            // KEY_LOW_LATENCY is what matters on decoders with FEATURE_LowLatency (MediaTek on Android 14),
+            // so it is the last thing to go: try 0 = all, try 1 = low-latency + priority, try 2 = low-latency,
+            // try 3 = bare format. (Before this, a single rejected extra key took the official one down with it:
+            // c2.mtk.hevc.decoder refuses KEY_OPERATING_RATE=32767 at start(), and the decoder ended up with no
+            // low-latency option at all.)
+            if (tryNumber < 3) {
+                videoFormat.setInteger("low-latency", 1);
                 setNewOption = true;
             }
-            else {
-                videoFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
-                setNewOption = true;
-
-                // "Ultra low latency" on MediaTek: also ask for the maximum operating rate so the
-                // decoder doesn't pace itself for the nominal frame rate. Upstream only does this
-                // for Qualcomm; if the MediaTek decoder rejects it, the next configure() attempt
-                // (tryNumber >= 3) drops it again.
-                if (ultraLowLatency && isDecoderInList(mtkDecoderPrefixes, decoderInfo.getName())) {
+            if (tryNumber < 1) {
+                // Legacy MediaTek/Amlogic ACodec key, ignored by Codec2 decoders (see the comment in the
+                // non-ULL ladder below)
+                videoFormat.setInteger("vdec-lowlatency", 1);
+            }
+            if (tryNumber < 2) {
+                if (MediaCodecHelper.decoderSupportsMaxOperatingRate(decoderInfo.getName())) {
                     videoFormat.setInteger(MediaFormat.KEY_OPERATING_RATE, Short.MAX_VALUE);
+                }
+                else {
+                    videoFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
+                }
+            }
+        }
+        else {
+            if (tryNumber < 1) {
+                // Official Android 11+ low latency option (KEY_LOW_LATENCY).
+                videoFormat.setInteger("low-latency", 1);
+                setNewOption = true;
+
+                // If this decoder officially supports FEATURE_LowLatency, we will just use that alone
+                // for try 0. Otherwise, we'll include it as best effort with other options.
+                if (decoderSupportsAndroidRLowLatency(decoderInfo, mimeType)) {
+                    return true;
+                }
+            }
+
+            if (tryNumber < 2) {
+                // MediaTek decoders don't use vendor-defined keys for low latency mode. Instead, they have a modified
+                // version of AOSP's ACodec.cpp which supports the "vdec-lowlatency" option. This option is passed down
+                // to the decoder as OMX.MTK.index.param.video.LowLatencyDecode.
+                //
+                // This option is also plumbed for Amazon Amlogic-based devices like the Fire TV 3. Not only does it
+                // reduce latency on Amlogic, it fixes the HEVC bug that causes the decoder to not output any frames.
+                // Unfortunately, it does the exact opposite for the Xiaomi MITV4-ANSM0, breaking it in the way that
+                // Fire TV was broken prior to vdec-lowlatency :(
+                //
+                // On Fire TV 3, vdec-lowlatency is translated to OMX.amazon.fireos.index.video.lowLatencyDecode.
+                //
+                // https://github.com/yuan1617/Framwork/blob/master/frameworks/av/media/libstagefright/ACodec.cpp
+                // https://github.com/iykex/vendor_mediatek_proprietary_hardware/blob/master/libomx/video/MtkOmxVdecEx/MtkOmxVdecEx.h
+                videoFormat.setInteger("vdec-lowlatency", 1);
+                setNewOption = true;
+            }
+
+            if (tryNumber < 3) {
+                if (MediaCodecHelper.decoderSupportsMaxOperatingRate(decoderInfo.getName())) {
+                    videoFormat.setInteger(MediaFormat.KEY_OPERATING_RATE, Short.MAX_VALUE);
+                    setNewOption = true;
+                }
+                else {
+                    videoFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
+                    setNewOption = true;
                 }
             }
         }

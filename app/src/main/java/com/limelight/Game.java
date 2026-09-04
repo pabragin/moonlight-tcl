@@ -3811,6 +3811,11 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         volumeChangeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                // MASTER_MUTE_CHANGED_ACTION is a sticky broadcast: registering delivers the stale one immediately,
+                // which used to freeze the first 4 s of every stream. Only react to live changes.
+                if (isInitialStickyBroadcast()) {
+                    return;
+                }
                 Log.i("MoonlightTCL", "Volume change broadcast " + intent.getAction() + ": holding frames for " + VOLUME_HOLD_MS + " ms");
                 holdVideoFor(VOLUME_HOLD_MS);
             }

@@ -58,9 +58,12 @@ For experiments the keep-alive layer can be forced from adb without a rebuild: `
    automatically; AV1 remains available via "Force AV1".
 4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 100 Mbps, HEVC and "Prefer lowest latency" frame pacing
    (Artemis defaults to 1280x720 and 80 Mbps at 4K). Everything is still adjustable in Settings.
-5. **Decoder tuning that can be checked.** "Ultra Low Latency" is on by default on MediaTek TVs and now also requests the maximum
-   operating rate from the MediaTek decoder; the video renderer thread runs at display priority. The performance overlay shows a
-   "Low-latency mode" line with the options the decoder actually kept, so the effect of a setting can be verified without adb.
+5. **Decoder tuning that can be checked.** "Ultra Low Latency" is on by default on MediaTek TVs and the video renderer thread runs
+   at display priority. Until 20.2.8-tcl5 the MediaTek build also asked for `KEY_OPERATING_RATE = 32767`, which
+   `c2.mtk.hevc.decoder` rejects at `start()`; that key sat in every fallback attempt, so the decoder silently ended up
+   configured with *no* low-latency option at all (C8K log: tries 0–2 fail, try 3 succeeds with a bare format). 20.2.8-tcl6
+   drops the key and reorders the attempts so the official `low-latency` key is the last one given up. The performance
+   overlay's "Low-latency mode" line shows what was requested and what the decoder echoed, so this can be checked without adb.
 6. **Declared as a game.** The manifest carries `android:appCategory="game"` (plus the legacy `isGame` flag). Without the game
    category Android ignores the app's `GameManager` state updates and game-mode config, and TV vendors' automatic game picture
    mode keys off the category too. Together with `preferMinimalPostProcessing` this is everything an app can do to request the
