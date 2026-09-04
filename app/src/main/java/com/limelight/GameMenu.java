@@ -125,8 +125,12 @@ public class GameMenu implements Game.GameMenuCallbacks {
         });
 
         builder.setOnCancelListener(dialog -> hideMenu());
+        // Compositor guard: Game paused the video before the first dialog; a sub-menu replacing it
+        // must keep the hold, and every dismissal releases one.
+        builder.setOnDismissListener(dialog -> game.onOverlayGuardReleased());
 
         if (currentDialog != null) {
+            game.onOverlayShown();
             currentDialog.dismiss();
         }
         currentDialog = builder.show();

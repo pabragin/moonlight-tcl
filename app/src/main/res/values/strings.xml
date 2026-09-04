@@ -328,7 +328,9 @@
     <string name="title_enable_perf_overlay">Show performance stats while streaming</string>
     <string name="summary_enable_perf_overlay">Display real-time stream performance information while streaming</string>
     <string name="title_tv_compositor_workaround">Android TV compositor workaround</string>
-    <string name="summary_tv_compositor_workaround">Keeps a tiny invisible UI layer above the video and removes the video before leaving the stream. Works around TV firmware (e.g. TCL on Android 14) that freezes the whole TV when the video is the only layer on screen and the volume OSD or another app appears. Enabled automatically on known affected TVs.</string>
+    <string name="summary_tv_compositor_workaround">Works around the TCL Android 14 firmware hang that happens when the picture composition changes while the stream is running (volume bar, game menu, leaving the stream). The video stays the only layer on screen, which keeps the TV\'s fast video path, and frame output is paused for a moment before the menu, dialogs, messages and the system volume bar appear, and on exit.</string>
+    <string name="title_tv_compositor_layer">Keep a second layer above the video (slower, maximum protection)</string>
+    <string name="summary_tv_compositor_layer">The old workaround: a 2×2 px surface is kept above the video all the time so the composition never changes. Prevents the hang in every case but takes the TV off its fast video path and adds 10 to 15 ms of display latency to every frame.</string>
     <string name="title_tv_block_rumble">Block gamepad rumble on this TV</string>
     <string name="summary_tv_block_rumble">Blocks only rumble sent through the Android input stack (Bluetooth and system-managed gamepads), which crashes the system on some Android TV firmwares (TCL on Android 14) and restarts the TV mid-game. Gamepads driven by Moonlight\'s own USB driver keep rumbling. Enabled automatically on known affected TVs.</string>
     <string name="title_latency_test">Latency test mode</string>

@@ -735,6 +735,13 @@
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
+            android:dependency="checkbox_tv_compositor_workaround"
+            android:key="checkbox_tv_compositor_layer"
+            android:summary="@string/summary_tv_compositor_layer"
+            android:title="@string/title_tv_compositor_layer"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="checkbox_latency_test"
             android:summary="@string/summary_latency_test"
             android:title="@string/title_latency_test"

@@ -100,6 +100,7 @@ public class PreferenceConfiguration {
 
     private static final String ENABLE_RUMBLE_PREF_STRING = "checkbox_enable_rumble";
     private static final String TV_COMPOSITOR_WORKAROUND_PREF_STRING = "checkbox_tv_compositor_workaround";
+    private static final String TV_COMPOSITOR_LAYER_PREF_STRING = "checkbox_tv_compositor_layer";
     private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
     private static final String TV_RUMBLE_EXPERIMENTAL_PREF_STRING = "checkbox_tv_rumble_experimental";
     private static final String LATENCY_TEST_PREF_STRING = "checkbox_latency_test";
@@ -360,6 +361,7 @@ public class PreferenceConfiguration {
 
     // Android TV firmware workarounds (see isTvWithBrokenCompositor()/isTvWithBrokenInputRumble())
     public boolean tvCompositorWorkaround;
+    public boolean tvCompositorKeepAliveLayer;
     public boolean tvBlockRumble;
     public boolean tvRumbleExperimental;
     public boolean latencyTest;
@@ -1018,6 +1020,7 @@ private static int getFramePacingValue(Context context) {
 
         // Default to "on" only on TVs known to need the workarounds; the user can override either way
         config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
+        config.tvCompositorKeepAliveLayer = prefs.getBoolean(TV_COMPOSITOR_LAYER_PREF_STRING, false);
         config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
         config.tvRumbleExperimental = prefs.getBoolean(TV_RUMBLE_EXPERIMENTAL_PREF_STRING, false);
         config.latencyTest = prefs.getBoolean(LATENCY_TEST_PREF_STRING, false);

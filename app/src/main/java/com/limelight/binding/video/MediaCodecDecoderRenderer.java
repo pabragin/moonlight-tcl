@@ -994,9 +994,13 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             if (nextOutputBuffer != null) {
                 try {
                     long queuedPtsUs = nextOutputBuffer < outputIndexPts.length ? outputIndexPts[nextOutputBuffer] : 0;
-                    recordFrameRelease(queuedPtsUs);
-                    videoDecoder.releaseOutputBuffer(nextOutputBuffer, frameTimeNanos);
-                    com.limelight.utils.LatencyTester.onFrameRendered(queuedPtsUs);
+                    if (outputPaused) {
+                        videoDecoder.releaseOutputBuffer(nextOutputBuffer, false);
+                    } else {
+                        recordFrameRelease(queuedPtsUs);
+                        videoDecoder.releaseOutputBuffer(nextOutputBuffer, frameTimeNanos);
+                        com.limelight.utils.LatencyTester.onFrameRendered(queuedPtsUs);
+                    }
 
                     lastRenderedFrameTimeNanos = frameTimeNanos;
                     activeWindowVideoStats.totalFramesRendered++;
@@ -1042,6 +1046,14 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     private boolean submitThreadPriorityApplied;
+
+    // Compositor guard (TV workaround): while set, decoded frames are dropped instead of presented so
+    // the display pipeline can change composition with nothing in flight.
+    private volatile boolean outputPaused;
+
+    public void setOutputPaused(boolean paused) {
+        outputPaused = paused;
+    }
     private int oversizedDecodeUnits;
 
     private void startPresentTracking() {
@@ -1136,16 +1148,24 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                         prefs.framePacing == PreferenceConfiguration.FRAME_PACING_CAP_FPS) {
                                     // In max smoothness or cap FPS mode, we want to never drop frames
                                     // Use a PTS that will cause this frame to never be dropped
-                                    recordFrameRelease(presentationTimeUs);
-                                    videoDecoder.releaseOutputBuffer(lastIndex, 0);
-                                    com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
+                                    if (outputPaused) {
+                                        videoDecoder.releaseOutputBuffer(lastIndex, false);
+                                    } else {
+                                        recordFrameRelease(presentationTimeUs);
+                                        videoDecoder.releaseOutputBuffer(lastIndex, 0);
+                                        com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
+                                    }
                                 }
                                 else {
                                     // Use a PTS that will cause this frame to be dropped if another comes in within
                                     // the same V-sync period
-                                    recordFrameRelease(presentationTimeUs);
-                                    videoDecoder.releaseOutputBuffer(lastIndex, System.nanoTime());
-                                    com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
+                                    if (outputPaused) {
+                                        videoDecoder.releaseOutputBuffer(lastIndex, false);
+                                    } else {
+                                        recordFrameRelease(presentationTimeUs);
+                                        videoDecoder.releaseOutputBuffer(lastIndex, System.nanoTime());
+                                        com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
+                                    }
                                 }
 
                                 activeWindowVideoStats.totalFramesRendered++;

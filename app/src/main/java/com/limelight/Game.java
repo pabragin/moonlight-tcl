@@ -59,7 +59,9 @@ import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -71,6 +73,9 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
+import android.os.SystemClock;
+import android.provider.Settings;
+import android.util.Log;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -191,6 +196,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private final Handler workaroundHandler = new Handler(Looper.getMainLooper());
     private SurfaceView compositorKeepAliveView;
     private boolean compositorKeepAliveToggle;
+    private boolean compositorKeepAliveOpaque;
     private boolean compositorKeepAliveSurfaceReady;
     private boolean streamTeardownStarted;
     private final Runnable compositorKeepAliveRunnable = new Runnable() {
@@ -3139,6 +3145,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     }
 
     private void stopConnection() {
+        unregisterVolumeGuard();
         if (connecting || connected) {
             connecting = connected = false;
             updatePipAutoEnter();
@@ -3365,6 +3372,12 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                registerVolumeGuard();
+            }
+        });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
                 if (spinner != null) {
                     spinner.dismiss();
                     spinner = null;
@@ -3435,7 +3448,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(Game.this, message, Toast.LENGTH_LONG).show();
+                showToastGuarded(message, Toast.LENGTH_LONG);
             }
         });
     }
@@ -3446,7 +3459,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(Game.this, message, Toast.LENGTH_LONG).show();
+                    showToastGuarded(message, Toast.LENGTH_LONG);
                 }
             });
         }
@@ -3687,16 +3700,191 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                         InputDevice.SOURCE_CLASS_TRACKBALL);
     }
 
+    // adb-tunable knobs for the TV compositor experiments, no rebuild needed:
+    //   adb shell settings put global moonlight_tcl_keepalive "<px>:<opaque|translucent>"   (forces the layer on)
+    //   adb shell settings put global moonlight_tcl_keepalive off | default
+    // Compositor guard (TV workaround without the extra layer). Measured on the C8K: the MediaTek
+    // firmware presents a lone video layer within 2-12 ms, any second layer costs 16-33 ms, and the
+    // display pipeline hangs when the composition changes while video frames are in flight. So the
+    // video stays the only layer and, just before any overlay we know about (game menu, dialogs,
+    // toasts, the system volume bar), frame presentation is paused and resumed once it is gone.
+    private static final long OVERLAY_SHOW_DELAY_MS = 50;
+    private static final long OVERLAY_RESUME_DELAY_MS = 80;
+    private static final long VOLUME_HOLD_MS = 4000;
+    private int overlayHoldCount;
+    private long timedHoldUntilUptime;
+    private boolean videoHoldActive;
+    private BroadcastReceiver volumeChangeReceiver;
+    private final Runnable videoHoldExpiryRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateVideoHold();
+        }
+    };
+
+    private boolean compositorGuardEnabled() {
+        return prefConfig != null && prefConfig.tvCompositorWorkaround && !onExternelDisplay;
+    }
+
+    private void updateVideoHold() {
+        if (decoderRenderer == null) {
+            return;
+        }
+        long now = SystemClock.uptimeMillis();
+        boolean hold = overlayHoldCount > 0 || now < timedHoldUntilUptime;
+        if (hold != videoHoldActive) {
+            videoHoldActive = hold;
+            Log.i("MoonlightTCL", hold ? ("Compositor guard: pausing frame output (overlays=" + overlayHoldCount + ", timed hold " + Math.max(0, timedHoldUntilUptime - now) + " ms)") : "Compositor guard: resuming frame output");
+        }
+        decoderRenderer.setOutputPaused(hold);
+        workaroundHandler.removeCallbacks(videoHoldExpiryRunnable);
+        if (hold && overlayHoldCount == 0) {
+            workaroundHandler.postDelayed(videoHoldExpiryRunnable, timedHoldUntilUptime - now + 5);
+        }
+    }
+
+    /** Pause presentation, then run the action that puts a new layer on screen. */
+    public void runWithOverlayGuard(final Runnable showOverlay) {
+        if (!compositorGuardEnabled()) {
+            showOverlay.run();
+            return;
+        }
+        overlayHoldCount++;
+        updateVideoHold();
+        workaroundHandler.postDelayed(showOverlay, OVERLAY_SHOW_DELAY_MS);
+    }
+
+    /** Another overlay appears while one is already up (sub-menu): keep holding, no delay needed. */
+    public void onOverlayShown() {
+        if (!compositorGuardEnabled()) {
+            return;
+        }
+        overlayHoldCount++;
+        updateVideoHold();
+    }
+
+    /** An overlay is gone: give the compositor a couple of frames, then resume presenting. */
+    public void onOverlayGuardReleased() {
+        if (!compositorGuardEnabled()) {
+            return;
+        }
+        workaroundHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (overlayHoldCount > 0) {
+                    overlayHoldCount--;
+                }
+                updateVideoHold();
+            }
+        }, OVERLAY_RESUME_DELAY_MS);
+    }
+
+    private void holdVideoFor(long ms) {
+        if (!compositorGuardEnabled()) {
+            return;
+        }
+        timedHoldUntilUptime = Math.max(timedHoldUntilUptime, SystemClock.uptimeMillis() + ms);
+        updateVideoHold();
+    }
+
+    private void showToastGuarded(final CharSequence text, final int duration) {
+        runWithOverlayGuard(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(Game.this, text, duration).show();
+                workaroundHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        onOverlayGuardReleased();
+                    }
+                }, duration == Toast.LENGTH_LONG ? 3500 : 2000);
+            }
+        });
+    }
+
+    // The system volume bar (TCL's own dialog) shows up together with these broadcasts; SystemUI needs
+    // tens of milliseconds to put its window up, so pausing here lands before the composition changes.
+    private void registerVolumeGuard() {
+        if (!compositorGuardEnabled() || volumeChangeReceiver != null) {
+            return;
+        }
+        volumeChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.i("MoonlightTCL", "Volume change broadcast " + intent.getAction() + ": holding frames for " + VOLUME_HOLD_MS + " ms");
+                holdVideoFor(VOLUME_HOLD_MS);
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.media.VOLUME_CHANGED_ACTION");
+        filter.addAction("android.media.STREAM_MUTE_CHANGED_ACTION");
+        filter.addAction("android.media.MASTER_MUTE_CHANGED_ACTION");
+        try {
+            registerReceiver(volumeChangeReceiver, filter, Context.RECEIVER_EXPORTED);
+            Log.i("MoonlightTCL", "Compositor guard active: volume receiver registered, keep-alive layer " + (prefConfig.tvCompositorKeepAliveLayer ? "on" : "off"));
+        } catch (Exception e) {
+            Log.w("MoonlightTCL", "Could not register the volume guard", e);
+            volumeChangeReceiver = null;
+        }
+    }
+
+    private void unregisterVolumeGuard() {
+        if (volumeChangeReceiver != null) {
+            try {
+                unregisterReceiver(volumeChangeReceiver);
+            } catch (Exception ignored) {
+            }
+            volumeChangeReceiver = null;
+        }
+    }
+
+    private String tvDebugSetting(String key) {
+        try {
+            return Settings.Global.getString(getContentResolver(), key);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private void startCompositorKeepAlive() {
         compositorKeepAliveView = findViewById(R.id.compositorKeepAlive);
-        if (compositorKeepAliveView == null || !prefConfig.tvCompositorWorkaround || onExternelDisplay) {
+        if (compositorKeepAliveView == null || onExternelDisplay) {
             return;
         }
 
-        LimeLog.info("Android TV compositor workaround enabled (2x2 px overlay surface)");
+        boolean enabled = prefConfig.tvCompositorWorkaround && prefConfig.tvCompositorKeepAliveLayer;
+        int sizePx = 2;
+        boolean opaque = false;
+        String knob = tvDebugSetting("moonlight_tcl_keepalive");
+        if (knob != null && !knob.trim().isEmpty() && !knob.trim().equals("default")) {
+            knob = knob.trim();
+            if (knob.equals("off")) {
+                enabled = false;
+            } else {
+                enabled = true;
+                String[] parts = knob.split(":");
+                try {
+                    sizePx = Math.max(1, Integer.parseInt(parts[0].trim()));
+                } catch (NumberFormatException ignored) {
+                }
+                opaque = parts.length > 1 && parts[1].trim().startsWith("opaque");
+            }
+            Log.i("MoonlightTCL", "Keep-alive debug setting: " + knob + " -> enabled=" + enabled + " size=" + sizePx + " opaque=" + opaque);
+        }
+        if (!enabled) {
+            return;
+        }
+
+        compositorKeepAliveOpaque = opaque;
+        ViewGroup.LayoutParams lp = compositorKeepAliveView.getLayoutParams();
+        lp.width = sizePx;
+        lp.height = sizePx;
+        compositorKeepAliveView.setLayoutParams(lp);
+
+        LimeLog.info("Android TV compositor workaround enabled (" + sizePx + "x" + sizePx + " px " + (opaque ? "opaque" : "translucent") + " overlay surface)");
         // Above the stream SurfaceView, below the window. Must be set before the surface exists.
         compositorKeepAliveView.setZOrderMediaOverlay(true);
-        compositorKeepAliveView.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
+        compositorKeepAliveView.getHolder().setFormat(opaque ? android.graphics.PixelFormat.OPAQUE : android.graphics.PixelFormat.TRANSLUCENT);
         compositorKeepAliveView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -3727,7 +3915,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         try {
             canvas = holder.lockCanvas();
             if (canvas != null) {
-                canvas.drawColor(compositorKeepAliveToggle ? 0x02000000 : 0x01000000, android.graphics.PorterDuff.Mode.SRC);
+                int color = compositorKeepAliveOpaque
+                        ? (compositorKeepAliveToggle ? 0xFF000000 : 0xFF010101)
+                        : (compositorKeepAliveToggle ? 0x02000000 : 0x01000000);
+                canvas.drawColor(color, android.graphics.PorterDuff.Mode.SRC);
             }
         } catch (Exception e) {
             // Surface may be going away
@@ -4070,12 +4261,17 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     }
 
     @Override
-    public void showGameMenu(GameInputDevice device) {
+    public void showGameMenu(final GameInputDevice device) {
         if(isOnExternalDisplay()) {
             ExternalDisplayControlActivity.toggleGameMenu();
         } else {
             if (gameMenuCallbacks != null) {
-                gameMenuCallbacks.showMenu(device);
+                runWithOverlayGuard(new Runnable() {
+                    @Override
+                    public void run() {
+                        gameMenuCallbacks.showMenu(device);
+                    }
+                });
             }
         }
     }

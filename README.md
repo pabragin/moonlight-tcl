@@ -24,11 +24,16 @@ firmware. The bugs are in the TV firmware, so this project works around them on 
 
 What is changed compared to Artemis:
 
-1. **Compositor workaround** (`Settings → Advanced Settings → Android TV compositor workaround`). The TV's compositor hangs when it has to
-   reconfigure while the stream video is the only layer on screen and is still receiving frames (volume OSD, app switch, leaving the
-   stream). The app keeps a separate 2x2 px surface above the video at all times, so the video is never the only layer the compositor
-   sees while the window's own UI layer stays transparent and cheap, and on exit it stops the decoder and removes the video layer
-   *before* the activity transition starts.
+1. **Compositor workaround** (`Settings → Advanced Settings → Android TV compositor workaround`). Measured over adb on a C8K: the
+   MediaTek firmware presents a lone video layer within 2 to 12 ms after the decoder releases it, any second layer on screen costs
+   16 to 33 ms (a full extra frame), and the display pipeline hangs when the composition changes while video frames are in flight
+   (volume bar, game menu, home, leaving the stream). So the video stays the only layer, which keeps the TV on its fast path, and
+   the app pauses frame output just before every composition change it can see coming: 50 ms before its own menu, dialogs and
+   messages appear (resuming 80 ms after they close), for 4 s when the system reports a volume change (TCL's volume bar shows up
+   30 to 40 ms later and hides after 3 s), and on exit it stops the decoder and removes the video layer *before* the activity
+   transition. Decoding continues during a pause, only the presentation of frames is skipped. The old approach, a permanent 2×2 px
+   surface above the video, is still available as `Keep a second layer above the video`; it protects against overlays the app
+   cannot predict (notifications from other apps) at the price of 10 to 15 ms on every frame.
 2. **Gamepad rumble block** (`Settings → Gamepad → Block gamepad rumble on this TV`). The firmware has a race in `system_server`'s
    InputReader that crashes when an `InputDevice` vibrates, which shows up as the TV rebooting mid-game. Rumble through the Android
    input stack is blocked; USB gamepads driven by Moonlight's own USB driver still rumble. Confirmed on a C8K: with the block
@@ -42,7 +47,8 @@ What is changed compared to Artemis:
    and sent only right after the pad's own input event, when the system's input thread is idle. That makes the crash rare,
    not impossible; the option says so before it turns on.
 
-Both options turn themselves on for TCL/MediaTek TVs on Android 14 or newer and stay off on other devices. They can be toggled by hand.
+Both workarounds turn themselves on for TCL/MediaTek TVs on Android 14 or newer and stay off on other devices. They can be toggled by hand.
+For experiments the keep-alive layer can be forced from adb without a rebuild: `adb shell settings put global moonlight_tcl_keepalive "32:opaque"` (or `off` / `default`).
 
 3. **Video pipeline back to the proven one.** Artemis after August 2025 (commit `4de0227f`) gained an experimental renderer: a
    "latest-frame" polling loop with adaptive frame dropping, a decoder watchdog that flushes the codec, a set of undocumented
