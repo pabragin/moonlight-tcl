@@ -3486,14 +3486,14 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     @Override
     public void rumble(short controllerNumber, short lowFreqMotor, short highFreqMotor) {
         if (prefConfig.enableRumble) {
-            LimeLog.info(String.format((Locale)null, "Rumble on gamepad %d: %04x %04x", controllerNumber, lowFreqMotor, highFreqMotor));
+            LimeLog.debug(String.format((Locale)null, "Rumble on gamepad %d: %04x %04x", controllerNumber, lowFreqMotor, highFreqMotor));
             controllerHandler.handleRumble(controllerNumber, lowFreqMotor, highFreqMotor);
         }
     }
 
     @Override
     public void rumbleTriggers(short controllerNumber, short leftTrigger, short rightTrigger) {
-        LimeLog.info(String.format((Locale)null, "Rumble on gamepad triggers %d: %04x %04x", controllerNumber, leftTrigger, rightTrigger));
+        LimeLog.debug(String.format((Locale)null, "Rumble on gamepad triggers %d: %04x %04x", controllerNumber, leftTrigger, rightTrigger));
 
         controllerHandler.handleRumbleTriggers(controllerNumber, leftTrigger, rightTrigger);
     }

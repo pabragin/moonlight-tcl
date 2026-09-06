@@ -139,7 +139,8 @@ For experiments the keep-alive layer can be forced from adb without a rebuild: `
      (off by default); the adb knob overrides the checkbox when set.
    - **Quiet logcat by default (20.2.9-tcl2).** USB device dumps, PC polling, mDNS address filtering, poster cache hits and
      the periodic audio counters are silent unless `adb shell settings put global moonlight_tcl_verbose_log 1` is set (read at
-     app start); the audio counters still log a line whenever underruns or dropped packets actually change. The one-off lines
+     app start); the audio counters still log a line whenever underruns or dropped packets actually change. 20.2.9-tcl3 also
+     silences the per-event rumble line, the last one that repeated during play (up to 20 lines a second while a game rumbles). The one-off lines
      that matter for a bug report (decoder options kept, PTS mode, audio path, ADPF session, compositor caveat) stay.
 
 ## Download and install
