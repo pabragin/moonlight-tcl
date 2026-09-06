@@ -240,7 +240,7 @@ public class UsbDriverService extends Service implements UsbDriverListener {
 
     public static boolean kernelSupportsXboxOne() {
         String kernelVersion = System.getProperty("os.version");
-        LimeLog.info("Kernel Version: "+kernelVersion);
+        LimeLog.debug("Kernel Version: "+kernelVersion);
 
         if (kernelVersion == null) {
             // We'll assume this is some newer version of Android
@@ -284,7 +284,9 @@ public class UsbDriverService extends Service implements UsbDriverListener {
     }
 
     public static boolean shouldClaimDevice(UsbDevice device, boolean claimAllAvailable) {
-        LimeLog.info("UsbDevice info: "+device.toString());
+        // The full dump (interfaces and endpoints, dozens of lines per device) only in verbose mode
+        LimeLog.info("USB device: " + device.getDeviceName() + " vid=" + device.getVendorId() + " pid=" + device.getProductId());
+        LimeLog.debug("UsbDevice info: "+device.toString());
         return ((!kernelSupportsXboxOne() || !isRecognizedInputDevice(device) || claimAllAvailable) && XboxOneController.canClaimDevice(device)) ||
                 ((!isRecognizedInputDevice(device) || claimAllAvailable) && Xbox360Controller.canClaimDevice(device)) ||
                 // We must not call isRecognizedInputDevice() because wireless controllers don't share the same product ID as the dongle

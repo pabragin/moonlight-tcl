@@ -208,7 +208,7 @@ public class ComputerManagerService extends Service {
                 for (PollingTuple tuple : pollingTuples) {
                     // Enforce the poll data TTL
                     if (SystemClock.elapsedRealtime() - tuple.lastSuccessfulPollMs > POLL_DATA_TTL_MS) {
-                        LimeLog.info("Timing out polled state for "+tuple.computer.name);
+                        LimeLog.debug("Timing out polled state for "+tuple.computer.name);
                         tuple.computer.state = ComputerDetails.State.UNKNOWN;
                     }
 
@@ -691,9 +691,9 @@ public class ComputerManagerService extends Service {
 
     private boolean pollComputer(ComputerDetails details) throws InterruptedException {
         // Poll all addresses in parallel to speed up the process
-        LimeLog.info("Starting parallel poll for "+details.name+" ("+details.localAddress +", "+details.remoteAddress +", "+details.manualAddress+", "+details.ipv6Address+")");
+        LimeLog.debug("Starting parallel poll for "+details.name+" ("+details.localAddress +", "+details.remoteAddress +", "+details.manualAddress+", "+details.ipv6Address+")");
         ComputerDetails polledDetails = parallelPollPc(details);
-        LimeLog.info("Parallel poll for "+details.name+" returned address: "+details.activeAddress);
+        LimeLog.debug("Parallel poll for "+details.name+" returned address: "+details.activeAddress);
 
         if (polledDetails != null) {
             details.update(polledDetails);

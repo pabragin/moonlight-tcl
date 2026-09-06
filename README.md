@@ -137,6 +137,10 @@ For experiments the keep-alive layer can be forced from adb without a rebuild: `
      audio above which packets are dropped, default 40), `moonlight_tcl_present_log 1`, `moonlight_tcl_mtk_vendor on|off`.
      Since 20.2.9-tcl1 the timestamp mode is also a checkbox, `Settings → Advanced Settings → Render frames with timestamp 0`
      (off by default); the adb knob overrides the checkbox when set.
+   - **Quiet logcat by default (20.2.9-tcl2).** USB device dumps, PC polling, mDNS address filtering, poster cache hits and
+     the periodic audio counters are silent unless `adb shell settings put global moonlight_tcl_verbose_log 1` is set (read at
+     app start); the audio counters still log a line whenever underruns or dropped packets actually change. The one-off lines
+     that matter for a bug report (decoder options kept, PTS mode, audio path, ADPF session, compositor caveat) stay.
 
 ## Download and install
 
@@ -196,4 +200,6 @@ Android 14 на телевизорах TCL (C8K и похожие): зависа
 `moonlight_tcl_audio_max_ms 40|80|120` — объём звука в очереди, выше которого пакеты отбрасываются (по умолчанию 40 мс);
 `moonlight_tcl_present_log 1` — печатать цифры композитора в logcat каждые 5 секунд; `moonlight_tcl_mtk_vendor on|off` — ключи
 MediaTek `game-mode`/`low-latency-mode`; `moonlight_tcl_keepalive "32:opaque"|off|default` — принудительный слой-заглушка над
-видео; `adb shell setprop debug.moonlight.aaudio 0` — принудительно вернуть вывод звука через AudioTrack.
+видео; `adb shell setprop debug.moonlight.aaudio 0` — принудительно вернуть вывод звука через AudioTrack;
+`moonlight_tcl_verbose_log 1` — вернуть в logcat подробные дампы USB-устройств, опрос ПК и периодические счётчики звука (с 20.2.9-tcl2
+по умолчанию лог тихий, счётчики звука пишутся только когда меняются).

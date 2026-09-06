@@ -37,7 +37,7 @@ public class MemoryAssetLoader {
 
         ScaledBitmap bmp = memoryCache.get(key);
         if (bmp != null) {
-            LimeLog.info("LRU cache hit for tuple: "+tuple);
+            LimeLog.debug("LRU cache hit for tuple: "+tuple);
             return bmp;
         }
 

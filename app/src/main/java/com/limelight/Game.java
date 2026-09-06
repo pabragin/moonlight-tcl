@@ -3726,6 +3726,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     //   adb shell settings put global moonlight_tcl_mtk_vendor on | off   (MediaTek game-mode/low-latency-mode keys, off by default)
     //   adb shell settings put global moonlight_tcl_audio_max_ms 40 | 80 | 120
     //   adb shell setprop debug.moonlight.aaudio 0        (force the AudioTrack fallback)
+    //   adb shell settings put global moonlight_tcl_verbose_log 1   (device dumps, polling, periodic counters back in logcat)
     // Compositor guard (TV workaround without the extra layer). Measured on the C8K: the MediaTek
     // firmware presents a lone video layer within 2-12 ms, any second layer costs 16-33 ms, and the
     // display pipeline hangs when the composition changes while video frames are in flight. So the

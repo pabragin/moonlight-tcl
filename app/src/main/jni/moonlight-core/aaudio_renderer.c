@@ -260,11 +260,14 @@ void AAudioRenderer_Write(const int16_t* frames, int frameCount) {
     if (t - lastStatsLogNs > 10000000000LL) {
         lastStatsLogNs = t;
         int u = atomic_load(&underruns), d = atomic_load(&dropped);
-        LOGI("AAudio stats: underruns +%d (total %d), dropped +%d (total %d), queued %d frames",
-             u - atomic_load(&lastLoggedUnderruns), u, d - atomic_load(&lastLoggedDropped), d,
-             (int)(atomic_load(&writeIdx) - atomic_load(&readIdx)));
-        atomic_store(&lastLoggedUnderruns, u);
-        atomic_store(&lastLoggedDropped, d);
+        // Quiet while the stream is clean; one line per 10 s window in which the counters moved
+        if (u != atomic_load(&lastLoggedUnderruns) || d != atomic_load(&lastLoggedDropped)) {
+            LOGI("AAudio stats: underruns +%d (total %d), dropped +%d (total %d), queued %d frames",
+                 u - atomic_load(&lastLoggedUnderruns), u, d - atomic_load(&lastLoggedDropped), d,
+                 (int)(atomic_load(&writeIdx) - atomic_load(&readIdx)));
+            atomic_store(&lastLoggedUnderruns, u);
+            atomic_store(&lastLoggedDropped, d);
+        }
     }
     if (atomic_load(&needReopen)) {
         pthread_mutex_lock(&lifecycleLock);

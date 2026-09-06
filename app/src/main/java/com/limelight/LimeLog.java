@@ -7,6 +7,24 @@ import java.util.logging.Logger;
 public class LimeLog {
     private static final Logger LOGGER = Logger.getLogger(LimeLog.class.getName());
 
+    // Chatty diagnostics (device dumps, polling, periodic counters) only reach logcat when verbose
+    // logging is on: adb shell settings put global moonlight_tcl_verbose_log 1
+    private static volatile boolean verbose;
+
+    public static void setVerbose(boolean enabled) {
+        verbose = enabled;
+    }
+
+    public static boolean isVerbose() {
+        return verbose;
+    }
+
+    public static void debug(String msg) {
+        if (verbose) {
+            LOGGER.info(msg);
+        }
+    }
+
     public static void info(String msg) {
         LOGGER.info(msg);
     }

@@ -23,6 +23,8 @@ public class AndroidAudioRenderer implements AudioRenderer {
     private int droppedPackets;
     private long lastDropLogUptime;
     private long lastUnderrunLogUptime;
+    private int lastLoggedUnderruns;
+    private int lastLoggedDropped;
 
     public AndroidAudioRenderer(Context context, boolean enableAudioFx) {
         this(context, enableAudioFx, 40);
@@ -204,7 +206,13 @@ public class AndroidAudioRenderer implements AudioRenderer {
         if (now - lastUnderrunLogUptime > 10000) {
             lastUnderrunLogUptime = now;
             try {
-                LimeLog.info("AudioTrack underruns so far: " + track.getUnderrunCount() + ", dropped packets: " + droppedPackets);
+                // Quiet while nothing changes; one line whenever the counters moved
+                int underruns = track.getUnderrunCount();
+                if (underruns != lastLoggedUnderruns || droppedPackets != lastLoggedDropped) {
+                    lastLoggedUnderruns = underruns;
+                    lastLoggedDropped = droppedPackets;
+                    LimeLog.info("AudioTrack underruns so far: " + underruns + ", dropped packets: " + droppedPackets);
+                }
             } catch (Exception ignored) {
             }
         }

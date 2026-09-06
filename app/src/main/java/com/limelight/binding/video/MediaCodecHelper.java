@@ -459,7 +459,7 @@ public class MediaCodecHelper {
     private static boolean decoderSupportsAndroidRLowLatency(MediaCodecInfo decoderInfo, String mimeType) {
         try {
             if (decoderInfo.getCapabilitiesForType(mimeType).isFeatureSupported(CodecCapabilities.FEATURE_LowLatency)) {
-                LimeLog.info("Low latency decoding mode supported (FEATURE_LowLatency)");
+                LimeLog.debug("Low latency decoding mode supported (FEATURE_LowLatency)");
                 return true;
             }
         } catch (Exception e) {

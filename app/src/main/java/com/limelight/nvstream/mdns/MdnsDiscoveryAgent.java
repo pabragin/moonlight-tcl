@@ -75,7 +75,7 @@ public abstract class MdnsDiscoveryAgent {
     protected static Inet6Address getLinkLocalAddress(Inet6Address[] addresses) {
         for (Inet6Address addr : addresses) {
             if (addr.isLinkLocalAddress()) {
-                LimeLog.info("Found link-local address: "+addr.getHostAddress());
+                LimeLog.debug("Found link-local address: "+addr.getHostAddress());
                 return addr;
             }
         }
@@ -96,7 +96,7 @@ public abstract class MdnsDiscoveryAgent {
             for (Inet6Address addr : addresses) {
                 if (addr.isLinkLocalAddress() || addr.isSiteLocalAddress() || addr.isLoopbackAddress()) {
                     // Link-local, site-local, and loopback aren't global
-                    LimeLog.info("Ignoring non-global address: "+addr.getHostAddress());
+                    LimeLog.debug("Ignoring non-global address: "+addr.getHostAddress());
                     continue;
                 }
 
