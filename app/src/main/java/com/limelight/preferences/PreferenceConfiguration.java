@@ -92,6 +92,7 @@ public class PreferenceConfiguration {
     private static final String ENABLE_AUDIO_FX_PREF_STRING = "checkbox_enable_audiofx";
     private static final String AAUDIO_PREF_STRING = "checkbox_aaudio_renderer";
     private static final String ADPF_PREF_STRING = "checkbox_adpf_hints";
+    private static final String PTS_ZERO_PREF_STRING = "checkbox_pts_zero";
     private static final String REDUCE_REFRESH_RATE_PREF_STRING = "checkbox_reduce_refresh_rate";
     private static final String FULL_RANGE_PREF_STRING = "checkbox_full_range";
     private static final String GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING = "checkbox_gamepad_touchpad_as_mouse";
@@ -354,6 +355,7 @@ public class PreferenceConfiguration {
     public boolean enableAudioFx;
     public boolean useAAudio;
     public boolean adpfHints;
+    public boolean ptsZero;
     public boolean reduceRefreshRate;
     public boolean fullRange;
     public boolean gamepadMotionSensors;
@@ -1045,6 +1047,7 @@ private static int getFramePacingValue(Context context) {
         config.enableAudioFx = prefs.getBoolean(ENABLE_AUDIO_FX_PREF_STRING, DEFAULT_ENABLE_AUDIO_FX);
         config.useAAudio = prefs.getBoolean(AAUDIO_PREF_STRING, true);
         config.adpfHints = prefs.getBoolean(ADPF_PREF_STRING, true);
+        config.ptsZero = prefs.getBoolean(PTS_ZERO_PREF_STRING, false);
         config.reduceRefreshRate = prefs.getBoolean(REDUCE_REFRESH_RATE_PREF_STRING, DEFAULT_REDUCE_REFRESH_RATE);
         config.fullRange = prefs.getBoolean(FULL_RANGE_PREF_STRING, DEFAULT_FULL_RANGE);
         config.gamepadTouchpadAsMouse = prefs.getBoolean(GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING, DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE);

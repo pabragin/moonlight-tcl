@@ -840,8 +840,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 // Starten Sie die NvConnection
                 // adb-tunable experiments (see tvDebugSetting): PTS for the lowest-latency release and the
                 // MediaTek vendor keys. Read here, right before the decoder is set up.
+                // Settings checkbox, overridden by the adb knob when it is set to zero or now
                 String ptsMode = tvDebugSetting("moonlight_tcl_pts");
-                decoderRenderer.setImmediatePtsZero(ptsMode != null && ptsMode.trim().equalsIgnoreCase("zero"));
+                decoderRenderer.setImmediatePtsZero(ptsMode != null && !ptsMode.trim().isEmpty()
+                        ? ptsMode.trim().equalsIgnoreCase("zero") : prefConfig.ptsZero);
                 decoderRenderer.presentLogEnabled = "1".equals(tvDebugSetting("moonlight_tcl_present_log"));
                 String mtkVendor = tvDebugSetting("moonlight_tcl_mtk_vendor");
                 MediaCodecHelper.mtkVendorKeysEnabled = mtkVendor != null && mtkVendor.trim().equalsIgnoreCase("on");
@@ -3719,7 +3721,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     // adb-tunable knobs for the TV compositor experiments, no rebuild needed:
     //   adb shell settings put global moonlight_tcl_keepalive "<px>:<opaque|translucent>"   (forces the layer on)
     //   adb shell settings put global moonlight_tcl_keepalive off | default
-    //   adb shell settings put global moonlight_tcl_pts zero | now
+    //   adb shell settings put global moonlight_tcl_pts zero | now   (overrides the "Render frames with timestamp 0" checkbox)
     //   adb shell settings put global moonlight_tcl_present_log 1 | 0
     //   adb shell settings put global moonlight_tcl_mtk_vendor on | off   (MediaTek game-mode/low-latency-mode keys, off by default)
     //   adb shell settings put global moonlight_tcl_audio_max_ms 40 | 80 | 120

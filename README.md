@@ -135,6 +135,8 @@ For experiments the keep-alive layer can be forced from adb without a rebuild: `
    - adb knobs, no rebuild needed: `moonlight_tcl_pts zero|now` (render timestamp given to the compositor; `now` stays the
      default, with `0` SurfaceFlinger's frame-rate heuristics see identical timestamps), `moonlight_tcl_audio_max_ms` (queued
      audio above which packets are dropped, default 40), `moonlight_tcl_present_log 1`, `moonlight_tcl_mtk_vendor on|off`.
+     Since 20.2.9-tcl1 the timestamp mode is also a checkbox, `Settings → Advanced Settings → Render frames with timestamp 0`
+     (off by default); the adb knob overrides the checkbox when set.
 
 ## Download and install
 
@@ -189,7 +191,8 @@ Android 14 на телевизорах TCL (C8K и похожие): зависа
 
 Ключи для экспериментов через adb, без пересборки:
 `adb shell settings put global moonlight_tcl_pts zero|now` — какую метку времени отдавать композитору при выводе кадра (по умолчанию
-`now`; с нулём SurfaceFlinger видит у всех кадров одинаковые метки и не может оценить частоту кадров);
+`now`; с нулём SurfaceFlinger видит у всех кадров одинаковые метки и не может оценить частоту кадров; с 20.2.9-tcl1 это же есть
+галочкой «Нулевая метка времени кадра» в дополнительных настройках, ключ adb имеет приоритет над галочкой);
 `moonlight_tcl_audio_max_ms 40|80|120` — объём звука в очереди, выше которого пакеты отбрасываются (по умолчанию 40 мс);
 `moonlight_tcl_present_log 1` — печатать цифры композитора в logcat каждые 5 секунд; `moonlight_tcl_mtk_vendor on|off` — ключи
 MediaTek `game-mode`/`low-latency-mode`; `moonlight_tcl_keepalive "32:opaque"|off|default` — принудительный слой-заглушка над
