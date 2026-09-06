@@ -17,12 +17,23 @@ public class AndroidAudioRenderer implements AudioRenderer {
 
     private final Context context;
     private final boolean enableAudioFx;
+    private final int maxPendingMs;
 
     private AudioTrack track;
+    private int droppedPackets;
+    private long lastDropLogUptime;
+    private long lastUnderrunLogUptime;
 
     public AndroidAudioRenderer(Context context, boolean enableAudioFx) {
+        this(context, enableAudioFx, 40);
+    }
+
+    // maxPendingMs: how much decoded audio may queue up behind a blocking write before packets are
+    // dropped (upstream: 40 ms). adb: settings put global moonlight_tcl_audio_max_ms 80
+    public AndroidAudioRenderer(Context context, boolean enableAudioFx, int maxPendingMs) {
         this.context = context;
         this.enableAudioFx = enableAudioFx;
+        this.maxPendingMs = maxPendingMs > 0 ? maxPendingMs : 40;
     }
 
     private AudioTrack createAudioTrack(int channelConfig, int sampleRate, int bufferSize, boolean lowLatency) {
@@ -148,6 +159,9 @@ public class AndroidAudioRenderer implements AudioRenderer {
 
                 // Successfully created working AudioTrack. We're done here.
                 LimeLog.info("Audio track configuration: "+bufferSize+" "+lowLatency);
+                LimeLog.info("Audio track buffer: " + track.getBufferSizeInFrames() + " frames, min buffer "
+                        + AudioTrack.getMinBufferSize(sampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT)
+                        + " bytes, max pending " + maxPendingMs + " ms");
                 break;
             } catch (Exception e) {
                 // Try to release the AudioTrack if we got far enough
@@ -171,15 +185,28 @@ public class AndroidAudioRenderer implements AudioRenderer {
 
     @Override
     public void playDecodedAudio(short[] audioData) {
-        // Only queue up to 40 ms of pending audio data in addition to what AudioTrack is buffering for us.
-        if (MoonBridge.getPendingAudioDuration() < 40) {
+        // Only queue up to maxPendingMs of pending audio data in addition to what AudioTrack is buffering for us.
+        int pending = MoonBridge.getPendingAudioDuration();
+        long now = android.os.SystemClock.uptimeMillis();
+        if (pending < maxPendingMs) {
             // This will block until the write is completed. That can cause a backlog
             // of pending audio data, so we do the above check to be able to bound
-            // latency at 40 ms in that situation.
+            // latency in that situation.
             track.write(audioData, 0, audioData.length);
         }
         else {
-            LimeLog.info("Too much pending audio data: " + MoonBridge.getPendingAudioDuration() +" ms");
+            droppedPackets++;
+            if (now - lastDropLogUptime > 1000) {
+                lastDropLogUptime = now;
+                LimeLog.info("Too much pending audio data: " + pending + " ms (dropped " + droppedPackets + " packets so far)");
+            }
+        }
+        if (now - lastUnderrunLogUptime > 10000) {
+            lastUnderrunLogUptime = now;
+            try {
+                LimeLog.info("AudioTrack underruns so far: " + track.getUnderrunCount() + ", dropped packets: " + droppedPackets);
+            } catch (Exception ignored) {
+            }
         }
     }
 

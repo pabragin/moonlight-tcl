@@ -270,3 +270,8 @@ Java_com_limelight_nvstream_jni_MoonBridge_guessControllerHasShareButton(JNIEnv 
     // Xbox Elite and DualSense Edge controllers have paddles
     return SDL_IsJoystickXboxSeriesX(vendorId, productId);
 }
+
+JNIEXPORT jlong JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_getMicroseconds(JNIEnv *env, jclass clazz) {
+    return (jlong)LiGetMicroseconds();
+}

@@ -188,6 +188,12 @@
             android:summary="@string/summary_checkbox_enable_audiofx"
             android:title="@string/title_checkbox_enable_audiofx"
             app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="checkbox_aaudio_renderer"
+            android:summary="@string/summary_checkbox_aaudio_renderer"
+            android:title="@string/title_checkbox_aaudio_renderer"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -739,6 +745,12 @@
             android:key="checkbox_tv_compositor_layer"
             android:summary="@string/summary_tv_compositor_layer"
             android:title="@string/title_tv_compositor_layer"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="checkbox_adpf_hints"
+            android:summary="@string/summary_checkbox_adpf_hints"
+            android:title="@string/title_checkbox_adpf_hints"
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"

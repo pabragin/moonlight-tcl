@@ -51,11 +51,17 @@
     <string name="conn_client_latency">Средняя задержка декодирования кадра: </string>
     <string name="conn_client_latency_hw">Задержка аппаратного декодирования:</string>
     <string name="conn_client_latency_compositor">Композитор (отдача → экран): средн. %1$d мс, макс. %2$d мс за %3$d кадров, обход для TV %4$s</string>
+    <string name="conn_client_latency_compositor_partial">(только первые секунды: дальше телевизор не сообщает время показа кадров на быстром пути видео)</string>
     <string name="conn_workaround_on">включён</string>
     <string name="tv_block_rumble_warning_title">Вибрация перезагружает этот телевизор</string>
     <string name="tv_block_rumble_warning_text">На этой прошивке (TCL, Android 14) вибрация геймпада через системный стек ввода Android попадает в гонку в системном процессе: может работать час, а потом перезагрузить телевизор, иногда дважды подряд. Безопасная вибрация возможна только с Xbox-геймпадом по USB-кабелю при включённом USB-драйвере; для Bluetooth оставьте блокировку и попробуйте экспериментальный пункт ниже.\n\nВсё равно выключить блокировку?</string>
     <string name="tv_block_rumble_warning_disable">Всё равно выключить</string>
     <string name="tv_block_rumble_warning_keep">Оставить блокировку</string>
+    <string name="title_checkbox_aaudio_renderer">Звук с низкой задержкой (AAudio)</string>
+    <string name="summary_checkbox_aaudio_renderer">Воспроизводит звук через нативный поток AAudio с низкой задержкой вместо AudioTrack; декодированный звук не проходит через Java. Если телевизор откажет в потоке, автоматически возвращается к AudioTrack. Не используется при включённом системном эквалайзере.</string>
+    <string name="title_checkbox_adpf_hints">Подсказки производительности для потоков видео (ADPF)</string>
+    <string name="summary_checkbox_adpf_hints">Регистрирует потоки декодера и рендера в Performance Hint Manager Android и сообщает длительность каждого кадра, чтобы прошивка держала частоту и размещение ядер под них. Ничего не делает, если прошивка отказывает в сессии.</string>
+    <string name="perf_overlay_audio">Звук: %1$s · задержка %2$d мс · провалы %3$d · отброшено %4$d</string>
     <string name="title_tv_rumble_experimental">Вибрация по Bluetooth всё равно (эксперимент)</string>
     <string name="summary_tv_rumble_experimental">На затронутых телевизорах включено по умолчанию. Отправляет вибрацию через системный стек ввода несмотря на ошибку прошивки, но прореженно (не чаще 20 раз в секунду) и только сразу после события от этого геймпада, когда системный поток ввода простаивает. Сбой становится редким, но не невозможным: если телевизор всё же перезагружается во время игры, выключите этот пункт.</string>
     <string name="tv_rumble_experimental_warning_title">Редкие перезагрузки ТВ останутся</string>

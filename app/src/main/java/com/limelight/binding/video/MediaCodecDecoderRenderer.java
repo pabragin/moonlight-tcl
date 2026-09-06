@@ -113,7 +113,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private VideoStats globalVideoStats;
 
     private long lastTimestampUs;
-    private long baseTimestampUs;
     private int lastFrameNumber;
     private int refreshRate;
     private PreferenceConfiguration prefs;
@@ -555,6 +554,21 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             LimeLog.info("Low latency options kept by decoder: " + lowLatencyInfo);
         } catch (Throwable t) {
             lowLatencyInfo = null;
+        }
+
+        // Once per decoder: what vendor parameters it really exposes (the only proof that a vendor.* key is not ignored)
+        try {
+            String decoderName = videoDecoder.getName();
+            if (vendorParamsLogged.add(decoderName)) {
+                java.util.List<String> params = videoDecoder.getSupportedVendorParameters();
+                LimeLog.info("Decoder " + decoderName + " exposes " + params.size() + " vendor parameters");
+                for (String p : params) {
+                    MediaCodec.ParameterDescriptor d = videoDecoder.getParameterDescriptor(p);
+                    LimeLog.info("Vendor param: " + p + " type=" + (d != null ? d.getType() : -1));
+                }
+            }
+        } catch (Throwable t) {
+            LimeLog.info("Vendor parameter query failed: " + t);
         }
 
         videoDecoder.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
@@ -1000,6 +1014,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         recordFrameRelease(queuedPtsUs);
                         videoDecoder.releaseOutputBuffer(nextOutputBuffer, frameTimeNanos);
                         com.limelight.utils.LatencyTester.onFrameRendered(queuedPtsUs);
+                        reportFrameWork(queuedPtsUs);
                     }
 
                     lastRenderedFrameTimeNanos = frameTimeNanos;
@@ -1040,6 +1055,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         choreographerHandler.post(new Runnable() {
             @Override
             public void run() {
+                if (perfHints != null) {
+                    perfHints.addThread(Process.myTid());
+                }
                 Choreographer.getInstance().postFrameCallback(MediaCodecDecoderRenderer.this);
             }
         });
@@ -1051,6 +1069,31 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     // the display pipeline can change composition with nothing in flight.
     private volatile boolean outputPaused;
 
+    // adb: settings put global moonlight_tcl_pts zero -> release with PTS 0 instead of System.nanoTime()
+    private volatile boolean immediatePtsZero;
+
+    public void setImmediatePtsZero(boolean zero) {
+        immediatePtsZero = zero;
+    }
+
+    // adb: settings put global moonlight_tcl_present_log 1 -> track and log release->display timing every 5 s
+    public volatile boolean presentLogEnabled;
+    private int presentLogCounter;
+    // Diagnostics for the present tracking itself (why a window may end with zero matched frames)
+    private volatile int presentCallbacks, presentNoMatch, presentOutOfRange;
+    private int presentCallbacksLastSecond;
+    private boolean presentStopLogged;
+
+    // ADPF hint session for the video threads (null when disabled or unsupported)
+    private com.limelight.utils.PerformanceHints perfHints;
+    private static final java.util.Set<String> vendorParamsLogged = new java.util.HashSet<>();
+
+    private void reportFrameWork(long presentationTimeUs) {
+        if (perfHints != null) {
+            perfHints.reportWorkNanos((MoonBridge.getMicroseconds() - presentationTimeUs) * 1000L);
+        }
+    }
+
     public void setOutputPaused(boolean paused) {
         outputPaused = paused;
     }
@@ -1059,7 +1102,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private void startPresentTracking() {
         // The post-stream toast is the clean way to measure: nothing is drawn over the video during the
         // stream (a visible overlay would itself be a second compositor layer), the numbers appear at the end.
-        if (!(prefs.enablePerfOverlay || prefs.enablePerfOverlayLite || prefs.latencyTest || prefs.enableLatencyToast)) {
+        if (!(prefs.enablePerfOverlay || prefs.enablePerfOverlayLite || prefs.latencyTest || prefs.enableLatencyToast || presentLogEnabled)) {
             return;
         }
         if (frameRenderedThread == null) {
@@ -1071,12 +1114,15 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             public void onFrameRendered(MediaCodec codec, long presentationTimeUs, long renderTimeNanos) {
                 // renderTimeNanos is CLOCK_MONOTONIC like System.nanoTime(); on devices whose HWC
                 // reports present fences it is the moment the frame reached the panel.
+                presentCallbacks++;
                 long releaseNs = lookupFrameRelease(presentationTimeUs);
                 if (releaseNs == 0) {
+                    presentNoMatch++;
                     return;
                 }
                 long deltaMs = (renderTimeNanos - releaseNs) / 1000000L;
                 if (deltaMs < 0 || deltaMs > 1000) {
+                    presentOutOfRange++;
                     return;
                 }
                 VideoStats stats = activeWindowVideoStats;
@@ -1120,6 +1166,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 // Same priority the system gives its display threads: this thread hands decoded
                 // frames to the compositor, so it shouldn't wait behind ordinary app work.
                 Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+                if (perfHints != null) {
+                    perfHints.addThread(Process.myTid());
+                }
+                LimeLog.info("Renderer: lowest-latency PTS mode " + (immediatePtsZero ? "zero" : "now"));
 
                 BufferInfo info = new BufferInfo();
                 while (!stopping) {
@@ -1154,6 +1204,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                         recordFrameRelease(presentationTimeUs);
                                         videoDecoder.releaseOutputBuffer(lastIndex, 0);
                                         com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
+                                        reportFrameWork(presentationTimeUs);
                                     }
                                 }
                                 else {
@@ -1163,8 +1214,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                         videoDecoder.releaseOutputBuffer(lastIndex, false);
                                     } else {
                                         recordFrameRelease(presentationTimeUs);
-                                        videoDecoder.releaseOutputBuffer(lastIndex, System.nanoTime());
+                                        videoDecoder.releaseOutputBuffer(lastIndex, immediatePtsZero ? 0 : System.nanoTime());
                                         com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
+                                        reportFrameWork(presentationTimeUs);
                                     }
                                 }
 
@@ -1197,7 +1249,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                             }
 
                             // Add delta time to the totals (excluding probable outliers)
-                            long delta = SystemClock.uptimeMillis() - (presentationTimeUs / 1000);
+                            long delta = (MoonBridge.getMicroseconds() - presentationTimeUs) / 1000;
                             if (delta >= 0 && delta < 1000) {
                                 activeWindowVideoStats.decoderTimeMs += delta;
                                 activeWindowVideoStats.totalTimeMs += delta;
@@ -1296,6 +1348,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     @Override
     public void start() {
+        if (prefs.adpfHints) {
+            perfHints = com.limelight.utils.PerformanceHints.create(context, refreshRate);
+        }
         startRendererThread();
         startChoreographerThread();
     }
@@ -1365,6 +1420,11 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         if (frameRenderedThread != null) {
             frameRenderedThread.quitSafely();
             frameRenderedThread = null;
+        }
+
+        if (perfHints != null) {
+            perfHints.close();
+            perfHints = null;
         }
     }
 
@@ -1473,6 +1533,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             // MediaCodec. Give it the same priority as the renderer thread so it is not scheduled
             // behind ordinary app work on a busy TV SoC.
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+            if (perfHints != null) {
+                perfHints.addThread(Process.myTid());
+            }
             submitThreadPriorityApplied = true;
         }
 
@@ -1497,6 +1560,15 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         // Flip stats windows roughly every second
         if (SystemClock.uptimeMillis() >= activeWindowVideoStats.measurementStartTimestamp + 1000) {
+            if (presentLogEnabled && ++presentLogCounter % 5 == 0) {
+                VideoStats w = activeWindowVideoStats;
+                LimeLog.info("Present (compositor): avg " + (w.framesPresented > 0 ? Math.round(10.0 * w.presentTimeMs / w.framesPresented) / 10.0 : -1)
+                        + " ms, max " + w.maxPresentTimeMs + " ms over " + w.framesPresented + " frames; decode avg "
+                        + (w.totalFramesReceived > 0 ? Math.round(10.0 * w.decoderTimeMs / w.totalFramesReceived) / 10.0 : -1) + " ms"
+                        + "; frame-rendered callbacks this second " + presentCallbacksLastSecond
+                        + ", unmatched " + presentNoMatch + ", out of range " + presentOutOfRange);
+                presentNoMatch = 0; presentOutOfRange = 0;
+            }
             if (prefs.enablePerfOverlay || prefs.enablePerfLogging) {
                 VideoStats lastTwo = new VideoStats();
                 lastTwo.add(lastWindowVideoStats);
@@ -1579,6 +1651,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         sb.append('\n').append(context.getString(R.string.perf_overlay_present,
                                 (float)lastTwo.presentTimeMs / lastTwo.framesPresented, lastTwo.maxPresentTimeMs));
                     }
+                    if (com.limelight.binding.audio.AAudioRenderer.isActive()) {
+                        sb.append('\n').append(com.limelight.binding.audio.AAudioRenderer.perfLine(context));
+                    }
                 }
                 String fullLog = sb.toString();
                 if(prefs.enablePerfOverlay) {
@@ -1592,6 +1667,18 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 }
             }
             globalVideoStats.add(activeWindowVideoStats);
+            // The MediaTek HWC stops attaching present fences to the video layer once it moves it to its
+            // fast path (Codec2 logs "no present fence for frame N" and fires no more callbacks), so
+            // in-app present figures only ever cover the first seconds. Say so once instead of leaving
+            // the toast to imply the whole session was measured.
+            presentCallbacksLastSecond = presentCallbacks;
+            presentCallbacks = 0;
+            if (!presentStopLogged && frameRenderedThread != null && globalVideoStats.framesPresented > 0
+                    && presentCallbacksLastSecond == 0 && activeWindowVideoStats.totalFramesReceived > 20) {
+                presentStopLogged = true;
+                LimeLog.info("Present tracking: the compositor stopped reporting present times after "
+                        + globalVideoStats.framesPresented + " frames (video fast path); later frames are not measured, use dumpsys SurfaceFlinger --latency");
+            }
             lastWindowVideoStats.copy(activeWindowVideoStats);
             activeWindowVideoStats.clear();
             activeWindowVideoStats.measurementStartTimestamp = SystemClock.uptimeMillis();
@@ -1799,12 +1886,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }
         }
 
-        // The frame timestamps use an undefined epoch, so normalize them to uptime microseconds.
-        if (baseTimestampUs == 0) {
-            baseTimestampUs = (SystemClock.uptimeMillis() * 1000) - enqueueTimeUs;
-        }
-
-        long timestampUs = baseTimestampUs + enqueueTimeUs;
+        // Keep the PTS in moonlight-common-c's own clock domain (CLOCK_MONOTONIC_RAW); every latency
+        // computation against it below uses MoonBridge.getMicroseconds(). Mixing it with uptimeMillis()
+        // drifts by NTP slewing and produced bogus decode times.
+        long timestampUs = enqueueTimeUs;
         if (timestampUs <= lastTimestampUs) {
             // We can't submit multiple buffers with the same timestamp
             // so bump it up by one before queuing
@@ -1906,6 +1991,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             return 0;
         }
         return (int)(globalVideoStats.totalTimeMs / globalVideoStats.totalFramesReceived);
+    }
+
+    public boolean presentTrackingStoppedEarly() {
+        return presentStopLogged;
     }
 
     public int getPresentedFrames() {

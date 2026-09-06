@@ -349,6 +349,17 @@ public class StreamSettings extends AppCompatActivity {
             applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
+
+            // AAudio cannot host the system equalizer session: grey it out while audio FX are on
+            final CheckBoxPreference aaudioPref = findPreference("checkbox_aaudio_renderer");
+            final CheckBoxPreference audioFxPref = findPreference("checkbox_enable_audiofx");
+            if (aaudioPref != null && audioFxPref != null) {
+                aaudioPref.setEnabled(!audioFxPref.isChecked());
+                audioFxPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    aaudioPref.setEnabled(!Boolean.TRUE.equals(newValue));
+                    return true;
+                });
+            }
             applyDeviceDefault("checkbox_usb_bind_all", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
             applyDeviceDefault("checkbox_tv_rumble_experimental", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
 

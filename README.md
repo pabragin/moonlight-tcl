@@ -102,11 +102,39 @@ For experiments the keep-alive layer can be forced from adb without a rebuild: `
    **post-stream toast** (`Settings → UI → Show post-stream latency toast`, tcl8): nothing is drawn over the video during the
    stream and the toast at the end reports the compositor average/maximum, the frame count and whether the TV workaround was
    on. Run one session with the workaround on and one with it off to see what the 2x2 px keep-alive layer costs, without
-   `dumpsys SurfaceFlinger`. Nothing is tracked when overlay, test and toast are all off.
+   `dumpsys SurfaceFlinger`. Nothing is tracked when overlay, test and toast are all off. Caveat found in tcl9: on the C8K the
+   compositor attaches present times to the video layer only until it moves it to the MediaTek video fast path, a few seconds
+   into the stream (Codec2 then logs `no present fence for frame N` and stops the callbacks), so these figures describe the
+   first seconds of a session, not its steady state; the toast says so. Steady-state numbers still need
+   `adb shell dumpsys SurfaceFlinger --latency 'SurfaceView[com.limelight.tcl/com.limelight.Game](BLAST)#N'`, or
+   `adb shell settings put global moonlight_tcl_present_log 1` to get the same in-app figures in logcat every 5 s.
 12. **Settings screen no longer crashes on restore (20.2.8-tcl2).** Artemis' settings fragment had only a constructor with an
    argument, so whenever Android re-created the Settings activity from saved state (process killed in the background, a
    configuration change) the app crashed with `Fragment$InstantiationException`. The TV's crash log showed this on Artemis
    20.2.6 and on every TCL build; a no-arg constructor that re-reads the preferences fixes it.
+13. **Audio, CPU hints and decoder keys checked on the TV (20.2.8-tcl9).**
+   - **AAudio output** (`Settings → Audio → AAudio low-latency output`, on by default). Decoded PCM goes straight from
+     `moonlight-common-c`'s audio thread into a lock-free ring that an AAudio low-latency stream drains in its callback, so no
+     JNI call and no blocking `AudioTrack.write()` sit between the decoder and the audio HAL. The system equalizer needs an
+     `AudioTrack` session, so with audio effects on the classic renderer is used; any AAudio failure also falls back to it
+     (`adb shell setprop debug.moonlight.aaudio 0` forces that). Measured on a C8K over HDMI: 2 to 4 underruns at stream
+     start, none later, no dropped packets; `AAudio stats` in logcat every 10 s. The Artemis bug that handed the *audio
+     effects* renderer flag the value of "play audio on PC" is fixed on the way.
+   - **ADPF performance hints** (`Settings → Advanced Settings → Performance hints (ADPF)`, on by default). A
+     `PerformanceHintManager` session covers the video renderer thread and the thread that feeds the decoder, with a one-frame
+     target and the real per-frame duration reported. The C8K's power HAL accepts sessions (`dumpsys performance_hint`), but
+     its CPUs already run at their maximum during a stream, so expect less jitter rather than a lower average. Inert where
+     the HAL declines.
+   - **MediaTek Codec2 vendor keys** `vendor.mtk-codec2.game-mode` and `low-latency-mode` (upstream issue #1406). The C8K's
+     `c2.mtk.hevc.decoder` lists and echoes them, and the "Low-latency mode" overlay line now shows every `vendor.*` key, but
+     `dumpsys SurfaceFlinger --latency` showed them costing a full extra frame on screen (present minus desired 17 ms instead of
+     about 0), so they are **off** by default; `adb shell settings put global moonlight_tcl_mtk_vendor on` re-enables them.
+   - **Decode-time statistics were wrong since tcl5** and are fixed: the overlay, toast and latency test compared frame
+     timestamps from `moonlight-common-c` (`CLOCK_MONOTONIC_RAW`) with `SystemClock.uptimeMillis()`, and the two clocks drift
+     apart, which showed decode times near 0 ms. The statistics now use the library's own clock (`MoonBridge.getMicroseconds()`).
+   - adb knobs, no rebuild needed: `moonlight_tcl_pts zero|now` (render timestamp given to the compositor; `now` stays the
+     default, with `0` SurfaceFlinger's frame-rate heuristics see identical timestamps), `moonlight_tcl_audio_max_ms` (queued
+     audio above which packets are dropped, default 40), `moonlight_tcl_present_log 1`, `moonlight_tcl_mtk_vendor on|off`.
 
 ## Download and install
 
@@ -125,7 +153,7 @@ reboot, the output of `adb shell dumpsys dropbox --print system_server_native_cr
 
 ## Building
 
-- Install a JDK 17 and the Android SDK with NDK `27.0.12077973` (see `app/build.gradle`).
+- Install a JDK 17 and the Android SDK with NDK `27.3.13750724` (see `app/build.gradle`).
 - Run `git submodule update --init --recursive` (the `moonlight-common-c` submodule comes from
   [pabragin/moonlight-common-c](https://github.com/pabragin/moonlight-common-c), branch `tcl`).
 - Point Gradle at the SDK with `ANDROID_HOME` or a `local.properties` file containing `sdk.dir=`.
@@ -153,3 +181,8 @@ Android 14 на телевизорах TCL (C8K и похожие): зависа
 Приложение называется Moonlight TCL и имеет свой идентификатор пакета `com.limelight.tcl`, поэтому ставится рядом с обычным Artemis
 и не затирается его обновлениями. APK на странице [Releases](https://github.com/pabragin/moonlight-tcl/releases); после установки
 спарьтесь с ПК заново.
+
+В 20.2.8-tcl9: звук идёт через нативный AAudio с малой задержкой (при сбое или включённом эквалайзере автоматически
+используется прежний AudioTrack), добавлены подсказки производительности ADPF для потоков видео, исправлена статистика времени
+декодирования (с tcl5 она показывала около нуля из-за разных часов). Ключи MediaTek `game-mode`/`low-latency-mode` декодер
+принимает, но по замерам они добавляют целый кадр задержки на экране, поэтому выключены и доступны только через adb.

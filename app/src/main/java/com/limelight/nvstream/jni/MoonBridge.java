@@ -403,6 +403,10 @@ public class MoonBridge {
 
     public static native int getPendingAudioDuration();
 
+    // moonlight-common-c's clock (CLOCK_MONOTONIC_RAW on Android): the frame timestamps it hands us live in
+    // this domain, so latency math against them must use it too, not SystemClock.uptimeMillis().
+    public static native long getMicroseconds();
+
     public static native int getPendingVideoFrames();
 
     public static native int testClientConnectivity(String testServerHostName, int referencePort, int testFlags);

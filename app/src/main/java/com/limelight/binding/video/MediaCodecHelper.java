@@ -43,6 +43,11 @@ public class MediaCodecHelper {
     private static final List<String> tegraDecoderPrefixes;
 
     private static final List<String> mtkDecoderPrefixes; //ALONSOJR1980
+
+    // MediaTek Codec2 vendor keys from moonlight-android#1406. The C8K decoder accepts them (they are in its
+    // vendor parameter list) but they cost a full frame of display latency (present-desired median 17 ms vs ~0),
+    // so they are OFF by default. adb: settings put global moonlight_tcl_mtk_vendor on
+    public static volatile boolean mtkVendorKeysEnabled = false;
     private static final List<String> kirinDecoderPrefixes;
     private static final List<String> exynosDecoderPrefixes;
     private static final List<String> amlogicDecoderPrefixes;
@@ -508,6 +513,27 @@ public class MediaCodecHelper {
 
     // Human readable summary of the low-latency options the decoder actually kept in its input format,
     // shown in the performance overlay so users can check what their decoder accepted without adb.
+    private static boolean appendVendorKeys(StringBuilder sb, MediaFormat format) {
+        boolean any = false;
+        try {
+            for (String key : format.getKeys()) {
+                if (!key.startsWith("vendor.")) {
+                    continue;
+                }
+                String value;
+                try {
+                    value = String.valueOf(format.getInteger(key));
+                } catch (Exception e) {
+                    value = "set";
+                }
+                sb.append(' ').append(key).append('=').append(value);
+                any = true;
+            }
+        } catch (Exception ignored) {
+        }
+        return any;
+    }
+
     public static String describeLowLatencyOptions(MediaCodecInfo decoderInfo, String mimeType, MediaFormat configuredFormat, MediaFormat inputFormat) {
         StringBuilder sb = new StringBuilder();
         sb.append("feature=").append(decoderInfo != null && mimeType != null &&
@@ -522,6 +548,7 @@ public class MediaCodecHelper {
                     any = true;
                 }
             }
+            any |= appendVendorKeys(sb, configuredFormat);
             if (!any) {
                 sb.append(" none");
             }
@@ -544,6 +571,9 @@ public class MediaCodecHelper {
                 }
             }
         }
+        if (inputFormat != null) {
+            appendVendorKeys(sb, inputFormat);
+        }
         return sb.toString();
     }
 
@@ -561,16 +591,28 @@ public class MediaCodecHelper {
             // try 3 = bare format. (Before this, a single rejected extra key took the official one down with it:
             // c2.mtk.hevc.decoder refuses KEY_OPERATING_RATE=32767 at start(), and the decoder ended up with no
             // low-latency option at all.)
-            if (tryNumber < 3) {
+            int t = tryNumber;
+            if (mtkVendorKeysEnabled && isDecoderInList(mtkDecoderPrefixes, decoderInfo.getName())) {
+                // MediaTek Codec2 vendor keys get their own first attempt and are the first thing dropped;
+                // Codec2 ignores unknown vendor keys silently, so acceptance is judged from the vendor
+                // parameter list logged after configure(), not from a successful start().
+                if (t < 1) {
+                    videoFormat.setInteger("vendor.mtk-codec2.game-mode", 1);
+                    videoFormat.setInteger("vendor.mtk-codec2.low-latency-mode", 1);
+                    setNewOption = true;
+                }
+                t = Math.max(0, t - 1);
+            }
+            if (t < 3) {
                 videoFormat.setInteger("low-latency", 1);
                 setNewOption = true;
             }
-            if (tryNumber < 1) {
+            if (t < 1) {
                 // Legacy MediaTek/Amlogic ACodec key, ignored by Codec2 decoders (see the comment in the
                 // non-ULL ladder below)
                 videoFormat.setInteger("vdec-lowlatency", 1);
             }
-            if (tryNumber < 2) {
+            if (t < 2) {
                 if (MediaCodecHelper.decoderSupportsMaxOperatingRate(decoderInfo.getName())) {
                     videoFormat.setInteger(MediaFormat.KEY_OPERATING_RATE, Short.MAX_VALUE);
                 }

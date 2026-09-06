@@ -9,7 +9,7 @@ import static com.limelight.utils.ServerHelper.getActiveDisplay;
 import static com.limelight.utils.ServerHelper.getSecondaryDisplay;
 
 import com.limelight.binding.PlatformBinding;
-import com.limelight.binding.audio.AndroidAudioRenderer;
+import com.limelight.binding.audio.LowLatencyAudioRenderer;
 import com.limelight.binding.input.ControllerHandler;
 import com.limelight.binding.input.GameInputDevice;
 import com.limelight.binding.input.KeyboardTranslator;
@@ -838,7 +838,17 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 decoderRenderer.setRenderTarget(streamContainer.getSurface());
 
                 // Starten Sie die NvConnection
-                conn.start(new AndroidAudioRenderer(Game.this, prefConfig.playHostAudio),
+                // adb-tunable experiments (see tvDebugSetting): PTS for the lowest-latency release and the
+                // MediaTek vendor keys. Read here, right before the decoder is set up.
+                String ptsMode = tvDebugSetting("moonlight_tcl_pts");
+                decoderRenderer.setImmediatePtsZero(ptsMode != null && ptsMode.trim().equalsIgnoreCase("zero"));
+                decoderRenderer.presentLogEnabled = "1".equals(tvDebugSetting("moonlight_tcl_present_log"));
+                String mtkVendor = tvDebugSetting("moonlight_tcl_mtk_vendor");
+                MediaCodecHelper.mtkVendorKeysEnabled = mtkVendor != null && mtkVendor.trim().equalsIgnoreCase("on");
+
+                // Artemis passed playHostAudio where enableAudioFx belongs (the equalizer checkbox never
+                // worked and "play audio on PC" disabled AudioTrack low-latency mode); fixed here.
+                conn.start(new LowLatencyAudioRenderer(Game.this, prefConfig.enableAudioFx, prefConfig.useAAudio, audioMaxPendingMs()),
                         decoderRenderer, Game.this);
             }
         });
@@ -1525,6 +1535,11 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                         decoderRenderer.getAveragePresentLatency(), decoderRenderer.getMaxPresentLatency(),
                         decoderRenderer.getPresentedFrames(),
                         getResources().getString(prefConfig.tvCompositorWorkaround ? R.string.conn_workaround_on : R.string.conn_workaround_off));
+                if (decoderRenderer.presentTrackingStoppedEarly()) {
+                    // This TV attaches present fences to the video layer only until the HWC moves it to
+                    // its fast path, so the figures above describe the first seconds, not the session
+                    compositor += " " + getResources().getString(R.string.conn_client_latency_compositor_partial);
+                }
                 message = message == null ? compositor : message + "\n" + compositor;
             }
 
@@ -1550,6 +1565,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
             if (message != null) {
                 message += selectedVideoFormat;
+                LimeLog.info("Post-stream summary: " + message.replace('\n', '|'));
             }
 
             if (message != null) {
@@ -3703,6 +3719,11 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     // adb-tunable knobs for the TV compositor experiments, no rebuild needed:
     //   adb shell settings put global moonlight_tcl_keepalive "<px>:<opaque|translucent>"   (forces the layer on)
     //   adb shell settings put global moonlight_tcl_keepalive off | default
+    //   adb shell settings put global moonlight_tcl_pts zero | now
+    //   adb shell settings put global moonlight_tcl_present_log 1 | 0
+    //   adb shell settings put global moonlight_tcl_mtk_vendor on | off   (MediaTek game-mode/low-latency-mode keys, off by default)
+    //   adb shell settings put global moonlight_tcl_audio_max_ms 40 | 80 | 120
+    //   adb shell setprop debug.moonlight.aaudio 0        (force the AudioTrack fallback)
     // Compositor guard (TV workaround without the extra layer). Measured on the C8K: the MediaTek
     // firmware presents a lone video layer within 2-12 ms, any second layer costs 16-33 ms, and the
     // display pipeline hangs when the composition changes while video frames are in flight. So the
@@ -3840,6 +3861,15 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             } catch (Exception ignored) {
             }
             volumeChangeReceiver = null;
+        }
+    }
+
+    private int audioMaxPendingMs() {
+        String v = tvDebugSetting("moonlight_tcl_audio_max_ms");
+        try {
+            return v != null ? Integer.parseInt(v.trim()) : 40;
+        } catch (NumberFormatException e) {
+            return 40;
         }
     }
 
