@@ -569,8 +569,38 @@ public class PreferenceConfiguration {
     // before leaving the activity avoids the freeze.
     // See https://github.com/moonlight-stream/moonlight-android/issues/1533
     public static boolean isTvWithBrokenCompositor(Context context) {
+        // Confirmed on TCL Android 14 firmware 604/622/624 (moonlight-android#1533). On V655 (Android build
+        // AU04) a full day of play with the workaround off showed no hang, so it stays off there by default;
+        // the option remains available.
         return isTvDevice(context)
-                && (isTclDevice() || isMediaTekSoc());
+                && isTclDevice()
+                && !tclFirmwareHasCompositorFix();
+    }
+
+    private static String readSystemProperty(String key) {
+        try {
+            Class<?> sp = Class.forName("android.os.SystemProperties");
+            Object value = sp.getMethod("get", String.class).invoke(null, key);
+            return value != null ? value.toString() : null;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    // TCL firmware: "V8-T653T01-LF1V655" -> 655. Fallback: the Android build code (V560 = AS36, V655 = AU04).
+    static boolean tclFirmwareHasCompositorFix() {
+        String sw = readSystemProperty("persist.software.version_id");
+        if (sw != null) {
+            int i = sw.indexOf("LF1V");
+            if (i >= 0 && sw.length() >= i + 7) {
+                try {
+                    return Integer.parseInt(sw.substring(i + 4, i + 7)) >= 655;
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        String incremental = Build.VERSION.INCREMENTAL;
+        return incremental != null && incremental.length() == 4 && incremental.compareTo("AU04") >= 0;
     }
 
     // The same TCL Android 14 firmware has a data race in system_server's InputReader that is

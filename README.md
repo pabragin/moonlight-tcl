@@ -47,7 +47,10 @@ What is changed compared to Artemis:
    coalesced to at most 20 updates per second and sent only right after the pad's own input event, when the system's input
    thread is idle. That makes the crash rare, not impossible; if the TV still reboots during play, turn it off.
 
-Both workarounds turn themselves on for TCL/MediaTek TVs on Android 14 or newer and stay off on other devices. They can be toggled by hand.
+The rumble block turns itself on for TCL TVs on Android 14 or newer. The compositor workaround turns itself on only on TCL firmware
+older than V655 (604, 622, 624, where the hang is confirmed); on V655 a full day of play with it off showed no hang, and the
+"volume change after an hour freezes the screen and the app dies" symptom turned out to be the rumble crash (a remote key press
+is an input-reader event, exactly the moment the rumble race hits). Both can be toggled by hand.
 For experiments the keep-alive layer can be forced from adb without a rebuild: `adb shell settings put global moonlight_tcl_keepalive "32:opaque"` (or `off` / `default`).
 
 3. **Video pipeline back to the proven one.** Artemis after August 2025 (commit `4de0227f`) gained an experimental renderer: a
