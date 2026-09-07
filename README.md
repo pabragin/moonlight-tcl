@@ -96,9 +96,6 @@ TV, and its Settings screen crashed on open during the test.
 - If latency matters more than sharpness, 2560×1440 decodes in about 7 ms instead of 13 and the TV scales it to the panel. Stay on
   HEVC.
 
-If "Slow connection to PC" appears, the network is losing packets; the client cannot cause that. On the C8K it turned out to be the
-TV's own Ethernet port negotiating 2.5 Gbit over a marginal cable, fixed by reseating it and running at 1 Gbit.
-
 ## Download and install
 
 APKs are on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page, one `armeabi-v7a` APK per release. Install with
