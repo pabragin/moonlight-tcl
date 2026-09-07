@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Frame rate test pattern</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #eee; font-family: system-ui, sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #help { position: fixed; left: 16px; bottom: 12px; font-size: 14px; color: #888; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="help">F: full screen · H: heavy mode (loads the encoder like a game) · Space: pause</div>
+<script>
+// One drawn frame per browser frame. What you see on the streamed TV:
+//  - the big number and the browser fps must read 60 on the PC (if not, the PC itself is the bottleneck);
+//  - the ladder lights one cell per frame: a dropped frame in the stream shows as a skipped cell,
+//    a duplicated frame as a cell lit twice;
+//  - the bar moves a fixed step per frame: smooth at 60, jumps when frames are lost.
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d', { alpha: false });
+let frame = 0, last = performance.now(), fps = 0, fpsCount = 0, fpsStart = last, worst = 0;
+let heavy = false, paused = false;
+const times = new Array(120).fill(16.7);
+function resize() { canvas.width = innerWidth * devicePixelRatio; canvas.height = innerHeight * devicePixelRatio; }
+addEventListener('resize', resize); resize();
+addEventListener('keydown', e => {
+  if (e.key === 'f' || e.key === 'F') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  if (e.key === 'h' || e.key === 'H') heavy = !heavy;
+  if (e.key === ' ') paused = !paused;
+});
+function draw(now) {
+  requestAnimationFrame(draw);
+  if (paused) return;
+  const dt = now - last; last = now; frame++;
+  times[frame % times.length] = dt; if (dt > worst) worst = dt;
+  fpsCount++; if (now - fpsStart >= 1000) { fps = fpsCount * 1000 / (now - fpsStart); fpsCount = 0; fpsStart = now; worst = 0; }
+  const W = canvas.width, H = canvas.height, s = W / 1920;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  if (heavy) {
+    // High-detail moving texture: keeps the encoder near its bitrate cap like a busy game scene
+    const cell = 24 * s, off = (frame * 7) % cell;
+    for (let y = -cell; y < H; y += cell) for (let x = -cell; x < W; x += cell) {
+      const v = ((x / cell + y / cell + frame) * 2654435761) >>> 0;
+      ctx.fillStyle = `hsl(${v % 360} 70% ${30 + (v >> 8) % 40}%)`;
+      ctx.fillRect(x + off, y + off, cell - 2, cell - 2);
+    }
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, W, H);
+  }
+  // Ladder: 60 cells, one lit per frame
+  const cells = 60, cw = W / cells;
+  for (let i = 0; i < cells; i++) {
+    ctx.fillStyle = i === frame % cells ? '#fff' : '#222';
+    ctx.fillRect(i * cw + 2 * s, H * 0.42, cw - 4 * s, H * 0.16);
+  }
+  // Moving bar: fixed step per frame
+  const barW = 60 * s, x = (frame * 12 * s) % (W + barW) - barW;
+  ctx.fillStyle = '#4af'; ctx.fillRect(x, H * 0.66, barW, H * 0.12);
+  // Frame counter and browser fps
+  ctx.fillStyle = '#fff'; ctx.font = `${Math.round(160 * s)}px system-ui, sans-serif`; ctx.textBaseline = 'top';
+  ctx.fillText(String(frame % 1000).padStart(3, '0'), 40 * s, 40 * s);
+  ctx.font = `${Math.round(48 * s)}px system-ui, sans-serif`;
+  ctx.fillText(`${fps.toFixed(1)} fps in the browser · worst frame ${Math.max(...times).toFixed(1)} ms`, 40 * s, 230 * s);
+  // Frame-time strip: each frame one column, height = frame time (16.7 ms = one unit)
+  const bx = W - 40 * s - times.length * 6 * s, by = 300 * s;
+  for (let i = 0; i < times.length; i++) {
+    const t = times[(frame + 1 + i) % times.length];
+    ctx.fillStyle = t > 25 ? '#f44' : '#6c6';
+    ctx.fillRect(bx + i * 6 * s, by - Math.min(t, 60) * 2 * s, 5 * s, Math.min(t, 60) * 2 * s);
+  }
+  ctx.fillStyle = '#666'; ctx.fillRect(bx, by - 16.7 * 2 * s, times.length * 6 * s, 1 * s);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
