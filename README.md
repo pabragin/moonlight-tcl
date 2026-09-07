@@ -77,6 +77,7 @@ differs is what reaches the screen and what it costs:
 | Frames/s on screen while spinning the camera | 40–51 | 60, no dropped frames |
 | Frames/s on screen in a calm scene | 55–59 | 58–60 |
 | Frames/s on screen on a synthetic 60 fps test page (heavy mode) | 54–60, frames lost in two windows out of three | 60, one frame lost in 30 s |
+| Same page at 200 Mbps (decoder-bound for both) | 60 in 5 windows of 22, otherwise 54–59 | 60 in 10 windows of 22, otherwise 56–59 |
 | App CPU load | 48–55 % | 44–49 % |
 | Rumble | through the system input stack, the path that reboots this TV | safe path |
 | Settings screen | crashed on open | works |
