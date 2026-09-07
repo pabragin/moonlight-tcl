@@ -142,7 +142,7 @@ public class PreferenceConfiguration {
 
     private static final String CHECKBOX_ENABLE_COMMIT_TEXT = "checkbox_enable_commit_text";
 
-    // This build targets 4K TVs (TCL C8K and similar): default to 4K60 at 65 Mbps (see getDefaultBitrate)
+    // This build targets 4K TVs (TCL C8K and similar): default to 4K60 at 100 Mbps (see getDefaultBitrate)
     static final String DEFAULT_RESOLUTION = "3840x2160";
     static final String DEFAULT_FPS = "60";
     private static final boolean DEFAULT_ENFORCE_DISPLAY_MODE = false;
@@ -490,11 +490,12 @@ public class PreferenceConfiguration {
             5,
             10,
             20,
-            // 4K60 -> 65 Mbps (upstream uses 40 -> 80 Mbps; tcl1-tcl4 used 50 -> 100 Mbps). Measured on a TCL C8K:
-            // the MediaTek decoder needs 15-16 ms per 4K60 HEVC HDR frame at 100 Mbps (heavy scenes reach 19 ms,
-            // above the 16.7 ms frame interval), 12 ms at 60 Mbps, 11 ms at 40 Mbps. 65 Mbps is the highest
-            // bitrate whose worst-case scene still fits the interval.
-            32.5f,
+            // 4K60 -> 100 Mbps (upstream uses 40 -> 80 Mbps). Measured on a TCL C8K with a clean gigabit link:
+            // the MediaTek decoder needs 12 ms per 4K60 HEVC HDR frame at 60 Mbps, 13 ms at 100 Mbps (58-60 fps
+            // reach the screen in a heavy scene) and 15 ms at 150 Mbps (49-59 fps). 20.2.9-tcl5 briefly defaulted
+            // to 65 Mbps from measurements taken over a faulty Ethernet link that inflated the 100 Mbps figure to
+            // 15-16 ms; with the link fixed 100 Mbps is the better quality/latency trade.
+            50,
             -1
         };
 

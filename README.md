@@ -49,7 +49,7 @@ press is an input-reader event, exactly the moment the race hits), not a composi
    silently forced the *Balanced* frame pacing mode regardless of the setting. On TCL this showed up as a noticeably slower controller
    response. This build restores the previous renderer, honours the frame pacing setting (default: lowest latency) and picks HEVC
    automatically; AV1 remains available via "Force AV1".
-4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 65 Mbps (100 Mbps until 20.2.9-tcl4; see item 15 for why), HEVC and "Prefer lowest latency" frame pacing
+4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 100 Mbps (20.2.9-tcl5 to tcl7 used 65 Mbps; see item 15 for why it went back), HEVC and "Prefer lowest latency" frame pacing
    (Artemis defaults to 1280x720 and 80 Mbps at 4K). Everything is still adjustable in Settings.
 5. **Decoder tuning that can be checked.** The decoder is always configured with every low-latency hint (this was the "Ultra Low
    Latency" checkbox, on by default on MediaTek TVs, until 20.2.9-tcl6 made it the only mode) and the video threads run
@@ -162,9 +162,17 @@ press is an input-reader event, exactly the moment the race hits), not a composi
    AV1 could not be measured: the client offers `c2.mtk.av1.decoder`, but the host answered with HEVC (no AV1 encoder there).
    So the codec hardly matters at 4K (HEVC and H.264 decode in the same 14 to 16 ms, HDR on or off); resolution and bitrate
    do: 1440p HEVC removes about 8 ms per frame (the TV scales it to the panel itself), and 40 to 60 instead of 100 Mbps at 4K
-   removes 3 to 5 ms (the two lower bitrates decode alike). For stable 60 FPS the decoder has to fit the 16.7 ms frame interval
-   in heavy scenes too, which sit about 3.5 ms above the session average; that caps the average at about 12 ms, i.e. about
-   65 Mbps at 4K60 HEVC on this decoder. Since 20.2.9-tcl5 that is the default bitrate for 4K60.
+   removes 3 to 5 ms (the two lower bitrates decode alike). Caveat learned the hard way: the 100 Mbps rows above were measured
+   while the TV's Ethernet link (negotiated at 2.5 Gbit) was silently dropping packets, and late packets count in the decode
+   figure. Re-measured on a clean gigabit link: 60 Mbps 12 ms, 100 Mbps 13 ms with 58 to 60 frames/s reaching the screen in a
+   heavy scene, 150 Mbps 15 ms with only 49 to 59 frames/s. So 20.2.9-tcl5's 65 Mbps default lasted three releases; since
+   20.2.9-tcl8 the 4K60 default is 100 Mbps again, and if the picture stutters the first thing to check is the network, not
+   the bitrate (see the "Slow connection to PC" note below).
+   - **"Slow connection to PC"** means the library lost 30 % of the frames in a 3 s window (or 15 % twice); it is about packets,
+     not the decoder. On the C8K it turned out to be the TV's own Ethernet port negotiating 2.5 Gbit over a marginal cable:
+     `adb shell ping` from the TV to the router lost 8 to 29 %, the Mac reached the PC with 0 % loss. A reseated cable and a
+     gigabit link fixed it. Check `adb shell cat /sys/class/net/eth1/speed` and ping the router from the TV before touching
+     any setting.
 
 ## Download and install
 
