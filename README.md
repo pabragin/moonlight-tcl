@@ -151,13 +151,15 @@ exactly the moment the rumble race hits), not a compositor problem.
    |---|---|---|---|
    | HEVC 3840×2160, HDR | 15–16 ms | 14–15 ms | default |
    | HEVC 3840×2160, SDR | 14 ms | 13 ms | |
+   | HEVC 3840×2160, SDR, 60 Mbps | 11 ms | 10 ms | bitrate is the second lever |
    | H.264 3840×2160 | 14–15 ms | 13–14 ms | one run out of three showed 58 ms and 23 frames/s; not reproduced |
    | HEVC 2560×1440 | 7 ms | 7 ms | half a frame interval less than 4K |
    | HEVC 1920×1080 | 6 ms | 6 ms | |
 
    AV1 could not be measured: the client offers `c2.mtk.av1.decoder`, but the host answered with HEVC (no AV1 encoder there).
-   So the codec hardly matters at 4K (HEVC and H.264 decode in the same 14 to 16 ms, HDR on or off), the resolution does:
-   if latency matters more than sharpness, 1440p HEVC removes about 8 ms per frame and the TV scales it to the panel itself.
+   So the codec hardly matters at 4K (HEVC and H.264 decode in the same 14 to 16 ms, HDR on or off); resolution and bitrate
+   do: 1440p HEVC removes about 8 ms per frame (the TV scales it to the panel itself), and 60 instead of 100 Mbps at 4K
+   removes about 3 ms.
 
 ## Download and install
 
@@ -208,9 +210,9 @@ Android 14 на телевизорах TCL (C8K и похожие): зависа
 В 20.2.9-tcl4: убран обход композитора целиком (на прошивке V655 он больше не нужен), кадр копируется из сети в буфер
 декодера один раз вместо двух, декодер работает в асинхронном режиме без отдельного потока рендера, HDR включён по умолчанию.
 Проверено на C8K: все кадры идут прямым копированием, ожиданий буфера нет, ошибок нет, время декодирования прежнее. Замеры
-декодера MediaTek при 60 к/с и 100 Мбит/с: HEVC 4K с HDR 15–16 мс, без HDR 14 мс, H.264 4K 14–15 мс (один прогон из трёх дал 58 мс и 23 к/с, не повторился), HEVC 1440p 7 мс,
-HEVC 1080p 6 мс; AV1 хост не кодирует. Кодек при 4K почти не влияет, влияет разрешение: если задержка важнее чёткости,
-1440p HEVC экономит около 8 мс на кадре.
+декодера MediaTek при 60 к/с и 100 Мбит/с: HEVC 4K с HDR 15–16 мс, без HDR 14 мс, при 60 Мбит/с 11 мс, H.264 4K 14–15 мс (один прогон из трёх дал 58 мс и 23 к/с, не повторился), HEVC 1440p 7 мс,
+HEVC 1080p 6 мс; AV1 хост не кодирует. Кодек при 4K почти не влияет, влияют разрешение и битрейт: 1440p HEVC экономит около 8 мс на кадре,
+60 Мбит/с вместо 100 при 4K около 3 мс.
 
 В 20.2.8-tcl9: звук идёт через нативный AAudio с малой задержкой (при сбое или включённом эквалайзере автоматически
 используется прежний AudioTrack), добавлены подсказки производительности ADPF для потоков видео, исправлена статистика времени
