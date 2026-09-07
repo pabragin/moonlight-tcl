@@ -52,7 +52,7 @@ exactly the moment the rumble race hits), not a compositor problem.
    silently forced the *Balanced* frame pacing mode regardless of the setting. On TCL this showed up as a noticeably slower controller
    response. This build restores the previous renderer, honours the frame pacing setting (default: lowest latency) and picks HEVC
    automatically; AV1 remains available via "Force AV1".
-4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 100 Mbps, HEVC and "Prefer lowest latency" frame pacing
+4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 65 Mbps (100 Mbps until 20.2.9-tcl4; see item 15 for why), HEVC and "Prefer lowest latency" frame pacing
    (Artemis defaults to 1280x720 and 80 Mbps at 4K). Everything is still adjustable in Settings.
 5. **Decoder tuning that can be checked.** "Ultra Low Latency" is on by default on MediaTek TVs and the video renderer thread runs
    at display priority. Until 20.2.8-tcl5 the MediaTek build also asked for `KEY_OPERATING_RATE = 32767`, which
@@ -161,7 +161,9 @@ exactly the moment the rumble race hits), not a compositor problem.
    AV1 could not be measured: the client offers `c2.mtk.av1.decoder`, but the host answered with HEVC (no AV1 encoder there).
    So the codec hardly matters at 4K (HEVC and H.264 decode in the same 14 to 16 ms, HDR on or off); resolution and bitrate
    do: 1440p HEVC removes about 8 ms per frame (the TV scales it to the panel itself), and 40 to 60 instead of 100 Mbps at 4K
-   removes 3 to 5 ms (the two lower bitrates decode alike).
+   removes 3 to 5 ms (the two lower bitrates decode alike). For stable 60 FPS the decoder has to fit the 16.7 ms frame interval
+   in heavy scenes too, which sit about 3.5 ms above the session average; that caps the average at about 12 ms, i.e. about
+   65 Mbps at 4K60 HEVC on this decoder. Since 20.2.9-tcl5 that is the default bitrate for 4K60.
 
 ## Download and install
 
