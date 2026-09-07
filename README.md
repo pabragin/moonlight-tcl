@@ -68,19 +68,21 @@ smoothness or latency; MediaTek's `game-mode` decoder keys cost a full extra fra
 
 ## Compared with the official Artemis 20.2.6
 
-Same TV, same PC, same game and heavy scene, same settings (4K60 HEVC HDR, 100 Mbps, lowest-latency pacing). Artemis 20.2.6 is the
-release this fork started from, so the decoder and its options are identical and both report the same decode time, 14 ms. What
-differs is what reaches the screen and what it costs:
+Same TV, same PC, same settings (4K60 HEVC HDR, lowest-latency pacing), Artemis 20.2.6 being the release this fork started from, so
+the decoder and its options are identical and both report the same decode time, 14 ms. The controlled comparison uses
+[`tools/framerate-test.html`](tools/framerate-test.html) in heavy mode on the PC, a source that is guaranteed to deliver 60 frames per
+second, and counts the frames that reach the TV screen at the compositor over 2-second windows:
 
-| | Artemis 20.2.6 | Moonlight TCL |
+| Test page, heavy mode | Artemis 20.2.6 | Moonlight TCL |
 |---|---|---|
-| Frames/s on screen while spinning the camera | 40–51 | 60, no dropped frames |
-| Frames/s on screen in a calm scene | 55–59 | 58–60 |
-| Frames/s on screen on a synthetic 60 fps test page (heavy mode) | 54–60, frames lost in two windows out of three | 60, one frame lost in 30 s |
-| Same page at 200 Mbps (decoder-bound for both) | 60 in 5 windows of 22, otherwise 54–59 | 60 in 10 windows of 22, otherwise 56–59 |
-| App CPU load | 48–55 % | 44–49 % |
-| Rumble | through the system input stack, the path that reboots this TV | safe path |
-| Settings screen | crashed on open | works |
+| 100 Mbps: windows with all 60 frames on screen | 8 of 24, otherwise 54–59 | 13 of 14, the one miss a single frame |
+| 200 Mbps (both decoder-bound): windows with all 60 frames | 5 of 22, otherwise 54–59 | 10 of 22, otherwise 56–59 |
+| App CPU load | 35–54 % | 37–51 % |
+
+In a game at 100 Mbps the gap was larger, 40–51 frames per second on screen for Artemis against a steady 60 here while spinning the
+camera in a heavy scene, but the PC's own frame rate was not recorded in those runs, so take that pair as indicative only.
+Two more differences that need no measurement: Artemis sends rumble through the system input stack, the path that reboots this
+TV, and its Settings screen crashed on open during the test.
 
 ## Which bitrate to set (4K60 HDR)
 
@@ -139,10 +141,11 @@ Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
 гонки в прошивке. Зависания телевизора из первых сборок больше не воспроизводятся. Настроек мало, есть встроенный тест задержки и
 сообщение с временем декодирования после стрима.
 
-**Сравнение с официальным Artemis 20.2.6** на том же телевизоре и в той же игре при 4K60 HDR 100 Мбит/с: декодер и время
-декодирования одинаковые, 14 мс, но у Artemis при вращении камеры до экрана доходит 40–51 кадр в секунду, у этой сборки ровно 60,
-при меньшей загрузке процессора; на синтетической странице с ровными 60 кадрами Artemis теряет кадры в двух окнах из трёх,
-эта сборка потеряла один кадр за полминуты. Вибрация у Artemis идёт через системный стек, который перезагружает этот телевизор.
+**Сравнение с официальным Artemis 20.2.6** на том же телевизоре при одинаковых настройках 4K60 HDR: декодер и время
+декодирования одинаковые, 14 мс. На тестовой странице `tools/framerate-test.html`, которая гарантированно выдаёт 60 кадров в
+секунду, при 100 Мбит/с Artemis показывает все 60 кадров лишь в 8 окнах из 24, эта сборка в 13 из 14; при 200 Мбит/с, когда оба
+упираются в декодер, 5 из 22 против 10 из 22. В игре разрыв был больше, 40–51 кадр против ровных 60, но частота хоста там не
+записывалась. Вибрация у Artemis идёт через системный стек, который перезагружает этот телевизор.
 
 **Какой битрейт ставить для 4K60 HDR.** 100 Мбит/с по умолчанию: картинка практически без потерь, 60 кадров держатся почти во
 всех сценах. 60 Мбит/с, если нужна гарантированная плавность в любой сцене ценой чуть более мягкой картинки. 120 Мбит/с, если
