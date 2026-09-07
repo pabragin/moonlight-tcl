@@ -50,9 +50,8 @@
     <string name="conn_metered">Внимание: Происходит измерение Вашего сетевого соединения!</string>
     <string name="conn_client_latency">Средняя задержка декодирования кадра: </string>
     <string name="conn_client_latency_hw">Задержка аппаратного декодирования:</string>
-    <string name="conn_client_latency_compositor">Композитор (отдача → экран): средн. %1$d мс, макс. %2$d мс за %3$d кадров, обход для TV %4$s</string>
+    <string name="conn_client_latency_compositor">Композитор (отдача → экран): средн. %1$d мс, макс. %2$d мс за %3$d кадров</string>
     <string name="conn_client_latency_compositor_partial">(только первые секунды: дальше телевизор не сообщает время показа кадров на быстром пути видео)</string>
-    <string name="conn_workaround_on">включён</string>
     <string name="tv_block_rumble_warning_title">Вибрация перезагружает этот телевизор</string>
     <string name="tv_block_rumble_warning_text">На этой прошивке (TCL, Android 14) вибрация геймпада через системный стек ввода Android попадает в гонку в системном процессе: может работать час, а потом перезагрузить телевизор, иногда дважды подряд. Безопасная вибрация возможна только с Xbox-геймпадом по USB-кабелю при включённом USB-драйвере; для Bluetooth оставьте блокировку и попробуйте экспериментальный пункт ниже.\n\nВсё равно выключить блокировку?</string>
     <string name="tv_block_rumble_warning_disable">Всё равно выключить</string>
@@ -70,7 +69,6 @@
     <string name="tv_rumble_experimental_warning_text">Этот режим подгадывает момент и ограничивает частоту вибрации, чтобы уйти от гонки в прошивке (ошибка Android 14, исправлена в Android 15). Вероятность сбоя системы сильно снижается, но не до нуля: вместо перезагрузки раз в час ждите редкой.\n\nВсё равно включить?</string>
     <string name="tv_rumble_experimental_warning_enable">Включить</string>
     <string name="tv_rumble_experimental_warning_cancel">Отмена</string>
-    <string name="conn_workaround_off">выключен</string>
     <string name="conn_hardware_latency">Средняя задержка аппаратного декодирования:</string>
     <string name="conn_starting">Запуск</string>
     <string name="conn_error_title">Ошибка соединения</string>
@@ -182,7 +180,7 @@
     <string name="toast_reset_osc_success">Экранные элементы управления возвращены к положениям по умолчанию</string>
     <string name="title_disable_frame_drop">Никогда не пропускать кадры</string>
     <string name="summary_disable_frame_drop">Может уменьшить микрозависания на некоторых устройствах, но также увеличить задержку</string>
-    <string name="title_enable_hdr">Включить HDR (Экспериментально)</string>
+    <string name="title_enable_hdr">Включить HDR</string>
     <string name="summary_enable_hdr">Потоковая передача с HDR, когда игра и графический процессор ПК поддерживают эту функцию. Для HDR требуется графический процессор с поддержкой кодирования HEVC Main 10.</string>
     <string name="title_enable_post_stream_toast">Показывать отчёт о задержке после трансляции</string>
     <string name="summary_enable_post_stream_toast">Отобразить сообщение с информацией о задержке после окончания трансляции</string>
@@ -215,10 +213,6 @@
 \nСнизьте битрейт</string>
     <string name="summary_unlock_fps">Трансляция со скоростью 90 или 120 кадров в секунду может уменьшить задержку на устройствах высокого класса, но может вызвать задержки или сбой на устройствах без поддержки этого функционала</string>
     <string name="summary_enable_perf_overlay">Отображение оверлея на экране с информацией о производительности во время трансляции в режиме реального времени</string>
-    <string name="title_tv_compositor_workaround">Обход зависаний композитора Android TV</string>
-    <string name="summary_tv_compositor_workaround">Обходит зависание прошивки TCL на Android 14, которое происходит при смене композиции экрана во время трансляции (шкала громкости, меню игры, выход). Видео остаётся единственным слоем на экране, что сохраняет быстрый путь вывода телевизора, а перед появлением меню, диалогов, сообщений и системной шкалы громкости, а также при выходе, вывод кадров на мгновение приостанавливается. По умолчанию включено только на прошивках TCL старше V655 (604, 622, 624); на V655 зависание не воспроизводится, там выключено.</string>
-    <string name="title_tv_compositor_layer">Держать второй слой над видео (медленнее, максимальная защита)</string>
-    <string name="summary_tv_compositor_layer">Старый вариант обхода: над видео постоянно держится поверхность 2×2 px, чтобы композиция никогда не менялась. Защищает во всех случаях, но снимает телевизор с быстрого пути вывода и добавляет 10–15 мс задержки каждому кадру.</string>
     <string name="title_tv_block_rumble">Блокировать вибрацию геймпада на этом ТВ</string>
     <string name="summary_tv_block_rumble">Блокирует только вибрацию через системный стек ввода Android (Bluetooth и системные геймпады), которая на некоторых прошивках Android TV (TCL на Android 14) роняет систему и перезагружает телевизор посреди игры. Геймпады, подключённые через собственный USB-драйвер Moonlight, продолжают вибрировать. На известных проблемных ТВ включается автоматически.</string>
     <string name="title_latency_test">Режим теста задержки</string>

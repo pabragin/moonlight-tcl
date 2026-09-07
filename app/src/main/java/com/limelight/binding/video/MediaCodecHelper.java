@@ -42,12 +42,7 @@ public class MediaCodecHelper {
     private static final List<String> qualcommDecoderPrefixes;
     private static final List<String> tegraDecoderPrefixes;
 
-    private static final List<String> mtkDecoderPrefixes; //ALONSOJR1980
 
-    // MediaTek Codec2 vendor keys from moonlight-android#1406. The C8K decoder accepts them (they are in its
-    // vendor parameter list) but they cost a full frame of display latency (present-desired median 17 ms vs ~0),
-    // so they are OFF by default. adb: settings put global moonlight_tcl_mtk_vendor on
-    public static volatile boolean mtkVendorKeysEnabled = false;
     private static final List<String> kirinDecoderPrefixes;
     private static final List<String> exynosDecoderPrefixes;
     private static final List<String> amlogicDecoderPrefixes;
@@ -237,13 +232,6 @@ public class MediaCodecHelper {
     }
 
     //ALONSOJR1980
-    static {
-        mtkDecoderPrefixes = new LinkedList<>();
-
-        mtkDecoderPrefixes.add("omx.mtk");
-        mtkDecoderPrefixes.add("c2.mtk");
-    }
-
     static {
         kirinDecoderPrefixes = new LinkedList<>();
 
@@ -591,18 +579,10 @@ public class MediaCodecHelper {
             // try 3 = bare format. (Before this, a single rejected extra key took the official one down with it:
             // c2.mtk.hevc.decoder refuses KEY_OPERATING_RATE=32767 at start(), and the decoder ended up with no
             // low-latency option at all.)
+            // MediaTek's Codec2 vendor keys (game-mode / low-latency-mode, moonlight-android#1406) were tried
+            // here in 20.2.8-tcl9: the C8K decoder accepts them but they cost a full extra frame on screen
+            // (present-desired 17 ms instead of ~0), so they are not requested.
             int t = tryNumber;
-            if (mtkVendorKeysEnabled && isDecoderInList(mtkDecoderPrefixes, decoderInfo.getName())) {
-                // MediaTek Codec2 vendor keys get their own first attempt and are the first thing dropped;
-                // Codec2 ignores unknown vendor keys silently, so acceptance is judged from the vendor
-                // parameter list logged after configure(), not from a successful start().
-                if (t < 1) {
-                    videoFormat.setInteger("vendor.mtk-codec2.game-mode", 1);
-                    videoFormat.setInteger("vendor.mtk-codec2.low-latency-mode", 1);
-                    setNewOption = true;
-                }
-                t = Math.max(0, t - 1);
-            }
             if (t < 3) {
                 videoFormat.setInteger("low-latency", 1);
                 setNewOption = true;

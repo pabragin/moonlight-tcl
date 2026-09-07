@@ -342,10 +342,9 @@ public class StreamSettings extends AppCompatActivity {
             AppCompatActivity activity = (AppCompatActivity) requireActivity();
             PackageManager pm = activity.getPackageManager();
 
-            // The Android TV firmware workarounds default to "on" only on known affected TVs.
+            // The Android TV firmware workaround defaults to "on" only on known affected TVs.
             // Persist the device default the first time the settings are shown so the checkbox
             // matches what PreferenceConfiguration.readPreferences() uses when the key is absent.
-            applyDeviceDefault("checkbox_tv_compositor_workaround", PreferenceConfiguration.isTvWithBrokenCompositor(activity));
             applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
             applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));

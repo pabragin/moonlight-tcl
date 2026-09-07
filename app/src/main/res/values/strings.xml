@@ -105,9 +105,8 @@
     <string name="conn_metered">Warning: Your active network connection is metered!</string>
     <string name="conn_client_latency">Average frame decoding latency:</string>
     <string name="conn_client_latency_hw">hardware decoder latency:</string>
-    <string name="conn_client_latency_compositor">Compositor (release → screen): avg %1$d ms, max %2$d ms over %3$d frames, TV workaround %4$s</string>
+    <string name="conn_client_latency_compositor">Compositor (release → screen): avg %1$d ms, max %2$d ms over %3$d frames</string>
     <string name="conn_client_latency_compositor_partial">(first seconds only: this TV reports no present times once the video layer is on its fast path)</string>
-    <string name="conn_workaround_on">on</string>
     <string name="tv_block_rumble_warning_title">Rumble reboots this TV</string>
     <string name="tv_block_rumble_warning_text">On this TV firmware (TCL, Android 14) gamepad rumble sent through the Android input stack hits a race in the system process: it can work for an hour and then reboot the TV, sometimes twice in a row. The only safe rumble is an Xbox controller on a USB cable with the USB driver enabled; for Bluetooth keep the block on and try the experimental option below instead.\n\nTurn the block off anyway?</string>
     <string name="tv_block_rumble_warning_disable">Turn off anyway</string>
@@ -125,7 +124,6 @@
     <string name="tv_rumble_experimental_warning_text">This mode times and rate-limits rumble to dodge the race in the TV firmware (an Android 14 bug, fixed in Android 15). It shrinks the chance of the system crash a lot but cannot remove it: expect an occasional reboot instead of one per hour.\n\nEnable anyway?</string>
     <string name="tv_rumble_experimental_warning_enable">Enable</string>
     <string name="tv_rumble_experimental_warning_cancel">Cancel</string>
-    <string name="conn_workaround_off">off</string>
     <string name="conn_hardware_latency">Average hardware decoding latency:</string>
     <string name="conn_starting">Starting</string>
     <string name="conn_error_title">Connection Error</string>
@@ -327,7 +325,7 @@
     <string name="summary_disable_frame_drop">May reduce micro-stuttering on some devices, but can increase latency</string>
     <string name="title_video_format">Change codec settings</string>
     <string name="summary_video_format">Newer codecs can lower video bandwidth requirements if your device supports them. Codec selections may be ignored if not supported by the host software or GPU.</string>
-    <string name="title_enable_hdr">Enable HDR (Experimental)</string>
+    <string name="title_enable_hdr">Enable HDR</string>
     <string name="summary_enable_hdr">Stream HDR when the game and PC GPU support it. HDR requires a GPU with HEVC Main 10 encoding support.</string>
     <string name="title_full_range">Force full range video (Experimental)</string>
     <string name="summary_full_range">This will cause loss of detail in light and dark areas if your device doesn\'t properly display full range video content.</string>
@@ -335,10 +333,6 @@
     <string name="summary_prevent_packet_loss">For devices that have packet loss for unknown reasons, you can try to enable this option.</string>
     <string name="title_enable_perf_overlay">Show performance stats while streaming</string>
     <string name="summary_enable_perf_overlay">Display real-time stream performance information while streaming</string>
-    <string name="title_tv_compositor_workaround">Android TV compositor workaround</string>
-    <string name="summary_tv_compositor_workaround">Works around the TCL Android 14 firmware hang that happens when the picture composition changes while the stream is running (volume bar, game menu, leaving the stream). The video stays the only layer on screen, which keeps the TV\'s fast video path, and frame output is paused for a moment before the menu, dialogs, messages and the system volume bar appear, and on exit. On by default only on TCL firmware older than V655 (604, 622, 624); on V655 the hang could not be reproduced, so it is off there.</string>
-    <string name="title_tv_compositor_layer">Keep a second layer above the video (slower, maximum protection)</string>
-    <string name="summary_tv_compositor_layer">The old workaround: a 2×2 px surface is kept above the video all the time so the composition never changes. Prevents the hang in every case but takes the TV off its fast video path and adds 10 to 15 ms of display latency to every frame.</string>
     <string name="title_tv_block_rumble">Block gamepad rumble on this TV</string>
     <string name="summary_tv_block_rumble">Blocks only rumble sent through the Android input stack (Bluetooth and system-managed gamepads), which crashes the system on some Android TV firmwares (TCL on Android 14) and restarts the TV mid-game. Gamepads driven by Moonlight\'s own USB driver keep rumbling. Enabled automatically on known affected TVs.</string>
     <string name="title_latency_test">Latency test mode</string>

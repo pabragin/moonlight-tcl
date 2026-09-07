@@ -157,7 +157,7 @@
             android:title="@string/title_checkbox_enforce_display_mode"
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="checkbox_enable_hdr"
             android:summary="@string/summary_enable_hdr"
             android:title="@string/title_enable_hdr"
@@ -732,19 +732,6 @@
             android:key="checkbox_prevent_packet_loss"
             android:summary="@string/summary_prevent_packet_loss"
             android:title="@string/title_prevent_packet_loss"
-            app:iconSpaceReserved="false" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="checkbox_tv_compositor_workaround"
-            android:summary="@string/summary_tv_compositor_workaround"
-            android:title="@string/title_tv_compositor_workaround"
-            app:iconSpaceReserved="false" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:dependency="checkbox_tv_compositor_workaround"
-            android:key="checkbox_tv_compositor_layer"
-            android:summary="@string/summary_tv_compositor_layer"
-            android:title="@string/title_tv_compositor_layer"
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="true"

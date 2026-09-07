@@ -13,6 +13,17 @@ public abstract class VideoDecoderRenderer {
                                          int frameNumber, int frameType, char frameHostProcessingLatency,
                                          long receiveTimeUs, long enqueueTimeUs);
     
+    // Direct-copy submit path (optional): both run on the submit thread. Between them native writes
+    // picDataLength bytes at the position prepare returned (see MoonBridge.bridgeDrPrepareDecodeUnit).
+    public long prepareDecodeUnit(int picDataLength, int frameNumber, int frameType, char frameHostProcessingLatency,
+                                  long receiveTimeUs, long enqueueTimeUs) {
+        return com.limelight.nvstream.jni.MoonBridge.DR_PREPARE_FALLBACK;
+    }
+
+    public int commitDecodeUnit(byte[] fallbackData, int length) {
+        return com.limelight.nvstream.jni.MoonBridge.DR_NEED_IDR;
+    }
+
     public abstract void cleanup();
 
     public abstract int getCapabilities();

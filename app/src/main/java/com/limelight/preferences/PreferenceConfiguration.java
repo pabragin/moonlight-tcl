@@ -102,8 +102,6 @@ public class PreferenceConfiguration {
     private static final String FULL_SCREEN_PREF_STRING = "checkbox_full_screen";
 
     private static final String ENABLE_RUMBLE_PREF_STRING = "checkbox_enable_rumble";
-    private static final String TV_COMPOSITOR_WORKAROUND_PREF_STRING = "checkbox_tv_compositor_workaround";
-    private static final String TV_COMPOSITOR_LAYER_PREF_STRING = "checkbox_tv_compositor_layer";
     private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
     private static final String TV_RUMBLE_EXPERIMENTAL_PREF_STRING = "checkbox_tv_rumble_experimental";
     private static final String LATENCY_TEST_PREF_STRING = "checkbox_latency_test";
@@ -173,7 +171,7 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_HIDE_OSC_WHEN_HAS_GAMEPAD = true;
     private static final boolean ONLY_L3_R3_DEFAULT = false;
     private static final boolean SHOW_GUIDE_BUTTON_DEFAULT = true;
-    private static final boolean DEFAULT_ENABLE_HDR = false;
+    private static final boolean DEFAULT_ENABLE_HDR = true;
     private static final boolean DEFAULT_ENABLE_PIP = false;
     private static final boolean DEFAULT_ENABLE_PERF_OVERLAY = false;
     private static final boolean DEFAULT_PERF_OVERLAY_BOTTOM = false;
@@ -365,9 +363,7 @@ public class PreferenceConfiguration {
     public boolean enableRumble;
     public boolean preventPacketLoss;
 
-    // Android TV firmware workarounds (see isTvWithBrokenCompositor()/isTvWithBrokenInputRumble())
-    public boolean tvCompositorWorkaround;
-    public boolean tvCompositorKeepAliveLayer;
+    // Android TV firmware workaround (see isTvWithBrokenInputRumble())
     public boolean tvBlockRumble;
     public boolean tvRumbleExperimental;
     public boolean latencyTest;
@@ -566,47 +562,6 @@ public class PreferenceConfiguration {
         String hw = (Build.HARDWARE + " " + Build.BOARD).toLowerCase(Locale.ROOT);
         hw += " " + Build.SOC_MANUFACTURER.toLowerCase(Locale.ROOT);
         return hw.contains("mediatek") || hw.contains("mtk") || Build.HARDWARE.toLowerCase(Locale.ROOT).startsWith("mt");
-    }
-
-    // TCL Google TVs on Android 14 firmware (C6K/C8K/QM6K/QM8K, ...) hard-freeze when SurfaceFlinger
-    // has to reconfigure the display pipeline while the stream's video SurfaceView is the only
-    // visible layer on screen (volume OSD, app switch, stream exit). The same TVs are fine on their
-    // Android 12 firmware. Keeping a tiny UI layer above the video and removing the video layer
-    // before leaving the activity avoids the freeze.
-    // See https://github.com/moonlight-stream/moonlight-android/issues/1533
-    public static boolean isTvWithBrokenCompositor(Context context) {
-        // Confirmed on TCL Android 14 firmware 604/622/624 (moonlight-android#1533). On V655 (Android build
-        // AU04) a full day of play with the workaround off showed no hang, so it stays off there by default;
-        // the option remains available.
-        return isTvDevice(context)
-                && isTclDevice()
-                && !tclFirmwareHasCompositorFix();
-    }
-
-    private static String readSystemProperty(String key) {
-        try {
-            Class<?> sp = Class.forName("android.os.SystemProperties");
-            Object value = sp.getMethod("get", String.class).invoke(null, key);
-            return value != null ? value.toString() : null;
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
-    // TCL firmware: "V8-T653T01-LF1V655" -> 655. Fallback: the Android build code (V560 = AS36, V655 = AU04).
-    static boolean tclFirmwareHasCompositorFix() {
-        String sw = readSystemProperty("persist.software.version_id");
-        if (sw != null) {
-            int i = sw.indexOf("LF1V");
-            if (i >= 0 && sw.length() >= i + 7) {
-                try {
-                    return Integer.parseInt(sw.substring(i + 4, i + 7)) >= 655;
-                } catch (NumberFormatException ignored) {
-                }
-            }
-        }
-        String incremental = Build.VERSION.INCREMENTAL;
-        return incremental != null && incremental.length() == 4 && incremental.compareTo("AU04") >= 0;
     }
 
     // The same TCL Android 14 firmware has a data race in system_server's InputReader that is
@@ -1058,8 +1013,6 @@ private static int getFramePacingValue(Context context) {
         config.preventPacketLoss = prefs.getBoolean(PREVENT_PACKET_LOSS_PREF_STRING, DEFAULT_PREVENT_PACKET_LOSS);
 
         // Default to "on" only on TVs known to need the workarounds; the user can override either way
-        config.tvCompositorWorkaround = prefs.getBoolean(TV_COMPOSITOR_WORKAROUND_PREF_STRING, isTvWithBrokenCompositor(context));
-        config.tvCompositorKeepAliveLayer = prefs.getBoolean(TV_COMPOSITOR_LAYER_PREF_STRING, false);
         config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
         // On the affected TVs the deferred/coalesced rumble is the only way to get Bluetooth rumble at all;
         // it is on by default there (the user can turn it off), off everywhere else.

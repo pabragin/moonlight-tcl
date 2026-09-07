@@ -7,7 +7,6 @@
 #include <stdatomic.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/system_properties.h>
 #include <time.h>
 #include <sys/resource.h>
 #include <unistd.h>
@@ -133,11 +132,6 @@ static int openStreamLocked(void) {
 }
 
 int AAudioRenderer_Setup(int channelCount, int rate, int spf, int maxPending) {
-    char prop[PROP_VALUE_MAX] = {0};
-    if (__system_property_get("debug.moonlight.aaudio", prop) > 0 && strcmp(prop, "0") == 0) {
-        LOGI("AAudio disabled by debug.moonlight.aaudio=0");
-        return -100;
-    }
     pthread_mutex_lock(&lifecycleLock);
     channels = channelCount;
     sampleRate = rate;

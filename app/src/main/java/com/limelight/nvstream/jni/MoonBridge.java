@@ -230,6 +230,32 @@ public class MoonBridge {
         }
     }
 
+    public static final long DR_PREPARE_NEED_IDR = -1;
+    public static final long DR_PREPARE_SKIP = -2;
+    public static final long DR_PREPARE_FALLBACK = -3;
+
+    // Direct-copy submit path (callbacks.c): prepare returns (generation << 32 | position) or one of the
+    // DR_PREPARE_* values; native then writes the picture data into the input buffer and calls commit
+    public static long bridgeDrPrepareDecodeUnit(int picDataLength, int frameNumber, int frameType,
+                                                 char frameHostProcessingLatency, long receiveTimeUs, long enqueueTimeUs) {
+        if (videoRenderer != null) {
+            return videoRenderer.prepareDecodeUnit(picDataLength, frameNumber, frameType,
+                    frameHostProcessingLatency, receiveTimeUs, enqueueTimeUs);
+        }
+        else {
+            return DR_PREPARE_SKIP;
+        }
+    }
+
+    public static int bridgeDrCommitDecodeUnit(byte[] fallbackData, int length) {
+        if (videoRenderer != null) {
+            return videoRenderer.commitDecodeUnit(fallbackData, length);
+        }
+        else {
+            return DR_OK;
+        }
+    }
+
     public static int bridgeArInit(int audioConfiguration, int sampleRate, int samplesPerFrame) {
         if (audioRenderer != null) {
             return audioRenderer.setup(new AudioConfiguration(audioConfiguration), sampleRate, samplesPerFrame);
@@ -406,6 +432,11 @@ public class MoonBridge {
     // moonlight-common-c's clock (CLOCK_MONOTONIC_RAW on Android): the frame timestamps it hands us live in
     // this domain, so latency math against them must use it too, not SystemClock.uptimeMillis().
     public static native long getMicroseconds();
+
+    // Direct-copy submit path: the MediaCodec input buffer Java holds for the next frame (null = none) and
+    // the generation echoed back by prepareDecodeUnit(). Returns false when the buffer is not direct.
+    public static native boolean setVideoInputBuffer(java.nio.ByteBuffer buffer, int generation);
+    public static native void setVideoDirectCopyEnabled(boolean enabled);
 
     public static native int getPendingVideoFrames();
 

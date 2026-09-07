@@ -31,7 +31,7 @@ public class AndroidAudioRenderer implements AudioRenderer {
     }
 
     // maxPendingMs: how much decoded audio may queue up behind a blocking write before packets are
-    // dropped (upstream: 40 ms). adb: settings put global moonlight_tcl_audio_max_ms 80
+    // dropped (upstream: 40 ms)
     public AndroidAudioRenderer(Context context, boolean enableAudioFx, int maxPendingMs) {
         this.context = context;
         this.enableAudioFx = enableAudioFx;

@@ -102,16 +102,6 @@
 
     </LinearLayout>
 
-    <!-- Android TV compositor workaround: a separate 2x2 px surface above the video, so the video
-         SurfaceView is never the only layer the compositor sees, while the window's own (full-screen)
-         UI layer stays fully transparent and culled. See Game.startCompositorKeepAlive(). -->
-    <SurfaceView
-        android:id="@+id/compositorKeepAlive"
-        android:layout_width="2px"
-        android:layout_height="2px"
-        android:layout_gravity="bottom|end"
-        android:visibility="gone" />
-
     <!-- Floating Menu Button -->
     <ImageButton
         android:id="@+id/floatingMenuButton"

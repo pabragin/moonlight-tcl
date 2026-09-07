@@ -7,7 +7,7 @@
 // AudioDec thread goes into a lock-free ring that the AAudio data callback drains, so no JNI and no
 // AudioTrack.write() blocking sit between the decoder and the HAL.
 
-// Returns 0 on success, a negative AAudio result or -100 when disabled by debug.moonlight.aaudio=0.
+// Returns 0 on success or a negative AAudio result.
 int AAudioRenderer_Setup(int channelCount, int sampleRate, int samplesPerFrame, int maxPendingMs);
 int AAudioRenderer_Start(void);
 void AAudioRenderer_Stop(void);

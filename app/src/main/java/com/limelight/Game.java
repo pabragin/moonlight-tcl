@@ -185,33 +185,9 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private boolean connecting = false;
     public boolean connected = false;
     private boolean surfaceCreated = false;
+    // Queued audio above which packets are dropped (upstream: 40 ms)
+    private static final int AUDIO_MAX_PENDING_MS = 40;
 
-    // Android TV compositor workaround (prefConfig.tvCompositorWorkaround). Some TV firmwares
-    // (TCL on Android 14) freeze the whole TV when SurfaceFlinger reconfigures composition while
-    // the stream's video SurfaceView is the only visible layer and is still receiving frames.
-    // We keep a tiny UI view above the video and redraw it periodically, and on exit we stop the
-    // decoder and remove the video layer before the activity transition starts.
-    private static final int COMPOSITOR_KEEP_ALIVE_INTERVAL_MS = 1000;
-    private static final int GRACEFUL_EXIT_DELAY_MS = 200;
-    private final Handler workaroundHandler = new Handler(Looper.getMainLooper());
-    private SurfaceView compositorKeepAliveView;
-    private boolean compositorKeepAliveToggle;
-    private boolean compositorKeepAliveOpaque;
-    private boolean compositorKeepAliveSurfaceReady;
-    private boolean streamTeardownStarted;
-    private final Runnable compositorKeepAliveRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (compositorKeepAliveView == null || streamTeardownStarted) {
-                return;
-            }
-            // Repaint the 2x2 px surface now and then so it always has a fresh buffer; the colour
-            // alternates between two practically transparent values
-            compositorKeepAliveToggle = !compositorKeepAliveToggle;
-            paintCompositorKeepAlive();
-            workaroundHandler.postDelayed(this, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
-        }
-    };
     private boolean attemptedConnection = false;
     private int suppressPipRefCount = 0;
     private String pcName;
@@ -653,8 +629,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             }
         }
 
-        startCompositorKeepAlive();
-
         decoderRenderer = new MediaCodecDecoderRenderer(
                 this,
                 prefConfig,
@@ -836,21 +810,13 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
                 // Der Decoder erhält die jeweils aktive Oberfläche vom Container
                 decoderRenderer.setRenderTarget(streamContainer.getSurface());
+                decoderRenderer.setImmediatePtsZero(prefConfig.ptsZero);
 
                 // Starten Sie die NvConnection
-                // adb-tunable experiments (see tvDebugSetting): PTS for the lowest-latency release and the
-                // MediaTek vendor keys. Read here, right before the decoder is set up.
-                // Settings checkbox, overridden by the adb knob when it is set to zero or now
-                String ptsMode = tvDebugSetting("moonlight_tcl_pts");
-                decoderRenderer.setImmediatePtsZero(ptsMode != null && !ptsMode.trim().isEmpty()
-                        ? ptsMode.trim().equalsIgnoreCase("zero") : prefConfig.ptsZero);
-                decoderRenderer.presentLogEnabled = "1".equals(tvDebugSetting("moonlight_tcl_present_log"));
-                String mtkVendor = tvDebugSetting("moonlight_tcl_mtk_vendor");
-                MediaCodecHelper.mtkVendorKeysEnabled = mtkVendor != null && mtkVendor.trim().equalsIgnoreCase("on");
 
                 // Artemis passed playHostAudio where enableAudioFx belongs (the equalizer checkbox never
                 // worked and "play audio on PC" disabled AudioTrack low-latency mode); fixed here.
-                conn.start(new LowLatencyAudioRenderer(Game.this, prefConfig.enableAudioFx, prefConfig.useAAudio, audioMaxPendingMs()),
+                conn.start(new LowLatencyAudioRenderer(Game.this, prefConfig.enableAudioFx, prefConfig.useAAudio, AUDIO_MAX_PENDING_MS),
                         decoderRenderer, Game.this);
             }
         });
@@ -1170,18 +1136,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         setPictureInPictureParams(getPictureInPictureParams(autoEnter));
     }
 
-    @Override
-    public void onUserLeaveHint() {
-        super.onUserLeaveHint();
-
-        // Home/Recents: unless we may enter PiP (or a system prompt such as the USB permission
-        // dialog is on top of us), the stream is torn down in onStop() anyway, so on affected TVs
-        // drop the video layer before the launcher covers it.
-        boolean mayEnterPip = prefConfig.enablePip && connected && !isOnExternalDisplay();
-        if (!mayEnterPip && suppressPipRefCount == 0) {
-            beginStreamTeardownForWorkaround();
-        }
-    }
 
     @Override
     public boolean onPictureInPictureRequested() {
@@ -1446,7 +1400,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         instance = null;
         timerHandler.removeCallbacksAndMessages(null);
-        workaroundHandler.removeCallbacksAndMessages(null);
         com.limelight.utils.LatencyTester.stop();
 
         if (prefConfig.enableFullExDisplay) handleDisplayRemoved();
@@ -1489,9 +1442,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     @Override
     protected void onPause() {
         if (isFinishing()) {
-            // Fallback for exit paths that didn't go through finishGracefully()
-            beginStreamTeardownForWorkaround();
-
             // Stop any further input device notifications before we lose focus (and pointer capture)
             if (controllerHandler != null) {
                 controllerHandler.stop();
@@ -1535,8 +1485,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             if (decoderRenderer.getPresentedFrames() > 0) {
                 String compositor = getResources().getString(R.string.conn_client_latency_compositor,
                         decoderRenderer.getAveragePresentLatency(), decoderRenderer.getMaxPresentLatency(),
-                        decoderRenderer.getPresentedFrames(),
-                        getResources().getString(prefConfig.tvCompositorWorkaround ? R.string.conn_workaround_on : R.string.conn_workaround_off));
+                        decoderRenderer.getPresentedFrames());
                 if (decoderRenderer.presentTrackingStoppedEarly()) {
                     // This TV attaches present fences to the video layer only until the HWC moves it to
                     // its fast path, so the figures above describe the first seconds, not the session
@@ -1694,7 +1643,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
                     // Quit
                     case KeyEvent.KEYCODE_Q:
-                        finishGracefully();
+                        finish();
                         break;
 
                     // Toggle cursor visibility
@@ -3163,7 +3112,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     }
 
     private void stopConnection() {
-        unregisterVolumeGuard();
         if (connecting || connected) {
             connecting = connected = false;
             updatePipAutoEnter();
@@ -3348,7 +3296,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                                 message, true);
                     }
                     else {
-                        finishGracefully();
+                        finish();
                     }
                 }
             }
@@ -3390,7 +3338,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                registerVolumeGuard();
             }
         });
         runOnUiThread(new Runnable() {
@@ -3466,7 +3413,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showToastGuarded(message, Toast.LENGTH_LONG);
+                Toast.makeText(Game.this, message, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -3477,7 +3424,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showToastGuarded(message, Toast.LENGTH_LONG);
+                    Toast.makeText(Game.this, message, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -3718,318 +3665,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                         InputDevice.SOURCE_CLASS_TRACKBALL);
     }
 
-    // adb-tunable knobs for the TV compositor experiments, no rebuild needed:
-    //   adb shell settings put global moonlight_tcl_keepalive "<px>:<opaque|translucent>"   (forces the layer on)
-    //   adb shell settings put global moonlight_tcl_keepalive off | default
-    //   adb shell settings put global moonlight_tcl_pts zero | now   (overrides the "Render frames with timestamp 0" checkbox)
-    //   adb shell settings put global moonlight_tcl_present_log 1 | 0
-    //   adb shell settings put global moonlight_tcl_mtk_vendor on | off   (MediaTek game-mode/low-latency-mode keys, off by default)
-    //   adb shell settings put global moonlight_tcl_audio_max_ms 40 | 80 | 120
-    //   adb shell setprop debug.moonlight.aaudio 0        (force the AudioTrack fallback)
-    //   adb shell settings put global moonlight_tcl_verbose_log 1   (device dumps, polling, periodic counters back in logcat)
-    // Compositor guard (TV workaround without the extra layer). Measured on the C8K: the MediaTek
-    // firmware presents a lone video layer within 2-12 ms, any second layer costs 16-33 ms, and the
-    // display pipeline hangs when the composition changes while video frames are in flight. So the
-    // video stays the only layer and, just before any overlay we know about (game menu, dialogs,
-    // toasts, the system volume bar), frame presentation is paused and resumed once it is gone.
-    private static final long OVERLAY_SHOW_DELAY_MS = 50;
-    private static final long OVERLAY_RESUME_DELAY_MS = 80;
-    private static final long VOLUME_HOLD_MS = 4000;
-    private int overlayHoldCount;
-    private long timedHoldUntilUptime;
-    private boolean videoHoldActive;
-    private BroadcastReceiver volumeChangeReceiver;
-    private final Runnable videoHoldExpiryRunnable = new Runnable() {
-        @Override
-        public void run() {
-            updateVideoHold();
-        }
-    };
-
-    private boolean compositorGuardEnabled() {
-        return prefConfig != null && prefConfig.tvCompositorWorkaround && !onExternelDisplay;
-    }
-
-    private void updateVideoHold() {
-        if (decoderRenderer == null) {
-            return;
-        }
-        long now = SystemClock.uptimeMillis();
-        boolean hold = overlayHoldCount > 0 || now < timedHoldUntilUptime;
-        if (hold != videoHoldActive) {
-            videoHoldActive = hold;
-            Log.i("MoonlightTCL", hold ? ("Compositor guard: pausing frame output (overlays=" + overlayHoldCount + ", timed hold " + Math.max(0, timedHoldUntilUptime - now) + " ms)") : "Compositor guard: resuming frame output");
-        }
-        decoderRenderer.setOutputPaused(hold);
-        workaroundHandler.removeCallbacks(videoHoldExpiryRunnable);
-        if (hold && overlayHoldCount == 0) {
-            workaroundHandler.postDelayed(videoHoldExpiryRunnable, timedHoldUntilUptime - now + 5);
-        }
-    }
-
-    /** Pause presentation, then run the action that puts a new layer on screen. */
-    public void runWithOverlayGuard(final Runnable showOverlay) {
-        if (!compositorGuardEnabled()) {
-            showOverlay.run();
-            return;
-        }
-        overlayHoldCount++;
-        updateVideoHold();
-        workaroundHandler.postDelayed(showOverlay, OVERLAY_SHOW_DELAY_MS);
-    }
-
-    /** Another overlay appears while one is already up (sub-menu): keep holding, no delay needed. */
-    public void onOverlayShown() {
-        if (!compositorGuardEnabled()) {
-            return;
-        }
-        overlayHoldCount++;
-        updateVideoHold();
-    }
-
-    /** An overlay is gone: give the compositor a couple of frames, then resume presenting. */
-    public void onOverlayGuardReleased() {
-        if (!compositorGuardEnabled()) {
-            return;
-        }
-        workaroundHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (overlayHoldCount > 0) {
-                    overlayHoldCount--;
-                }
-                updateVideoHold();
-            }
-        }, OVERLAY_RESUME_DELAY_MS);
-    }
-
-    private void holdVideoFor(long ms) {
-        if (!compositorGuardEnabled()) {
-            return;
-        }
-        timedHoldUntilUptime = Math.max(timedHoldUntilUptime, SystemClock.uptimeMillis() + ms);
-        updateVideoHold();
-    }
-
-    private void showToastGuarded(final CharSequence text, final int duration) {
-        runWithOverlayGuard(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(Game.this, text, duration).show();
-                workaroundHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        onOverlayGuardReleased();
-                    }
-                }, duration == Toast.LENGTH_LONG ? 3500 : 2000);
-            }
-        });
-    }
-
-    // The system volume bar (TCL's own dialog) shows up together with these broadcasts; SystemUI needs
-    // tens of milliseconds to put its window up, so pausing here lands before the composition changes.
-    private void registerVolumeGuard() {
-        if (!compositorGuardEnabled() || volumeChangeReceiver != null) {
-            return;
-        }
-        volumeChangeReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // MASTER_MUTE_CHANGED_ACTION is a sticky broadcast: registering delivers the stale one immediately,
-                // which used to freeze the first 4 s of every stream. Only react to live changes.
-                if (isInitialStickyBroadcast()) {
-                    return;
-                }
-                Log.i("MoonlightTCL", "Volume change broadcast " + intent.getAction() + ": holding frames for " + VOLUME_HOLD_MS + " ms");
-                holdVideoFor(VOLUME_HOLD_MS);
-            }
-        };
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.media.VOLUME_CHANGED_ACTION");
-        filter.addAction("android.media.STREAM_MUTE_CHANGED_ACTION");
-        filter.addAction("android.media.MASTER_MUTE_CHANGED_ACTION");
-        try {
-            registerReceiver(volumeChangeReceiver, filter, Context.RECEIVER_EXPORTED);
-            Log.i("MoonlightTCL", "Compositor guard active: volume receiver registered, keep-alive layer " + (prefConfig.tvCompositorKeepAliveLayer ? "on" : "off"));
-        } catch (Exception e) {
-            Log.w("MoonlightTCL", "Could not register the volume guard", e);
-            volumeChangeReceiver = null;
-        }
-    }
-
-    private void unregisterVolumeGuard() {
-        if (volumeChangeReceiver != null) {
-            try {
-                unregisterReceiver(volumeChangeReceiver);
-            } catch (Exception ignored) {
-            }
-            volumeChangeReceiver = null;
-        }
-    }
-
-    private int audioMaxPendingMs() {
-        String v = tvDebugSetting("moonlight_tcl_audio_max_ms");
-        try {
-            return v != null ? Integer.parseInt(v.trim()) : 40;
-        } catch (NumberFormatException e) {
-            return 40;
-        }
-    }
-
-    private String tvDebugSetting(String key) {
-        try {
-            return Settings.Global.getString(getContentResolver(), key);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private void startCompositorKeepAlive() {
-        compositorKeepAliveView = findViewById(R.id.compositorKeepAlive);
-        if (compositorKeepAliveView == null || onExternelDisplay) {
-            return;
-        }
-
-        boolean enabled = prefConfig.tvCompositorWorkaround && prefConfig.tvCompositorKeepAliveLayer;
-        int sizePx = 2;
-        boolean opaque = false;
-        String knob = tvDebugSetting("moonlight_tcl_keepalive");
-        if (knob != null && !knob.trim().isEmpty() && !knob.trim().equals("default")) {
-            knob = knob.trim();
-            if (knob.equals("off")) {
-                enabled = false;
-            } else {
-                enabled = true;
-                String[] parts = knob.split(":");
-                try {
-                    sizePx = Math.max(1, Integer.parseInt(parts[0].trim()));
-                } catch (NumberFormatException ignored) {
-                }
-                opaque = parts.length > 1 && parts[1].trim().startsWith("opaque");
-            }
-            Log.i("MoonlightTCL", "Keep-alive debug setting: " + knob + " -> enabled=" + enabled + " size=" + sizePx + " opaque=" + opaque);
-        }
-        if (!enabled) {
-            return;
-        }
-
-        compositorKeepAliveOpaque = opaque;
-        ViewGroup.LayoutParams lp = compositorKeepAliveView.getLayoutParams();
-        lp.width = sizePx;
-        lp.height = sizePx;
-        compositorKeepAliveView.setLayoutParams(lp);
-
-        LimeLog.info("Android TV compositor workaround enabled (" + sizePx + "x" + sizePx + " px " + (opaque ? "opaque" : "translucent") + " overlay surface)");
-        // Above the stream SurfaceView, below the window. Must be set before the surface exists.
-        compositorKeepAliveView.setZOrderMediaOverlay(true);
-        compositorKeepAliveView.getHolder().setFormat(opaque ? android.graphics.PixelFormat.OPAQUE : android.graphics.PixelFormat.TRANSLUCENT);
-        compositorKeepAliveView.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                compositorKeepAliveSurfaceReady = true;
-                paintCompositorKeepAlive();
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                paintCompositorKeepAlive();
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                compositorKeepAliveSurfaceReady = false;
-            }
-        });
-        compositorKeepAliveView.setVisibility(View.VISIBLE);
-        workaroundHandler.postDelayed(compositorKeepAliveRunnable, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
-    }
-
-    private void paintCompositorKeepAlive() {
-        if (compositorKeepAliveView == null || !compositorKeepAliveSurfaceReady) {
-            return;
-        }
-        SurfaceHolder holder = compositorKeepAliveView.getHolder();
-        android.graphics.Canvas canvas = null;
-        try {
-            canvas = holder.lockCanvas();
-            if (canvas != null) {
-                int color = compositorKeepAliveOpaque
-                        ? (compositorKeepAliveToggle ? 0xFF000000 : 0xFF010101)
-                        : (compositorKeepAliveToggle ? 0x02000000 : 0x01000000);
-                canvas.drawColor(color, android.graphics.PorterDuff.Mode.SRC);
-            }
-        } catch (Exception e) {
-            // Surface may be going away
-        } finally {
-            if (canvas != null) {
-                try {
-                    holder.unlockCanvasAndPost(canvas);
-                } catch (Exception ignored) {
-                }
-            }
-        }
-    }
-
-    /**
-     * Stops feeding frames to the stream surface and removes the video layer from the screen while
-     * this window is still the top one. On affected TVs the compositor must never have to
-     * reconfigure (app switch, exit) while the video layer is actively receiving frames.
-     */
-    private void beginStreamTeardownForWorkaround() {
-        if (prefConfig == null || !prefConfig.tvCompositorWorkaround || onExternelDisplay || streamTeardownStarted) {
-            return;
-        }
-        streamTeardownStarted = true;
-        workaroundHandler.removeCallbacks(compositorKeepAliveRunnable);
-
-        LimeLog.info("Android TV compositor workaround: removing video layer before leaving");
-
-        if (attemptedConnection && decoderRenderer != null) {
-            // Stop the renderer thread right away so no further buffers are queued to the surface
-            decoderRenderer.prepareForStop();
-        }
-
-        // Hiding the container destroys the stream surface, which runs surfaceDestroyed() ->
-        // stopConnection(). Our window stays on screen (black), so the compositor only drops the
-        // idle video layer; nothing else changes until the activity transition starts.
-        if (streamContainer != null) {
-            streamContainer.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    /**
-     * finish() replacement for user-initiated exits. On affected TVs it first removes the video
-     * layer and gives SurfaceFlinger a couple of vsyncs to present the frame without it.
-     */
-    private void finishGracefully() {
-        if (isFinishing()) {
-            return;
-        }
-
-        if (prefConfig == null || !prefConfig.tvCompositorWorkaround || onExternelDisplay) {
-            finish();
-            return;
-        }
-
-        beginStreamTeardownForWorkaround();
-        workaroundHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!isFinishing()) {
-                    finish();
-                }
-            }
-        }, GRACEFUL_EXIT_DELAY_MS);
-    }
-
     @Override
     public void onBackPressed() {
         if(prefConfig.enableBackMenu){
             showGameMenu(null);
-            return;
-        }
-        if (prefConfig.tvCompositorWorkaround) {
-            finishGracefully();
             return;
         }
         super.onBackPressed();
@@ -4272,7 +3911,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         if (prefConfig.smartClipboardSync) {
             getClipboard(-1);
         }
-        finishGracefully();
+        finish();
     }
 
     public void quit() {
@@ -4289,7 +3928,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         builder.setPositiveButton(getString(R.string.yes), (dialog, which) -> {
             quitOnStop = true;
             dialog.dismiss();
-            finishGracefully();
+            finish();
         });
 
         builder.setNegativeButton(getString(R.string.no), (dialog, which) -> dialog.dismiss());
@@ -4304,12 +3943,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             ExternalDisplayControlActivity.toggleGameMenu();
         } else {
             if (gameMenuCallbacks != null) {
-                runWithOverlayGuard(new Runnable() {
-                    @Override
-                    public void run() {
-                        gameMenuCallbacks.showMenu(device);
-                    }
-                });
+                gameMenuCallbacks.showMenu(device);
             }
         }
     }

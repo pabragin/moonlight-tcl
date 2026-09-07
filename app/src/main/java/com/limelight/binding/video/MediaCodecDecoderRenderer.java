@@ -57,9 +57,33 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private int nextInputBufferIndex = -1;
     private ByteBuffer nextInputBuffer;
 
+    // Direct-copy submit path: moonlight-common-c writes the picture data straight into nextInputBuffer
+    // (see callbacks.c), one memcpy instead of native -> byte[] -> codec buffer. The byte[] path stays as
+    // the automatic fallback for non-direct buffers and as a compile-time safety net.
+    private static final boolean DIRECT_COPY_SUBMIT = true;
+    private boolean directCopyActive;
+    private int inputBufferGeneration;
+    private long pendingTimestampUs;
+    private int pendingCodecFlags;
+    private int pendingPicLength;
+    private int directCopiedFrames, arrayCopiedFrames;
+
+    // Asynchronous MediaCodec mode: frames are released from the codec's own callback thread and free
+    // input buffers arrive through onInputBufferAvailable(), so no renderer thread sits between the
+    // decoder and the compositor. The synchronous dequeue path stays behind this constant.
+    private static final boolean ASYNC_CODEC = true;
+    private boolean asyncMode;
+    private HandlerThread codecCallbackThread;
+    private Handler codecCallbackHandler;
+    private final java.util.concurrent.ArrayBlockingQueue<Integer> inputIndexQueue = new java.util.concurrent.ArrayBlockingQueue<>(64);
+    private volatile boolean callbacksMuted;
+    private int inputWaitsOver20Ms;
+    private volatile int staleCallbacksDropped;
+    private MediaCodec.Callback codecCallback;
+
     private Context context;
     private Activity activity;
-    private MediaCodec videoDecoder;
+    private volatile MediaCodec videoDecoder;
     private Thread rendererThread;
     private boolean needsSpsBitstreamFixup, isExynos4;
     private boolean adaptivePlayback, directSubmit, fusedIdrFrame;
@@ -525,6 +549,13 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         LimeLog.info("Configuring with format: "+format);
 
+        if (asyncMode) {
+            // The framework drops the callback whenever the codec returns to the Initialized state
+            // (stop(), reset(), a fresh instance), so it is set here, right before every configure()
+            ensureCodecCallbackThread();
+            videoDecoder.setCallback(codecCallback, codecCallbackHandler);
+        }
+
         videoDecoder.configure(format, renderTarget, null, 0);
 
         try {
@@ -575,6 +606,11 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         startPresentTracking();
 
+        if (asyncMode) {
+            // Stale callbacks already queued for the previous codec state precede this marker and are
+            // dropped; everything the restarted codec delivers after it is accepted
+            armCallbackUnmute();
+        }
         // Start the decoder
         videoDecoder.start();
 
@@ -707,7 +743,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }
 
             if (!newFormat) {
-                // We couldn't even configure a decoder without any low latency options
+                // We couldn't even configure a decoder without any low latency options.
+                // moonlight-common-c skips stop()/cleanup() when setup() fails, so tidy up here.
+                quitCodecCallbackThread();
                 return -5;
             }
         }
@@ -721,6 +759,15 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         this.initialHeight = invertResolution ? width : height;
         this.videoFormat = format;
         this.refreshRate = redrawRate;
+
+        asyncMode = ASYNC_CODEC;
+        directCopyActive = DIRECT_COPY_SUBMIT;
+        inputBufferGeneration = 0;
+        directCopiedFrames = 0;
+        arrayCopiedFrames = 0;
+        MoonBridge.setVideoDirectCopyEnabled(directCopyActive);
+        LimeLog.info("Video submit path: " + (directCopyActive ? "direct copy into the MediaCodec input buffer" : "byte[] copy")
+                + "; decoder mode: " + (asyncMode ? "async callbacks" : "sync dequeue"));
 
         return initializeDecoder(false);
     }
@@ -743,11 +790,23 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
             codecRecoveryThreadQuiescedFlags |= quiescenceFlag;
 
+            if (asyncMode) {
+                // There is no renderer thread: the callback thread is quiesced explicitly below
+                codecRecoveryThreadQuiescedFlags |= CR_FLAG_RENDER_THREAD;
+            }
+
             // This is the final thread to quiesce, so let's perform the codec recovery now.
             if (codecRecoveryThreadQuiescedFlags == CR_FLAG_ALL) {
+                if (asyncMode) {
+                    // No callback may be inside releaseOutputBuffer() while the codec changes state, and
+                    // every callback queued before this point refers to buffers the codec is about to reclaim
+                    callbacksMuted = true;
+                    quiesceCallbackThread(1000);
+                    inputIndexQueue.clear();
+                }
+
                 // Input and output buffers are invalidated by stop() and reset().
-                nextInputBuffer = null;
-                nextInputBufferIndex = -1;
+                setNextInputBuffer(-1, null);
                 outputBufferQueue.clear();
 
                 // If we just need a flush, do so now with all threads quiesced.
@@ -755,6 +814,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     LimeLog.warning("Flushing decoder");
                     try {
                         videoDecoder.flush();
+                        if (asyncMode) {
+                            // In asynchronous mode flush() leaves the codec in the Flushed state; the
+                            // unmute marker is posted first so no post-start callback is dropped
+                            armCallbackUnmute();
+                            videoDecoder.start();
+                        }
                         codecRecoveryType.set(CR_RECOVERY_TYPE_NONE);
                     } catch (IllegalStateException e) {
                         e.printStackTrace();
@@ -775,6 +840,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 if (codecRecoveryType.get() == CR_RECOVERY_TYPE_RESTART) {
                     LimeLog.warning("Trying to restart decoder after CodecException");
                     try {
+                        callbacksMuted = asyncMode;
                         videoDecoder.stop();
                         configureAndStartDecoder(configuredFormat);
                         codecRecoveryType.set(CR_RECOVERY_TYPE_NONE);
@@ -798,6 +864,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 if (codecRecoveryType.get() == CR_RECOVERY_TYPE_RESET) {
                     LimeLog.warning("Trying to reset decoder after CodecException");
                     try {
+                        callbacksMuted = asyncMode;
                         videoDecoder.reset();
                         configureAndStartDecoder(configuredFormat);
                         codecRecoveryType.set(CR_RECOVERY_TYPE_NONE);
@@ -819,6 +886,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 // throw away the old decoder and reinitialize a new one from scratch.
                 if (codecRecoveryType.get() == CR_RECOVERY_TYPE_RESET) {
                     LimeLog.warning("Trying to recreate decoder after CodecException");
+                    callbacksMuted = asyncMode;
                     videoDecoder.release();
 
                     try {
@@ -1008,14 +1076,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             if (nextOutputBuffer != null) {
                 try {
                     long queuedPtsUs = nextOutputBuffer < outputIndexPts.length ? outputIndexPts[nextOutputBuffer] : 0;
-                    if (outputPaused) {
-                        videoDecoder.releaseOutputBuffer(nextOutputBuffer, false);
-                    } else {
-                        recordFrameRelease(queuedPtsUs);
-                        videoDecoder.releaseOutputBuffer(nextOutputBuffer, frameTimeNanos);
-                        com.limelight.utils.LatencyTester.onFrameRendered(queuedPtsUs);
-                        reportFrameWork(queuedPtsUs);
-                    }
+                    recordFrameRelease(queuedPtsUs);
+                    videoDecoder.releaseOutputBuffer(nextOutputBuffer, frameTimeNanos);
+                    com.limelight.utils.LatencyTester.onFrameRendered(queuedPtsUs);
+                    reportFrameWork(queuedPtsUs);
 
                     lastRenderedFrameTimeNanos = frameTimeNanos;
                     activeWindowVideoStats.totalFramesRendered++;
@@ -1065,22 +1129,16 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     private boolean submitThreadPriorityApplied;
 
-    // Compositor guard (TV workaround): while set, decoded frames are dropped instead of presented so
-    // the display pipeline can change composition with nothing in flight.
-    private volatile boolean outputPaused;
 
-    // adb: settings put global moonlight_tcl_pts zero -> release with PTS 0 instead of System.nanoTime()
+    // "Render frames with timestamp 0" checkbox: release with PTS 0 ("show now") instead of System.nanoTime()
     private volatile boolean immediatePtsZero;
 
     public void setImmediatePtsZero(boolean zero) {
         immediatePtsZero = zero;
     }
 
-    // adb: settings put global moonlight_tcl_present_log 1 -> track and log release->display timing every 5 s
-    public volatile boolean presentLogEnabled;
-    private int presentLogCounter;
     // Diagnostics for the present tracking itself (why a window may end with zero matched frames)
-    private volatile int presentCallbacks, presentNoMatch, presentOutOfRange;
+    private volatile int presentCallbacks;
     private int presentCallbacksLastSecond;
     private boolean presentStopLogged;
 
@@ -1094,15 +1152,18 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         }
     }
 
-    public void setOutputPaused(boolean paused) {
-        outputPaused = paused;
+    private void reportFrameWorkUs(long workUs) {
+        if (perfHints != null) {
+            perfHints.reportWorkNanos(workUs * 1000L);
+        }
     }
+
     private int oversizedDecodeUnits;
 
     private void startPresentTracking() {
         // The post-stream toast is the clean way to measure: nothing is drawn over the video during the
         // stream (a visible overlay would itself be a second compositor layer), the numbers appear at the end.
-        if (!(prefs.enablePerfOverlay || prefs.enablePerfOverlayLite || prefs.latencyTest || prefs.enableLatencyToast || presentLogEnabled)) {
+        if (!(prefs.enablePerfOverlay || prefs.enablePerfOverlayLite || prefs.latencyTest || prefs.enableLatencyToast)) {
             return;
         }
         if (frameRenderedThread == null) {
@@ -1117,12 +1178,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 presentCallbacks++;
                 long releaseNs = lookupFrameRelease(presentationTimeUs);
                 if (releaseNs == 0) {
-                    presentNoMatch++;
                     return;
                 }
                 long deltaMs = (renderTimeNanos - releaseNs) / 1000000L;
                 if (deltaMs < 0 || deltaMs > 1000) {
-                    presentOutOfRange++;
                     return;
                 }
                 VideoStats stats = activeWindowVideoStats;
@@ -1156,6 +1215,169 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }
         }
         return 0;
+    }
+
+    // Every non-null input buffer Java holds goes through here, so native always knows the buffer it
+    // may write into and the generation that must match on the next frame
+    private void setNextInputBuffer(int index, ByteBuffer buffer) {
+        nextInputBufferIndex = index;
+        nextInputBuffer = buffer;
+        inputBufferGeneration++;
+        if (!directCopyActive) {
+            return;
+        }
+        if (!MoonBridge.setVideoInputBuffer(buffer, inputBufferGeneration) && buffer != null) {
+            directCopyActive = false;
+            LimeLog.warning("MediaCodec input buffer is not a direct buffer; using the byte[] submit path");
+        }
+    }
+
+    private void ensureCodecCallbackThread() {
+        if (codecCallbackThread == null) {
+            codecCallbackThread = new HandlerThread("Video - Codec callbacks", Process.THREAD_PRIORITY_URGENT_DISPLAY);
+            codecCallbackThread.start();
+            codecCallbackHandler = new Handler(codecCallbackThread.getLooper());
+        }
+        if (codecCallback == null) {
+            codecCallback = createCodecCallback();
+        }
+    }
+
+    private void armCallbackUnmute() {
+        Handler handler = codecCallbackHandler;
+        if (handler != null) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callbacksMuted = false;
+                }
+            });
+        }
+    }
+
+    // Waits until every callback posted so far has run (bounded). Never called from the callback thread.
+    private void quiesceCallbackThread(long timeoutMs) {
+        Handler handler = codecCallbackHandler;
+        HandlerThread thread = codecCallbackThread;
+        if (handler == null || thread == null || !thread.isAlive() || Thread.currentThread() == thread) {
+            return;
+        }
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        if (!handler.post(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            }
+        })) {
+            return;
+        }
+        try {
+            if (!latch.await(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS)) {
+                LimeLog.warning("Codec callback thread did not quiesce within " + timeoutMs + " ms");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void quitCodecCallbackThread() {
+        if (codecCallbackThread != null) {
+            codecCallbackThread.quitSafely();
+            codecCallbackThread = null;
+            codecCallbackHandler = null;
+        }
+    }
+
+    private MediaCodec.Callback createCodecCallback() {
+        return new MediaCodec.Callback() {
+            @Override
+            public void onInputBufferAvailable(MediaCodec codec, int index) {
+                if (codec != videoDecoder || callbacksMuted || stopping) {
+                    staleCallbacksDropped++;
+                    return;
+                }
+                if (!inputIndexQueue.offer(index)) {
+                    LimeLog.warning("Input index queue full, dropping index " + index);
+                }
+            }
+
+            @Override
+            public void onOutputBufferAvailable(MediaCodec codec, int index, BufferInfo info) {
+                if (codec != videoDecoder || callbacksMuted || stopping) {
+                    // The buffer belongs to a codec state that is gone (flush/stop/release); touching it would throw
+                    staleCallbacksDropped++;
+                    return;
+                }
+
+                long presentationTimeUs = info.presentationTimeUs;
+                numFramesOut++;
+
+                try {
+                    if (prefs.framePacing != PreferenceConfiguration.FRAME_PACING_BALANCED) {
+                        // Release every frame as it arrives: SurfaceFlinger latches the newest due frame
+                        // and drops a stale one when two land within the same vsync
+                        boolean neverDrop = prefs.framePacing == PreferenceConfiguration.FRAME_PACING_MAX_SMOOTHNESS
+                                || prefs.framePacing == PreferenceConfiguration.FRAME_PACING_CAP_FPS;
+                        recordFrameRelease(presentationTimeUs);
+                        codec.releaseOutputBuffer(index, (neverDrop || immediatePtsZero) ? 0 : System.nanoTime());
+                        com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
+                        activeWindowVideoStats.totalFramesRendered++;
+
+                        long nowUs = MoonBridge.getMicroseconds();
+                        long delta = (nowUs - presentationTimeUs) / 1000;
+                        if (delta >= 0 && delta < 1000) {
+                            activeWindowVideoStats.decoderTimeMs += delta;
+                            activeWindowVideoStats.totalTimeMs += delta;
+                        }
+                        reportFrameWorkUs(nowUs - presentationTimeUs);
+                    }
+                    else {
+                        // Balanced pacing: the Choreographer callback renders from outputBufferQueue
+                        if (outputBufferQueue.size() == OUTPUT_BUFFER_QUEUE_LIMIT) {
+                            Integer oldest = outputBufferQueue.poll();
+                            if (oldest != null) {
+                                codec.releaseOutputBuffer(oldest, false);
+                            }
+                        }
+                        if (index >= 0 && index < outputIndexPts.length) {
+                            outputIndexPts[index] = presentationTimeUs;
+                        }
+                        outputBufferQueue.add(index);
+
+                        long delta = (MoonBridge.getMicroseconds() - presentationTimeUs) / 1000;
+                        if (delta >= 0 && delta < 1000) {
+                            activeWindowVideoStats.decoderTimeMs += delta;
+                            activeWindowVideoStats.totalTimeMs += delta;
+                        }
+                    }
+                } catch (IllegalStateException e) {
+                    if (callbacksMuted || codecRecoveryType.get() != CR_RECOVERY_TYPE_NONE) {
+                        LimeLog.warning("Output buffer release during codec recovery: " + e);
+                        return;
+                    }
+                    handleDecoderException(e);
+                }
+            }
+
+            @Override
+            public void onOutputFormatChanged(MediaCodec codec, MediaFormat format) {
+                if (codec != videoDecoder) {
+                    return;
+                }
+                LimeLog.info("Output format changed");
+                outputFormat = format;
+                LimeLog.info("New output format: " + outputFormat);
+            }
+
+            @Override
+            public void onError(MediaCodec codec, MediaCodec.CodecException e) {
+                if (codec != videoDecoder) {
+                    return;
+                }
+                // Same state machine as the synchronous path; the recovery itself runs on the submit thread
+                handleDecoderException(e);
+            }
+        };
     }
 
     private void startRendererThread()
@@ -1198,26 +1420,16 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                         prefs.framePacing == PreferenceConfiguration.FRAME_PACING_CAP_FPS) {
                                     // In max smoothness or cap FPS mode, we want to never drop frames
                                     // Use a PTS that will cause this frame to never be dropped
-                                    if (outputPaused) {
-                                        videoDecoder.releaseOutputBuffer(lastIndex, false);
-                                    } else {
-                                        recordFrameRelease(presentationTimeUs);
-                                        videoDecoder.releaseOutputBuffer(lastIndex, 0);
-                                        com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
-                                        reportFrameWork(presentationTimeUs);
-                                    }
+                                    recordFrameRelease(presentationTimeUs);
+                                    videoDecoder.releaseOutputBuffer(lastIndex, 0);
+                                    com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                                 }
                                 else {
                                     // Use a PTS that will cause this frame to be dropped if another comes in within
                                     // the same V-sync period
-                                    if (outputPaused) {
-                                        videoDecoder.releaseOutputBuffer(lastIndex, false);
-                                    } else {
-                                        recordFrameRelease(presentationTimeUs);
-                                        videoDecoder.releaseOutputBuffer(lastIndex, immediatePtsZero ? 0 : System.nanoTime());
-                                        com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
-                                        reportFrameWork(presentationTimeUs);
-                                    }
+                                    recordFrameRelease(presentationTimeUs);
+                                    videoDecoder.releaseOutputBuffer(lastIndex, immediatePtsZero ? 0 : System.nanoTime());
+                                    com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                                 }
 
                                 activeWindowVideoStats.totalFramesRendered++;
@@ -1248,11 +1460,16 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                 outputBufferQueue.add(lastIndex);
                             }
 
-                            // Add delta time to the totals (excluding probable outliers)
-                            long delta = (MoonBridge.getMicroseconds() - presentationTimeUs) / 1000;
+                            // Add delta time to the totals (excluding probable outliers). One clock read serves
+                            // both the statistic and the ADPF work report.
+                            long nowUs = MoonBridge.getMicroseconds();
+                            long delta = (nowUs - presentationTimeUs) / 1000;
                             if (delta >= 0 && delta < 1000) {
                                 activeWindowVideoStats.decoderTimeMs += delta;
                                 activeWindowVideoStats.totalTimeMs += delta;
+                            }
+                            if (prefs.framePacing != PreferenceConfiguration.FRAME_PACING_BALANCED) {
+                                reportFrameWorkUs(nowUs - presentationTimeUs);
                             }
                         } else {
                             switch (outIndex) {
@@ -1293,20 +1510,36 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         try {
             // If we don't have an input buffer index yet, fetch one now
-            while (nextInputBufferIndex < 0 && !stopping) {
-                nextInputBufferIndex = videoDecoder.dequeueInputBuffer(10000);
+            if (asyncMode) {
+                // Free input buffers arrive through onInputBufferAvailable(). A codec error stops them,
+                // so leave as soon as a recovery is pending and let this thread perform it below.
+                while (nextInputBufferIndex < 0 && !stopping && codecRecoveryType.get() == CR_RECOVERY_TYPE_NONE) {
+                    try {
+                        Integer index = inputIndexQueue.poll(10, java.util.concurrent.TimeUnit.MILLISECONDS);
+                        if (index != null) {
+                            nextInputBufferIndex = index;
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            } else {
+                while (nextInputBufferIndex < 0 && !stopping) {
+                    nextInputBufferIndex = videoDecoder.dequeueInputBuffer(10000);
+                }
             }
 
             // Get the backing ByteBuffer for the input buffer index
             if (nextInputBufferIndex >= 0) {
-                // Using the new getInputBuffer() API on Lollipop allows
-                // the framework to do some performance optimizations for us
-                nextInputBuffer = videoDecoder.getInputBuffer(nextInputBufferIndex);
-                if (nextInputBuffer == null) {
+                ByteBuffer buffer = videoDecoder.getInputBuffer(nextInputBufferIndex);
+                if (buffer == null) {
                     // According to the Android docs, getInputBuffer() can return null "if the
                     // index is not a dequeued input buffer". I don't think this ever should
                     // happen but if it does, let's try to get a new input buffer next time.
-                    nextInputBufferIndex = -1;
+                    setNextInputBuffer(-1, null);
+                } else {
+                    setNextInputBuffer(nextInputBufferIndex, buffer);
                 }
             }
         } catch (IllegalStateException e) {
@@ -1325,6 +1558,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         int deltaMs = (int)(SystemClock.uptimeMillis() - startTime);
 
         if (deltaMs >= 20) {
+            inputWaitsOver20Ms++;
             LimeLog.warning("Dequeue input buffer ran long: " + deltaMs + " ms");
         }
 
@@ -1351,7 +1585,20 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         if (prefs.adpfHints) {
             perfHints = com.limelight.utils.PerformanceHints.create(context, refreshRate);
         }
-        startRendererThread();
+        if (asyncMode) {
+            codecCallbackHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (perfHints != null) {
+                        perfHints.addThread(Process.myTid());
+                    }
+                }
+            });
+            LimeLog.info("Decoder mode: async callbacks; lowest-latency PTS mode " + (immediatePtsZero ? "zero" : "now"));
+        } else {
+            LimeLog.info("Decoder mode: sync dequeue");
+            startRendererThread();
+        }
         startChoreographerThread();
     }
 
@@ -1407,7 +1654,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         // Wait for the renderer thread to shut down
         try {
-            rendererThread.join();
+            if (rendererThread != null) {
+                rendererThread.join();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
 
@@ -1416,6 +1665,14 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             // status back to true.
             Thread.currentThread().interrupt();
         }
+
+        if (asyncMode) {
+            // Let an in-flight callback finish before the threads it uses go away. The callback
+            // thread itself lives until cleanup() releases the codec.
+            quiesceCallbackThread(500);
+            LimeLog.info("Decoder input waits >= 20 ms: " + inputWaitsOver20Ms + "; stale callbacks dropped: " + staleCallbacksDropped);
+        }
+        LimeLog.info("Video submit path: " + directCopiedFrames + " frames copied directly, " + arrayCopiedFrames + " through byte[]");
 
         if (frameRenderedThread != null) {
             frameRenderedThread.quitSafely();
@@ -1431,6 +1688,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     @Override
     public void cleanup() {
         videoDecoder.release();
+        quitCodecCallbackThread();
     }
 
     @Override
@@ -1470,8 +1728,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     timestampUs, codecFlags);
 
             // We need a new buffer now
-            nextInputBufferIndex = -1;
-            nextInputBuffer = null;
+            setNextInputBuffer(-1, null);
         } catch (IllegalStateException e) {
             if (handleDecoderException(e)) {
                 // We encountered a transient error. In this case, just hold onto the buffer
@@ -1482,8 +1739,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             else {
                 // We encountered a non-transient error. In this case, we will simply leak the
                 // buffer because we cannot be sure we will ever succeed in queuing it.
-                nextInputBufferIndex = -1;
-                nextInputBuffer = null;
+                setNextInputBuffer(-1, null);
             }
             return false;
         } finally {
@@ -1518,20 +1774,19 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         // Upstream (68adf9ec) no longer clears the flags on Oreo+, so leave them as sent by the host.
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public int submitDecodeUnit(byte[] decodeUnitData, int decodeUnitLength, int decodeUnitType,
-                                int frameNumber, int frameType, char frameHostProcessingLatency,
-                                long receiveTimeUs, long enqueueTimeUs) {
+    // Per-decode-unit preamble shared by every submit path: thread priority, loss statistics, CSD reset and
+    // the once-a-second statistics window. Idempotent for a repeated call with the same frame number.
+    // Returns false while stopping.
+    private boolean beginDecodeUnit(int frameNumber, int frameType) {
         if (stopping) {
             // Don't bother if we're stopping
-            return MoonBridge.DR_OK;
+            return false;
         }
 
         if (!submitThreadPriorityApplied) {
-            // This runs on moonlight-common-c's video decoder thread, which hands every NALU to
-            // MediaCodec. Give it the same priority as the renderer thread so it is not scheduled
-            // behind ordinary app work on a busy TV SoC.
+            // With direct submit this is moonlight-common-c's VideoRecv (UDP receive) thread, which
+            // hands every NALU to MediaCodec. Give it display priority so it is not scheduled behind
+            // ordinary app work on a busy TV SoC.
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
             if (perfHints != null) {
                 perfHints.addThread(Process.myTid());
@@ -1560,15 +1815,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         // Flip stats windows roughly every second
         if (SystemClock.uptimeMillis() >= activeWindowVideoStats.measurementStartTimestamp + 1000) {
-            if (presentLogEnabled && ++presentLogCounter % 5 == 0) {
-                VideoStats w = activeWindowVideoStats;
-                LimeLog.info("Present (compositor): avg " + (w.framesPresented > 0 ? Math.round(10.0 * w.presentTimeMs / w.framesPresented) / 10.0 : -1)
-                        + " ms, max " + w.maxPresentTimeMs + " ms over " + w.framesPresented + " frames; decode avg "
-                        + (w.totalFramesReceived > 0 ? Math.round(10.0 * w.decoderTimeMs / w.totalFramesReceived) / 10.0 : -1) + " ms"
-                        + "; frame-rendered callbacks this second " + presentCallbacksLastSecond
-                        + ", unmatched " + presentNoMatch + ", out of range " + presentOutOfRange);
-                presentNoMatch = 0; presentOutOfRange = 0;
-            }
             if (prefs.enablePerfOverlay || prefs.enablePerfLogging) {
                 VideoStats lastTwo = new VideoStats();
                 lastTwo.add(lastWindowVideoStats);
@@ -1684,10 +1930,13 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             activeWindowVideoStats.measurementStartTimestamp = SystemClock.uptimeMillis();
         }
 
-        boolean csdSubmittedForThisFrame = false;
+        return true;
+    }
 
-        // IDR frames require special handling for CSD buffer submission
-        if (frameType == MoonBridge.FRAME_TYPE_IDR) {
+    // Parameter sets (IDR frames only): batched into the CSD lists and submitted with the picture data
+    @SuppressWarnings("deprecation")
+    private int handleParameterSet(byte[] decodeUnitData, int decodeUnitLength, int decodeUnitType) {
+        {
             // H264 SPS
             if (decodeUnitType == MoonBridge.BUFFER_TYPE_SPS && (videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H264) != 0) {
                 numSpsIn++;
@@ -1801,12 +2050,26 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 ppsBuffers.add(naluBuffer);
                 return MoonBridge.DR_OK;
             }
-            else if ((videoFormat & (MoonBridge.VIDEO_FORMAT_MASK_H264 | MoonBridge.VIDEO_FORMAT_MASK_H265)) != 0) {
+        }
+        return MoonBridge.DR_OK;
+    }
+
+    // Everything between "the picture data of this frame is known" and "its bytes are in the input
+    // buffer": separate CSD submission, statistics, input buffer, fused CSD, PTS and the oversize check.
+    // Returns the position in nextInputBuffer where the picture data goes, or -1 when the caller has to
+    // answer DR_NEED_IDR.
+    private int prepareFrame(int decodeUnitLength, int frameType, char frameHostProcessingLatency,
+                             long receiveTimeUs, long enqueueTimeUs) {
+        boolean csdSubmittedForThisFrame = false;
+
+        // IDR frames require special handling for CSD buffer submission
+        if (frameType == MoonBridge.FRAME_TYPE_IDR) {
+            if ((videoFormat & (MoonBridge.VIDEO_FORMAT_MASK_H264 | MoonBridge.VIDEO_FORMAT_MASK_H265)) != 0) {
                 // If this is the first CSD blob or we aren't supporting fused IDR frames, we will
                 // submit the CSD blob in a separate input buffer for each IDR frame.
                 if (!submittedCsd || !fusedIdrFrame) {
                     if (!fetchNextInputBuffer()) {
-                        return MoonBridge.DR_NEED_IDR;
+                        return -1;
                     }
 
                     // Submit all CSD when we receive the first non-CSD blob in an IDR frame
@@ -1821,7 +2084,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     }
 
                     if (!queueNextInputBuffer(0, MediaCodec.BUFFER_FLAG_CODEC_CONFIG)) {
-                        return MoonBridge.DR_NEED_IDR;
+                        return -1;
                     }
 
                     // Remember that we already submitted CSD for this frame, so we don't do it
@@ -1835,7 +2098,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         needsBaselineSpsHack = false;
 
                         if (!replaySps()) {
-                            return MoonBridge.DR_NEED_IDR;
+                            return -1;
                         }
 
                         LimeLog.info("SPS replay complete");
@@ -1864,7 +2127,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         activeWindowVideoStats.totalTimeMs += (enqueueTimeUs - receiveTimeUs) / 1000;
 
         if (!fetchNextInputBuffer()) {
-            return MoonBridge.DR_NEED_IDR;
+            return -1;
         }
 
         int codecFlags = 0;
@@ -1921,17 +2184,84 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 }
                 throw new RendererException(this, exception);
             }
+            return -1;
+        }
+
+        pendingTimestampUs = timestampUs;
+        pendingCodecFlags = codecFlags;
+        pendingPicLength = decodeUnitLength;
+        return nextInputBuffer.position();
+    }
+
+    private int commitFrame() {
+        return queueNextInputBuffer(pendingTimestampUs, pendingCodecFlags) ? MoonBridge.DR_OK : MoonBridge.DR_NEED_IDR;
+    }
+
+    @Override
+    public int submitDecodeUnit(byte[] decodeUnitData, int decodeUnitLength, int decodeUnitType,
+                                int frameNumber, int frameType, char frameHostProcessingLatency,
+                                long receiveTimeUs, long enqueueTimeUs) {
+        if (!beginDecodeUnit(frameNumber, frameType)) {
+            return MoonBridge.DR_OK;
+        }
+
+        if (frameType == MoonBridge.FRAME_TYPE_IDR && decodeUnitType != MoonBridge.BUFFER_TYPE_PICDATA) {
+            return handleParameterSet(decodeUnitData, decodeUnitLength, decodeUnitType);
+        }
+
+        if (prepareFrame(decodeUnitLength, frameType, frameHostProcessingLatency, receiveTimeUs, enqueueTimeUs) < 0) {
             return MoonBridge.DR_NEED_IDR;
         }
 
-        // Copy data from our buffer list into the input buffer
+        // byte[] path: the frame was copied into a Java array by native code, copy it again into the codec buffer
         nextInputBuffer.put(decodeUnitData, 0, decodeUnitLength);
+        arrayCopiedFrames++;
 
-        if (!queueNextInputBuffer(timestampUs, codecFlags)) {
-            return MoonBridge.DR_NEED_IDR;
+        return commitFrame();
+    }
+
+    // Direct-copy path, step 1 (see callbacks.c): returns (generation << 32 | position) where native may write
+    // picDataLength bytes, or one of the DR_PREPARE_* values
+    @Override
+    public long prepareDecodeUnit(int picDataLength, int frameNumber, int frameType, char frameHostProcessingLatency,
+                                  long receiveTimeUs, long enqueueTimeUs) {
+        if (!beginDecodeUnit(frameNumber, frameType)) {
+            return MoonBridge.DR_PREPARE_SKIP;
         }
 
-        return MoonBridge.DR_OK;
+        // Obtain the buffer first: a non-direct buffer would switch the path off right here
+        if (!fetchNextInputBuffer()) {
+            return MoonBridge.DR_PREPARE_NEED_IDR;
+        }
+        if (!directCopyActive) {
+            return MoonBridge.DR_PREPARE_FALLBACK;
+        }
+
+        int position = prepareFrame(picDataLength, frameType, frameHostProcessingLatency, receiveTimeUs, enqueueTimeUs);
+        if (position < 0) {
+            return MoonBridge.DR_PREPARE_NEED_IDR;
+        }
+        return ((long) (inputBufferGeneration & 0x7FFFFFFF) << 32) | position;
+    }
+
+    // Direct-copy path, step 2: native wrote the picture data (fallbackData == null) or hands it over as a
+    // byte[] after a missed buffer hand-off
+    @Override
+    public int commitDecodeUnit(byte[] fallbackData, int length) {
+        if (nextInputBuffer == null || length != pendingPicLength) {
+            if (nextInputBuffer != null) {
+                nextInputBuffer.clear();
+            }
+            return MoonBridge.DR_NEED_IDR;
+        }
+        if (fallbackData != null) {
+            nextInputBuffer.put(fallbackData, 0, length);
+            arrayCopiedFrames++;
+        } else {
+            nextInputBuffer.position(nextInputBuffer.position() + length);
+            directCopiedFrames++;
+        }
+        return commitFrame();
     }
 
     private boolean replaySps() {
@@ -2145,6 +2475,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             str += "RFI active: "+renderer.refFrameInvalidationActive+DELIMITER;
             str += "Using modern SPS patching: "+(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)+DELIMITER;
             str += "Fused IDR frames: "+renderer.fusedIdrFrame+DELIMITER;
+            str += "Direct copy: "+renderer.directCopyActive+" ("+renderer.directCopiedFrames+" frames), async codec: "+renderer.asyncMode+DELIMITER;
             str += "Video dimensions: "+renderer.initialWidth+"x"+renderer.initialHeight+DELIMITER;
             str += "FPS target: "+renderer.refreshRate+DELIMITER;
             str += "Bitrate: "+renderer.prefs.bitrate+" Kbps"+DELIMITER;
