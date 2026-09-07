@@ -29,22 +29,19 @@ What is changed compared to Artemis:
    composition changed while the video layer received frames (measured over adb on a C8K: a lone video layer is presented in
    2 to 12 ms, any second layer costs 16 to 33 ms). Firmware V655 no longer hangs, a full day of play with the workaround off
    showed nothing, so the code, the two settings and the adb knobs are gone; the video is simply the only layer on screen.
-2. **Gamepad rumble block** (`Settings → Gamepad → Block gamepad rumble on this TV`). The firmware has a race in `system_server`'s
-   InputReader that crashes when an `InputDevice` vibrates, which shows up as the TV rebooting mid-game. Rumble through the Android
-   input stack is blocked; USB gamepads driven by Moonlight's own USB driver still rumble. Confirmed on a C8K: with the block
-   off the TV played for about an hour and then rebooted twice within minutes (it is a race, not a deterministic crash), so
-   since tcl9 the block wins over every other rumble option and unchecking it on an affected TV asks for confirmation.
-   Root cause (from the TV's crash log and AOSP source): Android 14's `InputReader::vibrate()` pushes into the input reader
-   thread's event queue from the binder thread while the reader may be flushing it; Android 15 fixed this (`mPendingArgs`). So
-   the only race-free rumble is Moonlight's own USB driver: since 20.2.8-tcl3 "Override native Xbox gamepad support" is on
-   by default on affected TVs, so a gamepad on a USB cable rumbles through the app, not the system. For Bluetooth there is
-   an **experimental** mode (`Rumble over Bluetooth anyway`, on by default on affected TVs since 20.2.8-tcl7): rumble is
-   coalesced to at most 20 updates per second and sent only right after the pad's own input event, when the system's input
-   thread is idle. That makes the crash rare, not impossible; if the TV still reboots during play, turn it off.
+2. **Gamepad rumble that does not reboot the TV** (`Settings → Gamepad → Enable rumble`, one switch). The firmware has a race
+   in `system_server`'s InputReader that crashes when an `InputDevice` vibrates, which shows up as the TV rebooting mid-game
+   (confirmed on a C8K: about an hour of play, then two reboots within minutes; root cause from the crash log and AOSP source:
+   Android 14's `InputReader::vibrate()` pushes into the reader thread's event queue from the binder thread while the reader
+   may be flushing it, fixed in Android 15). Two things make rumble safe here, and both are simply how the app works now: a
+   gamepad on a USB cable is driven by Moonlight's own USB driver (`Override native Xbox gamepad support` is on by default on
+   affected TVs since 20.2.8-tcl3), so its rumble never touches the system input stack; a Bluetooth pad gets its rumble
+   coalesced to at most 20 updates per second and sent only right after the pad's own input event, when the reader thread is
+   idle, which has run for days on a C8K without a reboot. Until 20.2.9-tcl7 this was three checkboxes (block, experimental
+   Bluetooth mode, enable); now "Enable rumble" is the only one: on means rumble with these safeguards, off means none.
 
-The rumble block turns itself on for TCL TVs on Android 14 or newer and can be toggled by hand. The old "volume change after an
-hour freezes the screen and the app dies" symptom turned out to be the rumble crash (a remote key press is an input-reader event,
-exactly the moment the rumble race hits), not a compositor problem.
+The old "volume change after an hour freezes the screen and the app dies" symptom turned out to be this rumble crash (a remote key
+press is an input-reader event, exactly the moment the race hits), not a compositor problem.
 
 3. **Video pipeline back to the proven one.** Artemis after August 2025 (commit `4de0227f`) gained an experimental renderer: a
    "latest-frame" polling loop with adaptive frame dropping, a decoder watchdog that flushes the codec, a set of undocumented
@@ -112,7 +109,7 @@ exactly the moment the rumble race hits), not a compositor problem.
      Measured on a C8K over HDMI: 2 to 4 underruns at stream
      start, none later, no dropped packets; `AAudio stats` in logcat every 10 s. The Artemis bug that handed the *audio
      effects* renderer flag the value of "play audio on PC" is fixed on the way.
-   - **ADPF performance hints** (`Settings → Advanced Settings → Performance hints (ADPF)`, on by default). A
+   - **ADPF performance hints** (always on; the checkbox existed from tcl9 to 20.2.9-tcl6). A
      `PerformanceHintManager` session covers the video renderer thread and the thread that feeds the decoder, with a one-frame
      target and the real per-frame duration reported. The C8K's power HAL accepts sessions (`dumpsys performance_hint`), but
      its CPUs already run at their maximum during a stream, so expect less jitter rather than a lower average. Inert where

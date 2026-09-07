@@ -90,7 +90,6 @@ public class PreferenceConfiguration {
     private static final String ABSOLUTE_MOUSE_MODE_PREF_STRING = "checkbox_absolute_mouse_mode";
     private static final String ENABLE_AUDIO_FX_PREF_STRING = "checkbox_enable_audiofx";
     private static final String AAUDIO_PREF_STRING = "checkbox_aaudio_renderer";
-    private static final String ADPF_PREF_STRING = "checkbox_adpf_hints";
     private static final String REDUCE_REFRESH_RATE_PREF_STRING = "checkbox_reduce_refresh_rate";
     private static final String FULL_RANGE_PREF_STRING = "checkbox_full_range";
     private static final String GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING = "checkbox_gamepad_touchpad_as_mouse";
@@ -100,8 +99,6 @@ public class PreferenceConfiguration {
     private static final String FULL_SCREEN_PREF_STRING = "checkbox_full_screen";
 
     private static final String ENABLE_RUMBLE_PREF_STRING = "checkbox_enable_rumble";
-    private static final String TV_BLOCK_RUMBLE_PREF_STRING = "checkbox_tv_block_rumble";
-    private static final String TV_RUMBLE_EXPERIMENTAL_PREF_STRING = "checkbox_tv_rumble_experimental";
     private static final String LATENCY_TEST_PREF_STRING = "checkbox_latency_test";
     private static final String PREVENT_PACKET_LOSS_PREF_STRING = "checkbox_prevent_packet_loss";
 
@@ -348,7 +345,6 @@ public class PreferenceConfiguration {
     public boolean absoluteMouseMode;
     public boolean enableAudioFx;
     public boolean useAAudio;
-    public boolean adpfHints;
     public boolean reduceRefreshRate;
     public boolean fullRange;
     public boolean gamepadMotionSensors;
@@ -358,9 +354,6 @@ public class PreferenceConfiguration {
     public boolean enableRumble;
     public boolean preventPacketLoss;
 
-    // Android TV firmware workaround (see isTvWithBrokenInputRumble())
-    public boolean tvBlockRumble;
-    public boolean tvRumbleExperimental;
     public boolean latencyTest;
 
     public boolean rememberZoomPan;
@@ -999,7 +992,6 @@ private static int getFramePacingValue(Context context) {
         config.hideClipboardContent = prefs.getBoolean(CHECKBOX_HIDE_CLIPBOARD_CONTENT, DEFAULT_HIDE_CLIPBOARD_CONTENT);
         config.enableAudioFx = prefs.getBoolean(ENABLE_AUDIO_FX_PREF_STRING, DEFAULT_ENABLE_AUDIO_FX);
         config.useAAudio = prefs.getBoolean(AAUDIO_PREF_STRING, true);
-        config.adpfHints = prefs.getBoolean(ADPF_PREF_STRING, true);
         config.reduceRefreshRate = prefs.getBoolean(REDUCE_REFRESH_RATE_PREF_STRING, DEFAULT_REDUCE_REFRESH_RATE);
         config.fullRange = prefs.getBoolean(FULL_RANGE_PREF_STRING, DEFAULT_FULL_RANGE);
         config.gamepadTouchpadAsMouse = prefs.getBoolean(GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING, DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE);
@@ -1010,10 +1002,6 @@ private static int getFramePacingValue(Context context) {
         config.preventPacketLoss = prefs.getBoolean(PREVENT_PACKET_LOSS_PREF_STRING, DEFAULT_PREVENT_PACKET_LOSS);
 
         // Default to "on" only on TVs known to need the workarounds; the user can override either way
-        config.tvBlockRumble = prefs.getBoolean(TV_BLOCK_RUMBLE_PREF_STRING, isTvWithBrokenInputRumble(context));
-        // On the affected TVs the deferred/coalesced rumble is the only way to get Bluetooth rumble at all;
-        // it is on by default there (the user can turn it off), off everywhere else.
-        config.tvRumbleExperimental = prefs.getBoolean(TV_RUMBLE_EXPERIMENTAL_PREF_STRING, isTvWithBrokenInputRumble(context));
         config.latencyTest = prefs.getBoolean(LATENCY_TEST_PREF_STRING, false);
 
         // Read custom values

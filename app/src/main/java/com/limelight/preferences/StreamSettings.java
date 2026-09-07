@@ -342,10 +342,8 @@ public class StreamSettings extends AppCompatActivity {
             AppCompatActivity activity = (AppCompatActivity) requireActivity();
             PackageManager pm = activity.getPackageManager();
 
-            // The Android TV firmware workaround defaults to "on" only on known affected TVs.
-            // Persist the device default the first time the settings are shown so the checkbox
-            // matches what PreferenceConfiguration.readPreferences() uses when the key is absent.
-            applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
+            // Device defaults are persisted the first time the settings are shown so the checkboxes
+            // match what PreferenceConfiguration.readPreferences() uses when the key is absent.
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
 
             // AAudio cannot host the system equalizer session: grey it out while audio FX are on
@@ -359,46 +357,7 @@ public class StreamSettings extends AppCompatActivity {
                 });
             }
             applyDeviceDefault("checkbox_usb_bind_all", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
-            applyDeviceDefault("checkbox_tv_rumble_experimental", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
 
-            // Experimental Bluetooth rumble exists only for the TVs with the InputReader race; enabling it asks first
-            final CheckBoxPreference expRumblePref = findPreference("checkbox_tv_rumble_experimental");
-            if (expRumblePref != null) {
-                if (!PreferenceConfiguration.isTvWithBrokenInputRumble(activity)) {
-                    removePreferenceIfPresent("checkbox_tv_rumble_experimental");
-                } else {
-                    expRumblePref.setOnPreferenceChangeListener((preference, newValue) -> {
-                        if (Boolean.TRUE.equals(newValue)) {
-                            new AlertDialog.Builder(activity)
-                                    .setTitle(R.string.tv_rumble_experimental_warning_title)
-                                    .setMessage(R.string.tv_rumble_experimental_warning_text)
-                                    .setPositiveButton(R.string.tv_rumble_experimental_warning_enable, (d, w) -> expRumblePref.setChecked(true))
-                                    .setNegativeButton(R.string.tv_rumble_experimental_warning_cancel, null)
-                                    .show();
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-            }
-
-            // Turning the rumble block off on an affected TV leads to reboots sooner or later (race in
-            // system_server; confirmed on a TCL C8K, Android 14: an hour of play, then two reboots). Ask first.
-            final CheckBoxPreference blockRumblePref = findPreference("checkbox_tv_block_rumble");
-            if (blockRumblePref != null && PreferenceConfiguration.isTvWithBrokenInputRumble(activity)) {
-                blockRumblePref.setOnPreferenceChangeListener((preference, newValue) -> {
-                    if (Boolean.FALSE.equals(newValue)) {
-                        new AlertDialog.Builder(activity)
-                                .setTitle(R.string.tv_block_rumble_warning_title)
-                                .setMessage(R.string.tv_block_rumble_warning_text)
-                                .setPositiveButton(R.string.tv_block_rumble_warning_disable, (d, w) -> blockRumblePref.setChecked(false))
-                                .setNegativeButton(R.string.tv_block_rumble_warning_keep, null)
-                                .show();
-                        return false;
-                    }
-                    return true;
-                });
-            }
 
             // TV build: hide the phone/tablet-only options (touch input, on-screen keyboard, screen
             // orientation, external display, zoom/pan). Hiding only trims the list; defaults stay in effect.

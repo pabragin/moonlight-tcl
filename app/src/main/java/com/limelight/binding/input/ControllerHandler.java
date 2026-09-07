@@ -680,20 +680,14 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         context.hasPaddles = MoonBridge.guessControllerHasPaddles(context.vendorId, context.productId);
         context.hasShare = MoonBridge.guessControllerHasShareButton(context.vendorId, context.productId);
 
-        // Experimental mode: keep the block semantics but deliver rumble coalesced and timed right after
-        // this gamepad's own input events (see flushPendingRumble). Reduces the crash odds, not to zero.
-        context.deferredRumble = prefConfig.tvBlockRumble && prefConfig.tvRumbleExperimental;
-        if (context.deferredRumble) {
-            LimeLog.info("Gamepad rumble for " + devName + " is deferred/coalesced (Android TV experimental mode)");
-        }
+        // Vibrating an InputDevice goes through system_server's InputReader thread, which has a crashing
+        // data race on TCL's Android 14 firmware (an hour of play, then reboots). Rumble is therefore always
+        // delivered coalesced (at most one update per RUMBLE_MIN_INTERVAL_MS) and timed right after this
+        // gamepad's own input events, when the reader thread is idle (see flushPendingRumble). A gamepad
+        // on USB is driven by Moonlight's own USB driver and never touches the system input stack.
+        context.deferredRumble = true;
 
-        if (prefConfig.tvBlockRumble && !prefConfig.tvRumbleExperimental) {
-            // Vibrating an InputDevice is routed through system_server's InputReader thread, which
-            // has a crashing data race on some Android TV firmwares (TCL on Android 14, confirmed:
-            // an hour of play, then two reboots within minutes). Leave this gamepad without any vibrator,
-            // the block takes precedence over every other rumble option.
-            LimeLog.info("Gamepad rumble blocked for " + devName + " (Android TV workaround)");
-        } else if (prefConfig.enableDeviceRumble) {
+        if (prefConfig.enableDeviceRumble) {
             context.vibrator = deviceVibrator;
         } else {
             // Try to use the InputDevice's associated vibrators first
@@ -2171,7 +2165,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         // We may decide to rumble the device for player 1
         if (controllerNumber == 0) {
-            if (foundMatchingDevice && !vibrated && prefConfig.vibrateFallbackToDevice && !prefConfig.tvBlockRumble) {
+            if (foundMatchingDevice && !vibrated && prefConfig.vibrateFallbackToDevice) {
                 // We found a device to vibrate but it didn't have rumble support. The user
                 // has requested us to vibrate the device in this case.
 

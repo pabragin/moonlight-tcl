@@ -1575,9 +1575,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     @Override
     public void start() {
-        if (prefs.adpfHints) {
-            perfHints = com.limelight.utils.PerformanceHints.create(context, refreshRate);
-        }
+        // ADPF hint session for the video threads; inert where the power HAL declines (see PerformanceHints)
+        perfHints = com.limelight.utils.PerformanceHints.create(context, refreshRate);
         if (asyncMode) {
             codecCallbackHandler.post(new Runnable() {
                 @Override
