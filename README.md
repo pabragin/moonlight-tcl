@@ -39,6 +39,8 @@ their updates. Android 14 only, `armeabi-v7a` only (that is what these TVs run).
 - **Built-in latency test** (`Settings → Advanced Settings → Latency test mode`): open [`tools/latency-test.html`](tools/latency-test.html)
   full screen on the PC, press A/B/X/Y in the stream, read button-to-frame latency split into input, host+network and
   decode+present. **Post-stream toast** (`Settings → UI`) shows the decode time of the session.
+  [`tools/framerate-test.html`](tools/framerate-test.html) is a local 60 fps test pattern for the PC (ladder, moving bar, frame
+  counter, heavy mode): every dropped or duplicated frame in the stream is visible on the TV without any overlay.
 
 ## Measurements
 
@@ -74,6 +76,7 @@ differs is what reaches the screen and what it costs:
 |---|---|---|
 | Frames/s on screen while spinning the camera | 40–51 | 60, no dropped frames |
 | Frames/s on screen in a calm scene | 55–59 | 58–60 |
+| Frames/s on screen on a synthetic 60 fps test page (heavy mode) | 54–60, frames lost in two windows out of three | 60, one frame lost in 30 s |
 | App CPU load | 48–55 % | 44–49 % |
 | Rumble | through the system input stack, the path that reboots this TV | safe path |
 | Settings screen | crashed on open | works |
@@ -137,7 +140,8 @@ Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
 
 **Сравнение с официальным Artemis 20.2.6** на том же телевизоре и в той же игре при 4K60 HDR 100 Мбит/с: декодер и время
 декодирования одинаковые, 14 мс, но у Artemis при вращении камеры до экрана доходит 40–51 кадр в секунду, у этой сборки ровно 60,
-при меньшей загрузке процессора. Вибрация у Artemis идёт через системный стек, который перезагружает этот телевизор.
+при меньшей загрузке процессора; на синтетической странице с ровными 60 кадрами Artemis теряет кадры в двух окнах из трёх,
+эта сборка потеряла один кадр за полминуты. Вибрация у Artemis идёт через системный стек, который перезагружает этот телевизор.
 
 **Какой битрейт ставить для 4K60 HDR.** 100 Мбит/с по умолчанию: картинка практически без потерь, 60 кадров держатся почти во
 всех сценах. 60 Мбит/с, если нужна гарантированная плавность в любой сцене ценой чуть более мягкой картинки. 120 Мбит/с, если
