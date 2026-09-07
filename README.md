@@ -54,7 +54,8 @@ exactly the moment the rumble race hits), not a compositor problem.
    automatically; AV1 remains available via "Force AV1".
 4. **Defaults for a 4K TV.** First start uses 3840x2160, 60 FPS, 65 Mbps (100 Mbps until 20.2.9-tcl4; see item 15 for why), HEVC and "Prefer lowest latency" frame pacing
    (Artemis defaults to 1280x720 and 80 Mbps at 4K). Everything is still adjustable in Settings.
-5. **Decoder tuning that can be checked.** "Ultra Low Latency" is on by default on MediaTek TVs and the video renderer thread runs
+5. **Decoder tuning that can be checked.** The decoder is always configured with every low-latency hint (this was the "Ultra Low
+   Latency" checkbox, on by default on MediaTek TVs, until 20.2.9-tcl6 made it the only mode) and the video threads run
    at display priority. Until 20.2.8-tcl5 the MediaTek build also asked for `KEY_OPERATING_RATE = 32767`, which
    `c2.mtk.hevc.decoder` rejects at `start()`; that key sat in every fallback attempt, so the decoder silently ended up
    configured with *no* low-latency option at all (C8K log: tries 0–2 fail, try 3 succeeds with a bare format). 20.2.8-tcl6
@@ -126,8 +127,11 @@ exactly the moment the rumble race hits), not a compositor problem.
    - **Quiet logcat (20.2.9-tcl2/tcl3).** USB device dumps, PC polling, mDNS address filtering, poster cache hits, the
      per-event rumble line and the periodic audio counters only appear in debug builds; the audio counters still log a line
      whenever underruns or dropped packets actually change.
-   - The timestamp-0 release mode (upstream PR #1577) is the checkbox `Settings → Advanced Settings → Render frames with
-     timestamp 0`, off by default. Since 20.2.9-tcl4 there are no adb debug knobs: every switch is a real setting.
+   - The timestamp-0 release mode (upstream PR #1577) was a checkbox from 20.2.9-tcl1 to tcl5. Measured on the C8K in the same
+     static scene with `dumpsys SurfaceFlinger --latency`: both modes present a steady 60 frames/s with the same decode time,
+     the only dips are in the first seconds after stream start (HDR decoder restart) and happen in both, so 20.2.9-tcl6 removed
+     the checkbox and frames are always released with `System.nanoTime()` timestamps, as upstream does. Since 20.2.9-tcl4 there
+     are no adb debug knobs: every remaining switch is a real setting.
 14. **One copy less and no renderer thread on the video path (20.2.9-tcl4).** Two code explorations of the per-frame hot path
    found that the client's share of the "decode time" statistic is small (the MediaTek hardware decoder dominates the 10 to
    19 ms at 4K60 HEVC) and removed what there was:
@@ -223,5 +227,6 @@ HEVC 1080p 6 мс; AV1 хост не кодирует. Кодек при 4K по
 декодирования (с tcl5 она показывала около нуля из-за разных часов). Ключи MediaTek `game-mode`/`low-latency-mode` декодер
 принимает, но по замерам они добавляют целый кадр задержки на экране, поэтому с 20.2.9-tcl4 не запрашиваются.
 
-Ключи adb удалены в 20.2.9-tcl4: все переключатели теперь только в настройках приложения (нулевая метка времени кадра,
-AAudio, подсказки ADPF, вибрация).
+Ключи adb удалены в 20.2.9-tcl4: все переключатели теперь только в настройках приложения (AAudio, подсказки ADPF, вибрация). Галочки
+«Нулевая метка времени кадра» и «Сверхнизкая задержка» удалены в 20.2.9-tcl6: первая по замерам у композитора ничего не
+меняет, вторая теперь единственный режим декодера.

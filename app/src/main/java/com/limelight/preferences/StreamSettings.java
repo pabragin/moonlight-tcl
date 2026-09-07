@@ -346,7 +346,6 @@ public class StreamSettings extends AppCompatActivity {
             // Persist the device default the first time the settings are shown so the checkbox
             // matches what PreferenceConfiguration.readPreferences() uses when the key is absent.
             applyDeviceDefault("checkbox_tv_block_rumble", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
-            applyDeviceDefault("checkbox_ultra_low_latency", PreferenceConfiguration.isMediaTekTv(activity));
             applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
 
             // AAudio cannot host the system equalizer session: grey it out while audio FX are on

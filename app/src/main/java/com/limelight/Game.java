@@ -728,7 +728,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 .setVirtualDisplay(vDisplay)
                 .setResolutionScaleFactor(prefConfig.resolutionScaleFactor)
                 .setApp(app)
-                .setEnableUltraLowLatency(prefConfig.enableUltraLowLatency)
                 .setBitrate(isMetered ? prefConfig.meteredBitrate: prefConfig.bitrate)
                 .setEnableSops(prefConfig.enableSops)
                 .enableLocalAudioPlayback(prefConfig.playHostAudio)
@@ -810,7 +809,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
                 // Der Decoder erhält die jeweils aktive Oberfläche vom Container
                 decoderRenderer.setRenderTarget(streamContainer.getSurface());
-                decoderRenderer.setImmediatePtsZero(prefConfig.ptsZero);
 
                 // Starten Sie die NvConnection
 

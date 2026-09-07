@@ -60,12 +60,6 @@
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="checkbox_ultra_low_latency"
-            android:summary="@string/summary_checkbox_ultra_low_latency"
-            android:title="@string/title_checkbox_ultra_low_latency"
-            app:iconSpaceReserved="false" />
-        <CheckBoxPreference
-            android:defaultValue="false"
             android:key="checkbox_forceTightThresholds"
             android:summary="@string/summary_checkbox_forceTightThresholds"
             android:title="@string/title_checkbox_forceTightThresholds"
@@ -738,12 +732,6 @@
             android:key="checkbox_adpf_hints"
             android:summary="@string/summary_checkbox_adpf_hints"
             android:title="@string/title_checkbox_adpf_hints"
-            app:iconSpaceReserved="false" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="checkbox_pts_zero"
-            android:summary="@string/summary_checkbox_pts_zero"
-            android:title="@string/title_checkbox_pts_zero"
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"

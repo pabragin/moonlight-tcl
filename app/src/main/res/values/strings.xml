@@ -115,8 +115,6 @@
     <string name="summary_checkbox_aaudio_renderer">Plays the stream through a native AAudio low-latency stream instead of AudioTrack; decoded audio never passes through Java. Falls back to AudioTrack automatically if the TV refuses the stream. Not used while the system equalizer is enabled.</string>
     <string name="title_checkbox_adpf_hints">Performance hints for the video threads (ADPF)</string>
     <string name="summary_checkbox_adpf_hints">Tells Android which threads decode and present the video and how long every frame took (Android Dynamic Performance Framework), so the firmware can keep the CPU frequency up for them and not move them to slow cores. On a C8K the CPU already runs at maximum during a stream, so this only smooths frame times. Does nothing on firmware that declines the session.</string>
-    <string name="title_checkbox_pts_zero">Render frames with timestamp 0</string>
-    <string name="summary_checkbox_pts_zero">Hands each decoded frame to the compositor with a zero timestamp ("show now") instead of the current clock time. Some TCL/MediaTek users report a smoother picture this way; on a C8K no difference was measurable. The compositor then sees identical timestamps on all frames and cannot estimate the content frame rate. The adb setting moonlight_tcl_pts overrides this checkbox.</string>
     <string name="perf_overlay_audio">Audio: %1$s · latency %2$d ms · underruns %3$d · dropped %4$d</string>
     <string name="title_tv_rumble_experimental">Rumble over Bluetooth anyway (experimental)</string>
     <string name="summary_tv_rumble_experimental">On by default on affected TVs. Sends rumble through the system input stack despite the firmware bug, but coalesced (at most 20 updates per second) and only right after this gamepad\'s own input, when the system\'s input thread is idle. Makes the crash rare, not impossible: if the TV still reboots during play, turn this off.</string>
@@ -587,8 +585,6 @@
     <string name="summary_checkbox_gamepad_enable_battery_report">Report gamepad battery status when possible.\nDisable this option might help if you experience stutter with touch screen/touch pad/stylus/mouse input occasionally.</string>
     <string name="title_checkbox_enforce_display_mode">Enforce Display Mode</string>
     <string name="summary_checkbox_enforce_display_mode">Force surface to use the optimal display mode.\nRequired by some systems (such as ColorOS) to set refresh rate/resolution properly.\nDo not enable on ChromeCast 4K as it might lead to bugs.</string>
-    <string name="title_checkbox_ultra_low_latency">Ultra Low Latency (experimental)</string>
-    <string name="summary_checkbox_ultra_low_latency">Adds extra low-latency hints even when the decoder advertises Android\'s official low-latency mode: on MediaTek the vdec-lowlatency key, realtime priority and maximum operating rate; on Snapdragon 8 Gen 2/3/Elite the Qualcomm extensions. Falls back automatically if the decoder rejects them. On by default on MediaTek TVs.</string>
    	<string name="title_checkbox_forceTightThresholds">Tight Vsync (Experimental)</string>
     <string name="summary_checkbox_forceTightThresholds">Tighter VSYNC thresholds for lower latency; may increase drops.</string>
     <string name="title_checkbox_use_virtual_display">Use Virtual Display</string>

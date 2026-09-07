@@ -729,7 +729,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
             MediaFormat mediaFormat = createBaseMediaFormat(mimeType);
             // This will try low latency options until we find one that works (or we give up).
-            boolean newFormat = MediaCodecHelper.setDecoderLowLatencyOptions(mediaFormat, selectedDecoderInfo, prefs.enableUltraLowLatency, tryNumber);
+            boolean newFormat = MediaCodecHelper.setDecoderLowLatencyOptions(mediaFormat, selectedDecoderInfo, tryNumber);
             //todo 色彩格式
 //            MediaCodecInfo.CodecCapabilities codecCapabilities = selectedDecoderInfo.getCapabilitiesForType(mimeType);
 //            int[] colorFormats=codecCapabilities.colorFormats;
@@ -1130,13 +1130,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private boolean submitThreadPriorityApplied;
 
 
-    // "Render frames with timestamp 0" checkbox: release with PTS 0 ("show now") instead of System.nanoTime()
-    private volatile boolean immediatePtsZero;
-
-    public void setImmediatePtsZero(boolean zero) {
-        immediatePtsZero = zero;
-    }
-
     // Diagnostics for the present tracking itself (why a window may end with zero matched frames)
     private volatile int presentCallbacks;
     private int presentCallbacksLastSecond;
@@ -1319,7 +1312,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         boolean neverDrop = prefs.framePacing == PreferenceConfiguration.FRAME_PACING_MAX_SMOOTHNESS
                                 || prefs.framePacing == PreferenceConfiguration.FRAME_PACING_CAP_FPS;
                         recordFrameRelease(presentationTimeUs);
-                        codec.releaseOutputBuffer(index, (neverDrop || immediatePtsZero) ? 0 : System.nanoTime());
+                        codec.releaseOutputBuffer(index, neverDrop ? 0 : System.nanoTime());
                         com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                         activeWindowVideoStats.totalFramesRendered++;
 
@@ -1391,7 +1384,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 if (perfHints != null) {
                     perfHints.addThread(Process.myTid());
                 }
-                LimeLog.info("Renderer: lowest-latency PTS mode " + (immediatePtsZero ? "zero" : "now"));
+                LimeLog.info("Renderer: lowest-latency release with System.nanoTime() timestamps");
 
                 BufferInfo info = new BufferInfo();
                 while (!stopping) {
@@ -1428,7 +1421,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                     // Use a PTS that will cause this frame to be dropped if another comes in within
                                     // the same V-sync period
                                     recordFrameRelease(presentationTimeUs);
-                                    videoDecoder.releaseOutputBuffer(lastIndex, immediatePtsZero ? 0 : System.nanoTime());
+                                    videoDecoder.releaseOutputBuffer(lastIndex, System.nanoTime());
                                     com.limelight.utils.LatencyTester.onFrameRendered(presentationTimeUs);
                                 }
 
@@ -1594,7 +1587,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     }
                 }
             });
-            LimeLog.info("Decoder mode: async callbacks; lowest-latency PTS mode " + (immediatePtsZero ? "zero" : "now"));
+            LimeLog.info("Decoder mode: async callbacks");
         } else {
             LimeLog.info("Decoder mode: sync dequeue");
             startRendererThread();
