@@ -2,7 +2,8 @@
 
 A build of [Artemis](https://github.com/ClassicOldSong/moonlight-android) (the Moonlight Android fork) for **TCL Google TVs on
 Android 14 firmware** (C8K, C6K, QM6K, QM8K and similar): a gamepad-only 4K client with the lowest latency the TV's MediaTek chip
-can deliver, and no TV freezes or reboots. Everything in this file was measured on a TCL C8K.
+can deliver, and no TV freezes or reboots. The numbers here were measured on a TCL C8K (the one game figure that was not is
+marked as such).
 Background: [moonlight-stream/moonlight-android#1533](https://github.com/moonlight-stream/moonlight-android/issues/1533).
 
 The app is called **Moonlight TCL**, package `com.limelight.tcl`, so it installs next to Artemis or Moonlight and is not replaced by
@@ -64,7 +65,9 @@ Frames that actually reach the screen at 4K60 HDR while spinning the camera in a
 
 Things that turned out not to matter on this TV: the display has exactly one mode, 3840×2160 at 60 Hz (the panel's 120/144 Hz
 exist only for HDMI inputs), so a 120 FPS stream is shown at 60; releasing frames with a zero timestamp made no difference to
-smoothness or latency; MediaTek's `game-mode` decoder keys cost a full extra frame on screen and are not used.
+smoothness or latency; and of the MediaTek decoder's ~113 vendor keys, the latency-named ones were tried one at a time and none
+helped (some are ignored, one blanks the screen, `game-mode` leaves the decode time unchanged and visibly smears the picture),
+so none are used.
 
 ## Compared with the official Artemis 20.2.6
 
@@ -72,7 +75,7 @@ Same TV, same PC, same settings (4K60 HEVC HDR, lowest-latency pacing), Artemis 
 the decoder and its options are identical and both report the same decode time, 14 ms. The controlled comparison uses
 [`tools/framerate-test.html`](tools/framerate-test.html) in heavy mode on the PC, a source that is guaranteed to deliver 60 frames per
 second. The TV's compositor was asked every two seconds how many frames it had actually put on the screen, and each answer was
-scored as either "all 60 per second" or "fewer". Over about 45 seconds per app:
+scored as either "all 60 per second" or "fewer":
 
 | Test page, heavy mode | Artemis 20.2.6 | Moonlight TCL |
 |---|---|---|
