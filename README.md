@@ -73,7 +73,7 @@ decoder is the rest, and what it costs depends on pixels and bits, not on the co
 |---|---|---|---|
 | 60 Mbps | 0.12 | 12 ms | 60 |
 | 100 Mbps | 0.20 | 13 ms | 58–60, single dropped frames |
-| 120 Mbps | 0.24 | 14 ms | 60, with a one-second dip to about 50 around each IDR frame |
+| 120 Mbps | 0.24 | 14 ms | 60 with one-second dips to about 50 around IDR frames in one run, 37–44 in a heavier scene: no headroom left |
 | 150 Mbps | 0.30 | 15 ms | 49–59 |
 
 **Things that turned out not to matter on this TV.** The display exposes exactly one mode, 3840×2160 at 60 Hz; the panel's 120/144 Hz
@@ -111,7 +111,7 @@ scenes get blocky, above it only dark gradients improve a little.
 | Guaranteed smooth 60, softer picture | 60 Mbps | 12 ms decode, big headroom |
 | Balance | 80 Mbps | headroom of 100 is already thin; 80 keeps most of its picture |
 | Best picture that still holds 60 (**default**) | 100 Mbps | near-transparent, rare single-frame drops in heavy scenes |
-| Maximum picture, accept rare dips | 120 Mbps | cleaner dark gradients; a one-second dip around IDR frames |
+| Maximum picture, accept dips | 120 Mbps | cleaner dark gradients; holds 60 in some scenes, drops to about 40 in the heaviest |
 | Not this | 150 Mbps | no visible gain over 120, the decoder no longer holds 60 |
 
 If latency matters more than sharpness, 2560×1440 at 60 Mbps decodes in about 7 ms and the TV scales it to the panel. Keep HEVC;
