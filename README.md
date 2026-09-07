@@ -83,6 +83,24 @@ frames with timestamp 0 instead of `System.nanoTime()` (upstream PR #1577) chang
 In-app compositor timing only covers the first seconds of a stream: once the HWC moves the video layer to its fast path it stops
 reporting present times (Codec2 logs `no present fence`), so steady-state numbers need `dumpsys SurfaceFlinger --latency`.
 
+## Compared with the official Artemis 20.2.6 on the same TV
+
+Same C8K, same PC, same game and heavy scene (camera spinning), same settings: 4K60 HEVC HDR at 100 Mbps, lowest-latency pacing.
+Artemis 20.2.6 is the release this fork started from, so the decoder and its low-latency options are identical, and both report
+the same decode time (14 ms, 13 ms hardware). What differs is what reaches the screen and what it costs:
+
+| 100 Mbps, heavy scene | Artemis 20.2.6 | Moonlight TCL |
+|---|---|---|
+| Frames/s on screen while spinning | 40–51 | 60, eight consecutive samples without a dropped frame |
+| Frames/s on screen in a calm scene | 55–59 | 58–60 |
+| App CPU load | 48–55 % | 44–49 % |
+| Incoming packets/s | ~10 400 | ~10 400 |
+| Rumble | 807 commands through the system input stack in 5 minutes, the path that reboots this TV | coalesced / USB driver, safe |
+| Settings screen | crashed once on open (`Fragment$InstantiationException`) | fixed |
+
+Same stream, same decoder, one frame in four or five lost in motion on Artemis versus none here: that is the asynchronous
+decoder path, the single copy and the thread priorities paying off.
+
 ## Which bitrate to set
 
 A real-time HEVC encoder is visually transparent at about 0.2 bits per pixel per frame; below that motion gets soft and dark HDR
@@ -151,6 +169,11 @@ Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
 через собственный драйвер, по Bluetooth пакетами не чаще 20 раз в секунду сразу после ввода геймпада (гонка в InputReader
 прошивки, исправленная в Android 15). Зависания телевизора из первых сборок больше не воспроизводятся, обход композитора удалён.
 Настроек мало, отладочных ключей нет, лог тихий. Встроенный тест задержки и итог после стрима.
+
+**Против официального Artemis 20.2.6** на том же телевизоре, той же игре и сцене, при одинаковых 4K60 HDR 100 Мбит/с: время
+декодирования одинаковое (14 и 13 мс, декодер тот же), но у Artemis при вращении камеры до экрана доходит 40–51 кадр в секунду,
+у этой сборки ровно 60 без пропусков, при меньшей загрузке процессора (44–49 % против 48–55 %); вибрация у Artemis идёт тем путём,
+который перезагружает телевизор, а экран настроек у него падает.
 
 **Замеры.** Доля самого приложения во времени декодирования меньше миллисекунды, остальное аппаратный декодер: 4K HEVC 13 мс,
 H.264 столько же, 1440p 7 мс, 1080p 6 мс. Экран у телевизора один режим 4K 60 Гц, 120 Гц только для HDMI. Битрейт для 4K60 HDR:
