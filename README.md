@@ -164,8 +164,18 @@ press is an input-reader event, exactly the moment the race hits), not a composi
    do: 1440p HEVC removes about 8 ms per frame (the TV scales it to the panel itself), and 40 to 60 instead of 100 Mbps at 4K
    removes 3 to 5 ms (the two lower bitrates decode alike). Caveat learned the hard way: the 100 Mbps rows above were measured
    while the TV's Ethernet link (negotiated at 2.5 Gbit) was silently dropping packets, and late packets count in the decode
-   figure. Re-measured on a clean gigabit link: 60 Mbps 12 ms, 100 Mbps 13 ms with 58 to 60 frames/s reaching the screen in a
-   heavy scene, 150 Mbps 15 ms with only 49 to 59 frames/s. So 20.2.9-tcl5's 65 Mbps default lasted three releases; since
+   figure. Re-measured on a clean gigabit link (4K60 HEVC HDR, camera spinning in a heavy scene, frames reaching the screen
+   counted with `dumpsys SurfaceFlinger --latency`):
+
+   | Bitrate | Decode average | Hardware share | Frames/s on screen in the heavy scene |
+   |---|---|---|---|
+   | 60 Mbps | 12 ms | 12 ms | 60 |
+   | 100 Mbps | 13 ms | 12 ms | 58–60, single dropped frames |
+   | 120 Mbps | 14 ms | 13 ms | 60, with a one-second dip to about 50 around each IDR frame |
+   | 150 Mbps | 15 ms | 13 ms | 49–59 |
+
+   In bits per pixel per frame that is 0.12 / 0.20 / 0.24 / 0.30; a real-time HEVC encoder is visually transparent at about
+   0.20, so 100 Mbps is where the picture stops improving noticeably while the decoder still has a little headroom. So 20.2.9-tcl5's 65 Mbps default lasted three releases; since
    20.2.9-tcl8 the 4K60 default is 100 Mbps again, and if the picture stutters the first thing to check is the network, not
    the bitrate (see the "Slow connection to PC" note below).
    - **"Slow connection to PC"** means the library lost 30 % of the frames in a 3 s window (or 15 % twice); it is about packets,
