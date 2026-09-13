@@ -256,7 +256,11 @@
     <string name="title_checkbox_force_device_motion">Always use device\'s motion sensors</string>
     <string name="summary_checkbox_force_device_motion">Enforce using devices\'s built-in motion sensor even when the controller reported motion sensors are supported.</string>
     <string name="title_enable_rumble">Enable Rumble</string>
-    <string name="summary_enable_rumble">Gamepad rumble. On TCL TVs with Android 14 firmware it is sent coalesced (at most 20 updates a second) right after the pad\'s own input, which dodges the firmware race that used to reboot the TV; a gamepad on a USB cable rumbles through Moonlight\'s own driver and never touches the system input stack.</string>
+    <string name="summary_enable_rumble">Gamepad rumble. Off by default on Android 14: vibration sent through the system input service can crash it and restart the TV (a firmware race, fixed in Android 15). When on, Moonlight TCL sends at most 10 updates a second right after the pad\'s own input and skips small level changes, which makes the crash rare but not impossible with a Bluetooth pad. A gamepad on a USB cable rumbles through Moonlight\'s own driver and is safe.</string>
+    <string name="rumble_warning_title">Rumble can restart this TV</string>
+    <string name="rumble_warning_text">On Android 14 the TV firmware has a race in the system input service that gamepad vibration can trigger. Moonlight TCL sends rumble sparingly (at most 10 updates a second, timed right after the pad\'s own input), so the crash is rare, but with a Bluetooth gamepad the system service can still die now and then: the TV shows the boot animation and every app restarts.\n\nA gamepad on a USB cable rumbles through Moonlight\'s own driver and is safe.\n\nEnable rumble anyway?</string>
+    <string name="rumble_warning_enable">Enable anyway</string>
+    <string name="rumble_warning_keep_off">Keep off</string>
     <string name="category_input_settings">Input Settings</string>
     <string name="title_checkbox_touchscreen_trackpad">Use the touchscreen as a trackpad</string>
     <string name="summary_checkbox_touchscreen_trackpad">If enabled, the touchscreen acts like a trackpad. If disabled, the touchscreen directly controls the mouse cursor.</string>

@@ -67,11 +67,14 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
     private static final int MINIMUM_BUTTON_DOWN_TIME_MS = 25;
 
-    // Deferred rumble (Android TV workaround, experimental): never call the vibrator more often than
-    // this per gamepad, and flush a pending request from the main thread after this long without
-    // input from the pad.
-    private static final int RUMBLE_MIN_INTERVAL_MS = 50;
+    // Deferred rumble (Android TV workaround): never call the vibrator more often than this per
+    // gamepad, and flush a pending request from the main thread after this long without input from
+    // the pad. Every call is one more chance to hit the firmware race, so 10 per second, not 20.
+    private static final int RUMBLE_MIN_INTERVAL_MS = 100;
     private static final int RUMBLE_IDLE_FLUSH_MS = 100;
+    // A motor level counts as changed only when it starts, stops or moves by at least this much
+    // (about 6% of full scale); smaller wobbles are not worth another call into the input stack.
+    private static final int RUMBLE_MIN_DELTA = 0x1000;
 
     private static final int QUICK_MENU_FIRST_STAGE_MS = 200;
 
@@ -2155,10 +2158,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 return;
             }
             boolean triggersMatter = ctx.quadVibrators;
-            if (ctx.lowFreqMotor == ctx.sentLowFreqMotor && ctx.highFreqMotor == ctx.sentHighFreqMotor &&
-                    (!triggersMatter || (ctx.leftTriggerMotor == ctx.sentLeftTriggerMotor &&
-                            ctx.rightTriggerMotor == ctx.sentRightTriggerMotor))) {
-                // Same values already sent (including "still stopped"): nothing to do
+            if (!rumbleChangeWorthSending(ctx.lowFreqMotor, ctx.sentLowFreqMotor) &&
+                    !rumbleChangeWorthSending(ctx.highFreqMotor, ctx.sentHighFreqMotor) &&
+                    (!triggersMatter || (!rumbleChangeWorthSending(ctx.leftTriggerMotor, ctx.sentLeftTriggerMotor) &&
+                            !rumbleChangeWorthSending(ctx.rightTriggerMotor, ctx.sentRightTriggerMotor)))) {
+                // Same or nearly the same values already sent (including "still stopped"): nothing to do.
+                // The pad keeps its last level; the next larger change, a start or a stop is delivered.
                 ctx.rumbleDirty = false;
                 return;
             }
@@ -2170,6 +2175,17 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             ctx.rumbleDirty = false;
         }
         deliverRumble(ctx, low, high, leftTrigger, rightTrigger);
+    }
+
+    private static boolean rumbleChangeWorthSending(short requested, short sent) {
+        int req = requested & 0xFFFF, cur = sent & 0xFFFF;
+        if (req == cur) {
+            return false;
+        }
+        if (req == 0 || cur == 0) {
+            return true;
+        }
+        return Math.abs(req - cur) >= RUMBLE_MIN_DELTA;
     }
 
     public void handleRumble(short controllerNumber, short lowFreqMotor, short highFreqMotor) {

@@ -192,7 +192,9 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_GAMEPAD_MOTION_SENSORS = true;
     private static final boolean DEFAULT_GAMEPAD_MOTION_FALLBACK = false;
     private static final boolean DEFAULT_FORCE_MOTION_SENSORS_FALLBACK = false;
-    private static final boolean DEFAULT_ENABLE_RUMBLE = true;
+    // Off: on Android 14 a vibration sent through the system input stack can crash system_server
+    // (InputReader race, see ControllerHandler.flushPendingRumble). StreamSettings warns before enabling.
+    private static final boolean DEFAULT_ENABLE_RUMBLE = false;
     private static final boolean DEFAULT_PREVENT_PACKET_LOSS = false;
     private static final boolean DEFAULT_GAMEPAD_ENABLE_BATTERY_REPORT = true;
     private static final boolean DEFAULT_FORCE_QWERTY = true;

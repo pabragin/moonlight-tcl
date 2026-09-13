@@ -358,6 +358,25 @@ public class StreamSettings extends AppCompatActivity {
             }
             applyDeviceDefault("checkbox_usb_bind_all", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
 
+            // Rumble through the system input stack can crash system_server on Android 14 (InputReader race,
+            // fixed in Android 15): the TV shows the boot animation and every app restarts. Off by default;
+            // ask before turning it on.
+            final CheckBoxPreference rumblePref = findPreference("checkbox_enable_rumble");
+            if (rumblePref != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                rumblePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    if (Boolean.TRUE.equals(newValue)) {
+                        new AlertDialog.Builder(activity)
+                                .setTitle(R.string.rumble_warning_title)
+                                .setMessage(R.string.rumble_warning_text)
+                                .setPositiveButton(R.string.rumble_warning_enable, (d, w) -> rumblePref.setChecked(true))
+                                .setNegativeButton(R.string.rumble_warning_keep_off, null)
+                                .show();
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
 
             // TV build: hide the phone/tablet-only options (touch input, on-screen keyboard, screen
             // orientation, external display, zoom/pan). Hiding only trims the list; defaults stay in effect.

@@ -24,12 +24,16 @@ their updates. Android 14 only, `armeabi-v7a` only (that is what these TVs run).
 - Native AAudio low-latency output, no Java between the decoder and the audio driver. Falls back to `AudioTrack` on its own,
   and when the system equalizer is on.
 
-**Rumble that does not reboot the TV**
-- TCL's Android 14 firmware has a race in `system_server` that crashes when a gamepad vibrates through the Android input stack:
-  the TV reboots mid-game (confirmed from the crash log and AOSP source; fixed upstream in Android 15). Here a USB gamepad is
-  driven by Moonlight's own USB driver and never touches that stack, and a Bluetooth pad gets its rumble coalesced to at most
-  20 updates per second, sent right after the pad's own input when the firmware's input thread is idle. One switch:
-  `Settings → Gamepad → Enable rumble`.
+**Rumble: off by default, because it can restart the TV**
+- TCL's Android 14 firmware has a race in `system_server`'s input service: a gamepad vibration arrives on a binder thread and is
+  pushed into the event queue that the input reader thread is draining without the lock. Any rumble sent through the Android
+  input stack can hit it; when it does, the system service aborts, the TV shows the boot animation and every app restarts, which
+  looks exactly like a reboot (confirmed from the crash dumps and AOSP source; fixed upstream in Android 15, so only TCL can fix
+  it here). Moonlight TCL therefore ships with rumble **off**, and `Settings → Gamepad → Enable rumble` warns before turning it
+  on. With it on, a Bluetooth pad gets at most 10 updates per second, sent right after the pad's own input when the reader thread
+  is idle, and small level changes are not sent at all; that made the crash rare (once in a week of daily play instead of hourly)
+  but not impossible. A gamepad on a USB cable is driven by Moonlight's own USB driver, never touches the input stack and is safe
+  to rumble.
 
 **Stability and housekeeping**
 - The whole-TV freezes of the first builds (volume bar, app switch, stream exit) no longer reproduce; the workarounds that fought
@@ -104,7 +108,8 @@ TV, and its Settings screen crashed on open during the test.
 APKs are on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page, one `armeabi-v7a` APK per release. Install with
 a file manager, the Downloader app or `adb install`; pair with your PC again after installing.
 Updates: [add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D)
-or use the "Use Obtainium" entry in the app's settings.
+or use `Settings → Follow Update` in the app. Moonlight TCL is also listed in the
+[Obtainium app catalog](https://apps.obtainium.imranr.dev/), so it can be found from Obtainium's own "Add app" search.
 
 If the TV freezes or reboots, open an issue with `adb logcat -v threadtime -b all` captured around the moment, or after a reboot
 the output of `adb shell dumpsys dropbox --print system_server_native_crash`.
@@ -134,12 +139,16 @@ Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
 Сборка [Artemis](https://github.com/ClassicOldSong/moonlight-android) для телевизоров TCL на прошивке Android 14 (C8K и похожие):
 клиент под геймпад и 4K с минимальной задержкой, которую может дать чип MediaTek, без зависаний и перезагрузок телевизора.
 Приложение называется Moonlight TCL, пакет `com.limelight.tcl`, ставится рядом с обычным Artemis, только Android 14. APK на
-странице [Releases](https://github.com/pabragin/moonlight-tcl/releases); после установки спарьтесь с ПК заново.
+странице [Releases](https://github.com/pabragin/moonlight-tcl/releases), обновления через Obtainium (приложение есть в его
+каталоге); после установки спарьтесь с ПК заново.
 
 **Что сделано.** Возвращён проверенный видеоконвейер; кадры уходят на экран прямо из декодера, без промежуточного потока; кадр
-копируется один раз; декодеру всегда выставляются все опции низкой задержки; звук через нативный AAudio. Вибрация геймпада не
-перезагружает телевизор: по USB через собственный драйвер, по Bluetooth короткими пакетами сразу после ввода геймпада, в обход
-гонки в прошивке. Зависания телевизора из первых сборок больше не воспроизводятся. Настроек мало, есть встроенный тест задержки и
+копируется один раз; декодеру всегда выставляются все опции низкой задержки; звук через нативный AAudio. Вибрация геймпада по умолчанию
+выключена: в прошивке Android 14 есть гонка в системной службе ввода, которую запускает вибрация через системный стек; служба
+падает, телевизор показывает анимацию загрузки, и все приложения перезапускаются (исправлено только в Android 15). По USB-кабелю
+вибрация идёт через собственный драйвер Moonlight и безопасна; по Bluetooth при включении она уходит не чаще 10 раз в секунду
+сразу после ввода геймпада, мелкие изменения уровня не отправляются, что делает сбой редким, но не исключает его. Зависания
+телевизора из первых сборок больше не воспроизводятся. Настроек мало, есть встроенный тест задержки и
 сообщение с временем декодирования после стрима.
 
 **Сравнение с официальным Artemis 20.2.6** на том же телевизоре при одинаковых настройках 4K60 HDR: декодер и время

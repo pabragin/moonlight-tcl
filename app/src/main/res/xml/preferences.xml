@@ -282,7 +282,7 @@
             android:title="@string/title_checkbox_gamepad_enable_battery_report"
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="checkbox_enable_rumble"
             android:summary="@string/summary_enable_rumble"
             android:title="@string/title_enable_rumble"
