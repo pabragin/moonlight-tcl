@@ -934,7 +934,7 @@ private static int getFramePacingValue(Context context) {
 
 
         //兼容joycon手柄
-        config.enableJoyConFix = prefs.getBoolean("checkbox_joycon_fix",false);
+        config.enableJoyConFix = prefs.getBoolean("checkbox_enable_joyconfix", false);
         //全键盘透明度
 
 

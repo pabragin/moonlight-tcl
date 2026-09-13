@@ -56,6 +56,13 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
     private static final int MAXIMUM_BUMPER_UP_DELAY_MS = 100;
 
+    // Mouse emulation: sample the sticks every 10 ms instead of 50 ms for smoother cursor motion.
+    // Each report carries 1/5 of the old per-report movement, so the overall speed is unchanged.
+    private static final int MOUSE_EMULATION_REPORT_PERIOD_MS = 10;
+    private static final float MOUSE_EMULATION_SPEED_SCALE = MOUSE_EMULATION_REPORT_PERIOD_MS / 50.0f;
+    // Holding LT while in mouse emulation scrolls this much faster (stick and D-pad alike)
+    private static final int MOUSE_EMULATION_FAST_SCROLL_MULTIPLIER = 3;
+
     private static final int START_DOWN_TIME_MOUSE_MODE_MS = 750;
 
     private static final int MINIMUM_BUTTON_DOWN_TIME_MS = 25;
@@ -1208,24 +1215,26 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                     conn.sendMouseButtonUp(MouseButtonPacket.BUTTON_RIGHT);
                 }
             }
+            // D-pad scrolls one notch per press, more while LT is held
+            byte scrollStep = (byte) ((leftTrigger & 0xFF) > 0 ? MOUSE_EMULATION_FAST_SCROLL_MULTIPLIER : 1);
             if ((changedMask & ControllerPacket.UP_FLAG) != 0) {
                 if ((inputMap & ControllerPacket.UP_FLAG) != 0) {
-                    conn.sendMouseScroll((byte) 1);
+                    conn.sendMouseScroll(scrollStep);
                 }
             }
             if ((changedMask & ControllerPacket.DOWN_FLAG) != 0) {
                 if ((inputMap & ControllerPacket.DOWN_FLAG) != 0) {
-                    conn.sendMouseScroll((byte) -1);
+                    conn.sendMouseScroll((byte) -scrollStep);
                 }
             }
             if ((changedMask & ControllerPacket.RIGHT_FLAG) != 0) {
                 if ((inputMap & ControllerPacket.RIGHT_FLAG) != 0) {
-                    conn.sendMouseHScroll((byte) 1);
+                    conn.sendMouseHScroll(scrollStep);
                 }
             }
             if ((changedMask & ControllerPacket.LEFT_FLAG) != 0) {
                 if ((inputMap & ControllerPacket.LEFT_FLAG) != 0) {
-                    conn.sendMouseHScroll((byte) -1);
+                    conn.sendMouseHScroll((byte) -scrollStep);
                 }
             }
 
@@ -1849,28 +1858,67 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         return vector;
     }
 
-    private void sendEmulatedMouseMove(short x, short y, boolean mouseEmulationXDown, int mouseEmulationPixelMultiplier) {
-        Vector2d vector = convertRawStickAxisToPixelMovement(x, y);
-        if (vector.getMagnitude() >= 1) {
+    // Splits a movement computed for the legacy 50 ms report period into 10 ms steps, carrying the
+    // fractional remainder over so slow stick deflections keep their average speed instead of
+    // rounding away to 0 or up to a whole pixel every report.
+    private static final class MouseEmulationAccumulator {
+        private final float[] remainder = new float[2];
 
-            // Used a fixed amount of mouse movement while the X button is pressed
-            if(mouseEmulationXDown == true )
-            {
-                // convert the vector number to -1 if negative and +1 if positive and then send the mouse movement in pixels
-                conn.sendMouseMove((short)(Integer.signum((int)vector.getX()) * mouseEmulationPixelMultiplier) , (short)(Integer.signum((int)-vector.getY()) * mouseEmulationPixelMultiplier) );
-            }
-            else {
-                // If X button is not pressed, base the movement on how much the stick is moved from the center
-                conn.sendMouseMove((short) vector.getX(), (short) -vector.getY());
-            }
+        short step(int axis, float delta) {
+            float scaled = delta * MOUSE_EMULATION_SPEED_SCALE + remainder[axis];
+            int whole = (int) scaled;
+            remainder[axis] = scaled - whole;
+            return (short) whole;
+        }
+
+        void reset() {
+            remainder[0] = 0;
+            remainder[1] = 0;
         }
     }
 
-    private void sendEmulatedMouseScroll(short x, short y) {
+    private void sendEmulatedMouseMove(GenericControllerContext ctx, short x, short y) {
         Vector2d vector = convertRawStickAxisToPixelMovement(x, y);
-        if (vector.getMagnitude() >= 1) {
-            conn.sendMouseHighResScroll((short)vector.getY());
-            conn.sendMouseHighResHScroll((short)vector.getX());
+        if (vector.getMagnitude() < 1) {
+            ctx.mouseEmulationMove.reset();
+            return;
+        }
+
+        float dx, dy;
+        if (ctx.mouseEmulationXDown) {
+            // Fixed amount of movement per report while the X button is pressed: -1/0/+1 per axis
+            // times the pixel multiplier
+            dx = Integer.signum((int) vector.getX()) * ctx.mouseEmulationPixelMultiplier;
+            dy = Integer.signum((int) -vector.getY()) * ctx.mouseEmulationPixelMultiplier;
+        }
+        else {
+            // Otherwise base the movement on how far the stick is from the center
+            dx = vector.getX();
+            dy = -vector.getY();
+        }
+
+        short stepX = ctx.mouseEmulationMove.step(0, dx);
+        short stepY = ctx.mouseEmulationMove.step(1, dy);
+        if (stepX != 0 || stepY != 0) {
+            conn.sendMouseMove(stepX, stepY);
+        }
+    }
+
+    private void sendEmulatedMouseScroll(GenericControllerContext ctx, short x, short y, boolean fastScroll) {
+        Vector2d vector = convertRawStickAxisToPixelMovement(x, y);
+        if (vector.getMagnitude() < 1) {
+            ctx.mouseEmulationScroll.reset();
+            return;
+        }
+
+        int multiplier = fastScroll ? MOUSE_EMULATION_FAST_SCROLL_MULTIPLIER : 1;
+        short stepY = ctx.mouseEmulationScroll.step(1, vector.getY() * multiplier);
+        short stepX = ctx.mouseEmulationScroll.step(0, vector.getX() * multiplier);
+        if (stepY != 0) {
+            conn.sendMouseHighResScroll(stepY);
+        }
+        if (stepX != 0) {
+            conn.sendMouseHighResHScroll(stepX);
         }
     }
 
@@ -3003,7 +3051,9 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         public int mouseEmulationPixelMultiplier = 1;
 
         public int mouseEmulationLastInputMap;
-        public final int mouseEmulationReportPeriod = 50;
+        // Fractional movement carried between reports, one accumulator per purpose
+        final MouseEmulationAccumulator mouseEmulationMove = new MouseEmulationAccumulator();
+        final MouseEmulationAccumulator mouseEmulationScroll = new MouseEmulationAccumulator();
 
         public final Runnable mouseEmulationRunnable = new Runnable() {
             @Override
@@ -3012,24 +3062,26 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                     return;
                 }
 
+                GenericControllerContext ctx = GenericControllerContext.this;
+                // Holding LT scrolls faster
+                boolean fastScroll = (leftTrigger & 0xFF) > 0;
+
                 // Send mouse events from analog sticks
                 if (prefConfig.analogStickForScrolling == PreferenceConfiguration.AnalogStickForScrolling.RIGHT) {
-
-                    // Changed absolute value
-                    sendEmulatedMouseMove(leftStickX, leftStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
-                    sendEmulatedMouseScroll(rightStickX, rightStickY);
+                    sendEmulatedMouseMove(ctx, leftStickX, leftStickY);
+                    sendEmulatedMouseScroll(ctx, rightStickX, rightStickY, fastScroll);
                 }
                 else if (prefConfig.analogStickForScrolling == PreferenceConfiguration.AnalogStickForScrolling.LEFT) {
-                    sendEmulatedMouseMove(rightStickX, rightStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
-                    sendEmulatedMouseScroll(leftStickX, leftStickY);
+                    sendEmulatedMouseMove(ctx, rightStickX, rightStickY);
+                    sendEmulatedMouseScroll(ctx, leftStickX, leftStickY, fastScroll);
                 }
                 else {
-                    sendEmulatedMouseMove(leftStickX, leftStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
-                    sendEmulatedMouseMove(rightStickX, rightStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
+                    sendEmulatedMouseMove(ctx, leftStickX, leftStickY);
+                    sendEmulatedMouseMove(ctx, rightStickX, rightStickY);
                 }
 
                 // Requeue the callback
-                mainThreadHandler.postDelayed(this, mouseEmulationReportPeriod);
+                mainThreadHandler.postDelayed(this, MOUSE_EMULATION_REPORT_PERIOD_MS);
             }
         };
 
@@ -3046,10 +3098,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         public void toggleMouseEmulation() {
             mainThreadHandler.removeCallbacks(mouseEmulationRunnable);
             mouseEmulationActive = !mouseEmulationActive;
+            mouseEmulationMove.reset();
+            mouseEmulationScroll.reset();
             Toast.makeText(activityContext, "Mouse emulation is: " + (mouseEmulationActive ? "ON" : "OFF"), Toast.LENGTH_SHORT).show();
 
             if (mouseEmulationActive) {
-                mainThreadHandler.postDelayed(mouseEmulationRunnable, mouseEmulationReportPeriod);
+                mainThreadHandler.postDelayed(mouseEmulationRunnable, MOUSE_EMULATION_REPORT_PERIOD_MS);
             }
         }
 

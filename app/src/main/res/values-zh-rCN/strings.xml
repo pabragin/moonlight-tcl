@@ -469,9 +469,9 @@
     <string name="summary_import_special_button">在返回菜单及特殊按键中可用。\n注意：导入会覆盖当前配置，请注意备份。</string>
     <string name="title_share_performance_logs_button">分享性能统计信息</string>
     <string name="title_software_update">软件更新</string>
-    <string name="summary_software_update">ClassicOldSong 黑月光修改版 - 访问 GitHub Release 以获取更新</string>
+    <string name="summary_software_update">pabragin 的 Moonlight TCL 版本 - 访问 GitHub Release 以获取更新</string>
     <string name="title_follow_update">订阅更新</string>
-    <string name="summary_follow_update">使用 Obtainium 订阅 Artemis 的更新</string>
+    <string name="summary_follow_update">使用 Obtainium 订阅 Moonlight TCL 的更新</string>
     <string name="title_special_key_layout">特殊按键布局</string>
     <string name="title_show_virtual_key">屏幕显示虚拟按键</string>
     <string name="summary_show_virtual_key">在触摸屏上显示一层虚拟特殊按键。\n按键透明度与上方选项中虚拟手柄共用。</string>

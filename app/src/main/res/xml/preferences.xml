@@ -756,7 +756,7 @@
             app:iconSpaceReserved="false" />
 
         <com.limelight.preferences.WebLauncherPreference
-            url="https://github.com/ClassicOldSong/moonlight-android/releases"
+            url="https://github.com/pabragin/moonlight-tcl/releases"
             android:key="option_software_release"
             android:summary="@string/summary_software_update"
             android:title="@string/title_software_update"
