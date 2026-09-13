@@ -763,7 +763,8 @@
             app:iconSpaceReserved="false" />
 
         <com.limelight.preferences.WebLauncherPreference
-            url="@string/obtainium_app_url"
+            url="@string/obtainium_deep_link"
+            fallbackUrl="@string/obtainium_app_url"
             android:key="option_follow_update"
             android:summary="@string/summary_follow_update"
             android:title="@string/title_follow_update"

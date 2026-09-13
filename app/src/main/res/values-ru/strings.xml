@@ -433,6 +433,7 @@
     <string name="summary_software_update">Moonlight TCL от pabragin — смотрите релизы на GitHub для последней версии</string>
     <string name="title_follow_update">Следить за обновлениями</string>
     <string name="summary_follow_update">Следите за обновлениями Moonlight TCL через Obtainium</string>
+    <string name="no_app_for_link">Нет приложения, которое может открыть эту ссылку</string>
     <string name="title_special_key_layout">Раскладка спец-клавиш</string>
     <string name="title_show_virtual_key">Показать виртуальные клавиши на экране</string>
     <string name="summary_show_virtual_key">Отобразить слой виртуальных спец-клавиш на тачскрине.\nНепрозрачность клавиш общая с виртуальным геймпадом.</string>
