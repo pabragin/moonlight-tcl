@@ -23,8 +23,8 @@ android {
                 "obtainium_deep_link",
                 "obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
 
-        versionName "20.2.10-tcl2"
-        versionCode = 96
+        versionName "20.2.10-tcl3"
+        versionCode = 98
 
         // Generate native debug symbols to allow Google Play to symbolicate our native crashes
         ndk.debugSymbolLevel = 'FULL'
@@ -68,7 +68,19 @@ android {
             // BouncyCastle 1.85 ships the same LICENSE/NOTICE in bcprov, bcpkix and bcutil
             pickFirsts.add('META-INF/LICENSE.md')
             pickFirsts.add('META-INF/NOTICE.md')
+            // BouncyCastle data files nothing here uses: the post-quantum Picnic tables alone are 1.2 MB
+            // compressed, the CertPathReviewer message bundles belong to code the shrinker drops anyway
+            excludes.add('org/bouncycastle/pqc/**')
+            excludes.add('org/bouncycastle/x509/CertPathReviewerMessages*.properties')
+            excludes.add('org/bouncycastle/pkix/CertPathReviewerMessages*.properties')
         }
+    }
+
+    androidResources {
+        // Only the languages this app is translated into; AndroidX and Material otherwise add their
+        // own strings for some 60 more locales to resources.arsc
+        localeFilters += ["en", "bg", "ckb", "cs", "de", "el", "eo", "es", "fa", "fr", "hu", "in", "it", "iw", "ja", "ko",
+                          "nb-rNO", "nl", "pl", "pt", "pt-rBR", "ro", "ru", "sv", "tr", "uk", "vi", "zh-rCN", "zh-rTW"]
     }
 
     buildTypes {
