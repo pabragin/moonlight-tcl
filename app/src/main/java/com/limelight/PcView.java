@@ -1,6 +1,10 @@
 package com.limelight;
 
 import java.io.FileNotFoundException;
+import android.Manifest;
+import android.content.SharedPreferences;
+import androidx.core.app.ActivityCompat;
+import com.limelight.binding.input.BluetoothHidRumble;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -204,6 +208,22 @@ public class PcView extends AppCompatActivity implements AdapterFragmentCallback
         pcGridAdapter.notifyDataSetChanged();
     }
 
+    private static final String BT_PERMISSION_ASKED_PREF = "bt_connect_permission_asked";
+    private static final int BT_PERMISSION_REQUEST_CODE = 0x4254;
+
+    // Bluetooth pads rumble through the Bluetooth stack (BluetoothHidRumble), which needs the Nearby
+    // devices permission. Ask once while rumble is on.
+    private void maybeRequestBluetoothPermission() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!PreferenceConfiguration.readPreferences(this).enableRumble
+                || BluetoothHidRumble.hasPermission(this)
+                || prefs.getBoolean(BT_PERMISSION_ASKED_PREF, false)) {
+            return;
+        }
+        prefs.edit().putBoolean(BT_PERMISSION_ASKED_PREF, true).apply();
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, BT_PERMISSION_REQUEST_CODE);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -211,6 +231,8 @@ public class PcView extends AppCompatActivity implements AdapterFragmentCallback
         // Assume we're in the foreground when created to avoid a race
         // between binding to CMS and onResume()
         inForeground = true;
+
+        maybeRequestBluetoothPermission();
 
         // Create a GLSurfaceView to fetch GLRenderer unless we have
         // a cached result already.

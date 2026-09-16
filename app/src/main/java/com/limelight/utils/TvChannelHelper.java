@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
@@ -38,10 +37,6 @@ public class TvChannelHelper {
     }
 
     void requestChannelOnHomeScreen(ComputerDetails computer) {
-        if (!isAndroidTV()) {
-            return;
-        }
-
         Long channelId = getChannelId(computer.uuid);
         if (channelId == null) {
             return;
@@ -60,10 +55,6 @@ public class TvChannelHelper {
     }
 
     void createTvChannel(ComputerDetails computer) {
-        if (!isAndroidTV()) {
-            return;
-        }
-
         ChannelBuilder builder = new ChannelBuilder()
                 .setType(TvContract.Channels.TYPE_PREVIEW)
                 .setDisplayName(computer.name)
@@ -123,10 +114,6 @@ public class TvChannelHelper {
     }
 
     void addGameToChannel(ComputerDetails computer, NvApp app) {
-        if (!isAndroidTV()) {
-            return;
-        }
-
 
         Long channelId = getChannelId(computer.uuid);
         if (channelId == null) {
@@ -165,10 +152,6 @@ public class TvChannelHelper {
     }
 
     void deleteChannel(ComputerDetails computer) {
-        if (!isAndroidTV()) {
-            return;
-        }
-
         Long channelId = getChannelId(computer.uuid);
         if (channelId == null) {
             return;
@@ -178,10 +161,6 @@ public class TvChannelHelper {
     }
 
     void deleteProgram(ComputerDetails computer, NvApp app) {
-        if (!isAndroidTV()) {
-            return;
-        }
-
         Long channelId = getChannelId(computer.uuid);
         if (channelId == null) {
             return;
@@ -255,10 +234,6 @@ public class TvChannelHelper {
 
     private static String toUriString(Intent intent) {
         return intent == null ? null : intent.toUri(Intent.URI_INTENT_SCHEME);
-    }
-
-    private boolean isAndroidTV() {
-        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
     private static class PreviewProgramBuilder {

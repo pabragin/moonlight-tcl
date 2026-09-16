@@ -51,12 +51,7 @@
     <string name="category_gamepad_settings">Ustawienia gamepada</string>
     <string name="title_checkbox_multi_controller">Automatyczne wykrywanie obecności gamepada</string>
     <string name="summary_checkbox_enable_audiofx">Umożliwia działanie efektów audio podczas przesyłania strumieniowego, ale może zwiększyć opóźnienie dźwięku</string>
-    <string name="title_checkbox_vibrate_fallback">Emuluj wsparcie dudnienia za pomocą wibracji</string>
-    <string name="title_seekbar_vibrate_fallback_strength">Regulacja intensywności emulowanego dudnienia</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">Wzmocnienie lub zmniejszenie intensywności wibracji na urządzeniu</string>
     <string name="summary_checkbox_multi_controller">Odznaczenie tej opcji wymusza, by gamepad był zawsze obecny</string>
-    <string name="summary_checkbox_vibrate_fallback">Wibruje urządzenie, aby naśladować dudnienie, jeśli gamepad go nie obsługuje</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
     <string name="title_seekbar_deadzone">Regulacja strefy martwej drążka analogowego</string>
     <string name="summary_seekbar_deadzone">Uwaga: Niektóre gry mogą wymuszać większą strefę martwą niż ta, do której skonfigurowany jest Moonlight.</string>
     <string name="suffix_seekbar_deadzone">%</string>
@@ -70,10 +65,7 @@
     <string name="summary_checkbox_gamepad_touchpad_as_mouse">Wymusza sterowanie myszą za pomocą touchpada gamepada, nawet w przypadku emulacji gamepada z touchpadem.</string>
     <string name="title_checkbox_gamepad_motion_sensors">Zezwalaj na korzystanie z czujników ruchu gamepada</string>
     <string name="summary_checkbox_gamepad_motion_sensors">Umożliwia obsługiwanym hostom żądanie danych z czujników ruchu podczas emulacji gamepada z czujnikami ruchu. Wyłączenie może nieznacznie zmniejszyć zużycie energii i sieci, jeśli czujniki ruchu nie są używane w grze.</string>
-    <string name="title_checkbox_gamepad_motion_fallback">Emulacja obsługi czujnika ruchu gamepada</string>
     <string name="category_input_settings">Ustawienia wejścia</string>
-    <string name="title_checkbox_touchscreen_trackpad">Używanie ekranu dotykowego jako gładzika</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Jeśli opcja ta jest włączona, ekran dotykowy działa jak gładzik. Jeśli jest wyłączony, ekran dotykowy bezpośrednio steruje kursorem myszy.</string>
     <string name="title_checkbox_absolute_mouse_mode">Tryb myszy dla pulpitu zdalnego</string>
     <string name="title_checkbox_mouse_nav_buttons">Włączanie przycisków myszy wstecz i dalej</string>
     <string name="category_on_screen_controls_settings">Ustawienia sterowania na ekranie</string>
@@ -91,7 +83,6 @@
     <string name="dialog_title_osc_opacity">Zmiana krycia</string>
     <string name="suffix_osc_opacity">%</string>
     <string name="category_ui_settings">Ustawienia interfejsu użytkownika</string>
-    <string name="title_checkbox_enable_pip">Włącz tryb obserwatora obrazu w obrazie</string>
     <string name="summary_reset_osc">Przywraca domyślny rozmiar i położenie wszystkich elementów sterujących na ekranie</string>
     <string name="title_language_list">Język</string>
     <string name="summary_language_list">Język używany w Moonlight</string>
@@ -199,7 +190,6 @@
     <string name="lost_connection">Utrata połączenia z komputerem</string>
     <string name="dialog_title_reset_osc">Reset układu</string>
     <string name="dialog_text_reset_osc">Czy na pewno chcesz usunąć zapisany układ kontrolek ekranowych?</string>
-    <string name="summary_checkbox_enable_pip">Umożliwia wyświetlanie strumienia (ale nie sterowanie nim) podczas pracy wielozadaniowej</string>
     <string name="title_checkbox_small_icon_mode">Używaj małe ramki</string>
     <string name="title_enable_perf_overlay">Wyświetlanie statystyk wydajności podczas przesyłania strumieniowego</string>
     <string name="summary_troubleshooting">Zobacz wskazówki dotyczące diagnozowania i naprawiania typowych problemów z transmisją strumieniową</string>
@@ -262,8 +252,6 @@
 \n
 \nMoże się zdarzyć, że monitor nie obsługuje wymaganej konfiguracji wyświetlania. W takim przypadku można spróbować skonfigurować monitor wirtualny. Jeśli urządzenie lub komputer hosta nie obsługuje przesyłania strumieniowego w określonej rozdzielczości lub częstotliwości odświeżania, niestety nie masz szczęścia.</string>
     <string name="fps_suffix_fps">FPS</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">Używa wbudowanych czujników ruchu urządzenia, jeśli czujniki gamepada nie są obsługiwane przez podłączony gamepad lub wersję systemu Android.
-\nUwaga: Włączenie tej opcji może spowodować, że gamepad będzie wyświetlany na hoście jako kontroler PlayStation.</string>
     <string name="summary_checkbox_absolute_mouse_mode">Może to sprawić, że akceleracja myszy będzie zachowywać się bardziej naturalnie podczas korzystania ze zdalnego pulpitu, ale jest niekompatybilna z wieloma grami.</string>
     <string name="title_troubleshooting">Przewodnik rozwiązywania problemów</string>
     <string name="resolution_1440p">1440p</string>

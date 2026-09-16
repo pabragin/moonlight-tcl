@@ -24,6 +24,7 @@ import com.limelight.utils.TrafficStatsHelper;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaCodec;
 import android.os.Bundle;
 import android.media.MediaCodecInfo;
@@ -53,6 +54,11 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private final ArrayList<byte[]> ppsBuffers = new ArrayList<>();
     private boolean submittedCsd;
     private byte[] currentHdrMetadata;
+    // Host UUID under which that host's HDR metadata is remembered between streams; null = no cache
+    private String hdrMetadataCacheKey;
+    // The pending decoder restart applies HDR metadata; it is not a recovery from a codec error
+    private volatile boolean hdrRestartPending;
+    private static final String HDR_METADATA_CACHE_PREFS = "hdr_metadata_cache";
 
     private int nextInputBufferIndex = -1;
     private ByteBuffer nextInputBuffer;
@@ -759,6 +765,16 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         this.initialHeight = invertResolution ? width : height;
         this.videoFormat = format;
         this.refreshRate = redrawRate;
+        // HDR static metadata can only be handed to MediaCodec at configure time, but the host sends it a
+        // few hundred milliseconds after the stream starts, which used to cost a decoder restart on every
+        // HDR stream. The metadata describes the host's display and rarely changes, so the decoder starts
+        // with the values seen last time; when the host confirms them, no restart is needed.
+        if ((format & MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0 && currentHdrMetadata == null) {
+            currentHdrMetadata = loadCachedHdrMetadata();
+            if (currentHdrMetadata != null) {
+                LimeLog.info("HDR metadata: starting the decoder with the values remembered for this host");
+            }
+        }
 
         asyncMode = ASYNC_CODEC;
         directCopyActive = DIRECT_COPY_SUBMIT;
@@ -830,15 +846,21 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     }
                 }
 
-                // We don't count flushes as codec recovery attempts
-                if (codecRecoveryType.get() != CR_RECOVERY_TYPE_NONE) {
+                // We don't count flushes or the planned HDR metadata restart as codec recovery attempts
+                boolean hdrRestart = hdrRestartPending;
+                hdrRestartPending = false;
+                if (codecRecoveryType.get() != CR_RECOVERY_TYPE_NONE && !hdrRestart) {
                     codecRecoveryAttempts++;
                     LimeLog.info("Codec recovery attempt: "+codecRecoveryAttempts);
                 }
 
                 // For "recoverable" exceptions, we can just stop, reconfigure, and restart.
                 if (codecRecoveryType.get() == CR_RECOVERY_TYPE_RESTART) {
-                    LimeLog.warning("Trying to restart decoder after CodecException");
+                    if (hdrRestart) {
+                        LimeLog.info("Restarting decoder to apply the host's HDR metadata");
+                    } else {
+                        LimeLog.warning("Trying to restart decoder after CodecException");
+                    }
                     try {
                         callbacksMuted = asyncMode;
                         videoDecoder.stop();
@@ -1692,9 +1714,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         }
         else if (enabled && hdrMetadata != null && !Arrays.equals(currentHdrMetadata, hdrMetadata)) {
             currentHdrMetadata = hdrMetadata;
+            storeCachedHdrMetadata(hdrMetadata);
         }
         else {
-            // Nothing to do
+            if (enabled && hdrMetadata != null) {
+                LimeLog.info("HDR metadata: unchanged, the decoder keeps running");
+            }
             return;
         }
 
@@ -1702,13 +1727,64 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         // pick up the HDR metadata change. This will happen on the next input
         // or output buffer.
 
-        // HACK: Reset codec recovery attempt counter, since this is an expected "recovery"
+        // This is a planned restart, not a recovery: keep the attempt counter and the log honest
         codecRecoveryAttempts = 0;
+        hdrRestartPending = true;
 
         // Promote None/Flush to Restart and leave Reset alone
         if (!codecRecoveryType.compareAndSet(CR_RECOVERY_TYPE_NONE, CR_RECOVERY_TYPE_RESTART)) {
             codecRecoveryType.compareAndSet(CR_RECOVERY_TYPE_FLUSH, CR_RECOVERY_TYPE_RESTART);
         }
+    }
+
+    /** Remember and reuse the HDR metadata of this host (its UUID); null disables the cache. */
+    public void setHdrMetadataCacheKey(String hostUuid) {
+        hdrMetadataCacheKey = (hostUuid == null || hostUuid.isEmpty()) ? null : hostUuid;
+    }
+
+    private byte[] loadCachedHdrMetadata() {
+        if (hdrMetadataCacheKey == null) {
+            return null;
+        }
+        try {
+            SharedPreferences cache = context.getSharedPreferences(HDR_METADATA_CACHE_PREFS, Context.MODE_PRIVATE);
+            String hex = cache.getString(hdrMetadataCacheKey, null);
+            return hex != null ? hexToBytes(hex) : null;
+        } catch (Exception e) {
+            LimeLog.warning("HDR metadata cache read failed: " + e);
+            return null;
+        }
+    }
+
+    private void storeCachedHdrMetadata(byte[] metadata) {
+        if (hdrMetadataCacheKey == null || metadata == null) {
+            return;
+        }
+        try {
+            context.getSharedPreferences(HDR_METADATA_CACHE_PREFS, Context.MODE_PRIVATE)
+                    .edit().putString(hdrMetadataCacheKey, bytesToHex(metadata)).apply();
+        } catch (Exception e) {
+            LimeLog.warning("HDR metadata cache write failed: " + e);
+        }
+    }
+
+    static String bytesToHex(byte[] data) {
+        StringBuilder sb = new StringBuilder(data.length * 2);
+        for (byte b : data) {
+            sb.append(String.format("%02x", b & 0xFF));
+        }
+        return sb.toString();
+    }
+
+    static byte[] hexToBytes(String hex) {
+        if (hex.length() % 2 != 0) {
+            throw new IllegalArgumentException("odd hex length");
+        }
+        byte[] out = new byte[hex.length() / 2];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+        }
+        return out;
     }
 
     private boolean queueNextInputBuffer(long timestampUs, int codecFlags) {

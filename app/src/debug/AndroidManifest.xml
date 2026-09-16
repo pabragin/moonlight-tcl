@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <!-- Debug builds only: lets adb start the diagnostics screen and its Bluetooth HID rumble autotest
+             (am start -n com.limelight.tcldebug/com.limelight.DebugInfoActivity with the boolean extra
+             bt_hid_autotest and the optional string extra pad) -->
+        <activity
+            android:name=".DebugInfoActivity"
+            android:exported="true"
+            tools:node="merge" />
+    </application>
+
+</manifest>

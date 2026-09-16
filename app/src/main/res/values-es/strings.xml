@@ -164,7 +164,6 @@
     <string name="resolution_1440p">1440p</string>
     <string name="resolution_4k">4K</string>
     <string name="suffix_osc_opacity">%</string>
-    <string name="title_checkbox_enable_pip">Activar modo Pantalla-en-Pantalla para modo espectador</string>
     <string name="resolution_720p">720p</string>
     <string name="fps_120">120 FPS</string>
     <string name="audioconf_71surround">7.1 Sonido Envolvente</string>
@@ -201,7 +200,6 @@
 \nEs posible que tu monitor no admita la configuración de pantalla necesaria. Si es así, puede intentar configurar un monitor virtual. Por último, si tu dispositivo o PC anfitrión no soporta streaming a una resolución o frecuencia de refresco específica, lamentablemente no tienes suerte.</string>
     <string name="resolution_prefix_native">Nativo</string>
     <string name="summary_audio_config_list">Activar sonido envolvente de 5.1 o 7.1 canales para sistemas de teatro en casa</string>
-    <string name="title_checkbox_vibrate_fallback">Emular la vibración del mando con vibración del equipo</string>
     <string name="summary_checkbox_enable_audiofx">Permitir funcionar efectos de sonido durante la transmisión, pero podría incrementar la latencia del sonido</string>
     <string name="summary_checkbox_usb_bind_all">Usar el controlador de USB de Moonlight para todos los mandos soportados, incluso si el control de Xbox se encuentra presente</string>
     <string name="summary_checkbox_mouse_emulation">Presionar por un periodo largo el botón de inicio hará cambiar el mando a modo de ratón</string>
@@ -218,13 +216,10 @@
     <string name="title_native_res_dialog">Advertencia Resolución Nativa</string>
     <string name="suffix_seekbar_bitrate_mbps">Mbps</string>
     <string name="category_input_settings">Opciones de Entrada</string>
-    <string name="title_checkbox_touchscreen_trackpad">Usa la pantalla táctil como panel táctil</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Si está activo, la pantalla táctil funcionará como panel táctil. Si está desactivado, la pantalla táctil directamente controlará el cursor del ratón.</string>
     <string name="summary_seekbar_deadzone">Nota: Algunos juegos pueden forzar una zona muerta mayor a la que Moonlight esta configurada a usar.</string>
     <string name="title_checkbox_flip_face_buttons">Invertir botones frontales</string>
     <string name="summary_checkbox_absolute_mouse_mode">Esto puede hacer que la aceleración de mouse se comporte mas natural para uso de escritorio remoto, pero es incompatible con muchos juegos.</string>
     <string name="title_checkbox_enable_audiofx">Activar el soporte para ecualizador de sistema</string>
-    <string name="summary_checkbox_vibrate_fallback">Vibrar el dispositivo para emular el retumbe si tu mando de control no lo soporta</string>
     <string name="title_checkbox_usb_bind_all">Sobrescribir el soporte nativo del control de Xbox</string>
     <string name="summary_checkbox_flip_face_buttons">Invertir botones frontales A/B y X/Y para los mandos y los botones sobre la pantalla</string>
     <string name="title_checkbox_absolute_mouse_mode">Modo de ratón para escritorio remoto</string>
@@ -237,7 +232,6 @@
     <string name="title_osc_opacity">Cambiar la transparencia de los controles en pantalla</string>
     <string name="summary_osc_opacity">Hacer los controles en pantalla más/menos transparentes</string>
     <string name="dialog_title_osc_opacity">Cambiar opacidad</string>
-    <string name="summary_checkbox_enable_pip">Permite que la transmisión sea vista (pero no controlable) mientras se usa la multitarea</string>
     <string name="title_disable_frame_drop">Nunca disminuir cuadros</string>
     <string name="summary_disable_frame_drop">Puede reducir micro-tartamudeos (Stuttering) en algunos dispositivos , pero puede incrementar latencia</string>
     <string name="title_enable_hdr">Activar HDR (Alto Rango Dinámico / Experimental)</string>
@@ -275,23 +269,13 @@
     <string name="title_checkbox_gamepad_touchpad_as_mouse">Controla siempre el ratón con el touchpad</string>
     <string name="summary_checkbox_gamepad_motion_sensors">Permite a los hosts compatibles solicitar datos de los sensores de movimiento al emular un gamepad con los sensores de movimiento. La desactivación puede reducir ligeramente el consumo de energía y el uso de la red si los sensores de movimiento no se utilizan en el juego.</string>
     <string name="toast_controller_type_changed">El tipo del Gamepad puede cambiar debido a la emulación del sensor de movimiento</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">Utiliza los sensores de movimiento integrados de tu dispositivo si el gamepad conectado o tu versión de Android no admiten los sensores del gamepad.
-\nNota: Activar esta opción puede hacer que tu gamepad aparezca como un mando de PlayStation en el host.</string>
-    <string name="title_checkbox_gamepad_motion_fallback">Emular el sensor de movimiento del gamepad</string>
     <string name="analogscroll_none">Ninguno (ambos joysticks mueven el mouse)</string>
     <string name="analogscroll_right">Joystick analógico derecho</string>
     <string name="analogscroll_left">Joystick analógico izquierdo</string>
     <string name="title_analog_scrolling">Usa un joystick analógico para hacer scroll</string>
     <string name="summary_analog_scrolling">Selecciona un joystick analógico para scroll cuando la emulación del mouse está habilitada</string>
     <string name="error_code_prefix">Código del error:</string>
-    <string name="title_seekbar_vibrate_fallback_strength">Ajustar la intensidad del ruido emulado</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">Amplifica o reduce la intensidad de la vibración de tu dispositivo</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
     <string name="title_enable_commit_text">Activar entrada de texto commit (gestos/voz)</string>
     <string name="summary_enable_commit_text">Envía texto de varias letras desde teclados en pantalla (escritura gestual, predicciones, dictado por voz). Puede afectar a juegos que dependen de pulsaciones individuales.</string>
-    <string name="title_show_overlay_zoom_toggle_button">Mostrar botón de alternar zoom de superposición</string>
-    <string name="summary_show_overlay_zoom_toggle_button">Muestra un botón desplazable en la parte superior de la pantalla para activar o desactivar el modo de desplazamiento/zoom.</string>
-    <string name="title_checkbox_remember_zoom_pan">Recordar zoom y desplazamiento</string>
-    <string name="summary_checkbox_remember_zoom_pan">Guarda la posición de zoom y desplazamiento entre sesiones.</string>
     <string name="title_edit_profile">Editar perfil</string>
 </resources>

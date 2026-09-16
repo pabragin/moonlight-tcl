@@ -172,22 +172,6 @@
         <item>1</item>
         <item>2</item>
     </string-array>
-    <string-array name="mouse_mode_names">
-        <item>@string/mouse_mode_multi_touch</item>
-        <item>@string/mouse_mode_absolute_touch</item>
-        <item>@string/mouse_mode_track_pad_natural</item>
-        <item>@string/mouse_mode_track_pad_gaming</item>
-        <item>@string/mouse_mode_disabled</item>
-        <item>@string/mouse_mode_absolute_touch_swapped</item>
-    </string-array>
-    <string-array name="mouse_mode_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-    </string-array>
 
     <string-array name="onscreen_keyboard_align_modes">
         <item>@string/align_left</item>

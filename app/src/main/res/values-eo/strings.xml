@@ -27,7 +27,6 @@
     <string name="applist_refresh_error_title">Eraro</string>
     <string name="applist_quit_app">Forlasante</string>
     <string name="resolution_prefix_native">Indiĝena</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
     <string name="suffix_seekbar_deadzone">%</string>
     <string name="resolution_1080p">1080p</string>
     <string name="resolution_1440p">1440p</string>

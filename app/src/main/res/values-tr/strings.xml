@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="summary_reset_osc">Tüm ekran kontrollerini varsayılan boyutu ve pozisyonuna sıfırlar</string>
-    <string name="title_checkbox_touchscreen_trackpad">Dokunmatik ekranı trackpad olarak kullan</string>
     <string name="category_input_settings">Girdi Ayarları</string>
     <string name="summary_language_list">Moonlight için kullanılacak olan dil</string>
     <string name="ip_hint">Ana bilgisayarın IP adresi</string>
@@ -63,7 +62,6 @@
 \nİnternet üzerinden yayın yapmaya çalışıyorsanız, Moonlight İnternet Barındırma Aracını bilgisayarınıza yükleyin ve bilgisayarınızın internet bağlantısını kontrol etmek için birlikte verilen İnternet Akış Test Cihazını çalıştırın.</string>
     <string name="title_checkbox_multi_controller">Oyun kumandası varlığını otomatik algıla</string>
     <string name="summary_checkbox_multi_controller">Bu seçeneğin işaretini kaldırmak, oyun kumandasının her zaman mevcut olmasını sağlar</string>
-    <string name="summary_checkbox_vibrate_fallback">Oyun kumandanız desteklemiyorsa, gürültüyü taklit etmek için cihazınızı titreştirir</string>
     <string name="title_seekbar_deadzone">Analog çubuk ölü bölgesini ayarla</string>
     <string name="summary_checkbox_xb1_driver">Yerel Xbox oyun kumandası desteği olmayan cihazlar için yerleşik USB sürücüsünü etkinleştirir</string>
     <string name="title_checkbox_mouse_emulation">Oyun kumandası üstünden fare taklidi</string>
@@ -124,7 +122,6 @@
     <string name="title_native_res_dialog">Yerel çözünürlük uyarısı</string>
     <string name="title_fps_list">Video kare hızı</string>
     <string name="title_seekbar_bitrate">Video bit hızı</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Etkinleştirilirse, dokunmatik ekran bir dokunmatik fare gibi davranır. Devre dışı bırakılırsa, dokunmatik ekran doğrudan fare imlecini kontrol eder.</string>
     <string name="conn_establishing_msg">Bağlantı başlatılıyor</string>
     <string name="conn_metered">Uyarı: Aktif ağ bağlantınız ölçülüdür!</string>
     <string name="conn_client_latency">Ortalama kare kod çözme gecikmesi:</string>
@@ -167,7 +164,6 @@
 \nMonitörünüz gerekli ekran yapılandırmasını desteklemiyor olabilir. Eğer öyleyse, sanal bir monitör kurmayı deneyebilirsiniz. Son olarak, cihazınız veya ana bilgisayarınız belirli bir çözünürlükte veya yenileme hızında akışı desteklemiyorsa ne yazık ki şansınız kalmaz.</string>
     <string name="summary_seekbar_bitrate">Daha iyi görüntü kalitesi için artırın. Daha yavaş bağlantılarda performansı artırmak için azaltın.</string>
     <string name="title_checkbox_stretch_video">Videoyu tam ekrana genişlet</string>
-    <string name="title_checkbox_vibrate_fallback">Titreşim ile gürültü desteğini taklit et</string>
     <string name="summary_checkbox_usb_bind_all">Yerel Xbox oyun kumandası desteği mevcut olsa bile desteklenen tüm oyun kumandaları için Moonlight\'ın USB sürücüsünü kullan</string>
     <string name="summary_checkbox_flip_face_buttons">Oyun kumandaları ve ekran kontrolleri için A/B ve X/Y yüzey düğmelerini değiştirir</string>
     <string name="summary_checkbox_absolute_mouse_mode">Bu fare hızlandırmanın uzak masaüstü kullanımı için daha doğal davranmasını sağlayabilir, ancak birçok oyunla uyumsuzdur.</string>
@@ -186,13 +182,9 @@
     <string name="title_native_fps_dialog">Yerel FPS Uyarısı</string>
     <string name="title_checkbox_enable_audiofx">Sistem ekolayzır desteğini etkinleştir</string>
     <string name="category_gamepad_settings">Oyun Kumandası Ayarları</string>
-    <string name="title_seekbar_vibrate_fallback_strength">Taklit edilmiş gürültü yoğunluğunu ayarla</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">Cihazınızdaki titreşim yoğunluğunu artırın veya azaltın</string>
     <string name="title_checkbox_gamepad_touchpad_as_mouse">Fareyi her zaman dokunmatik yüzeyle kontrol et</string>
     <string name="summary_checkbox_gamepad_touchpad_as_mouse">Dokunmatik yüzeyli bir oyun kumandasını taklit ederken bile, oyun kumandası dokunmatik yüzey girişini ana fareyi kontrol etmeye zorlar.</string>
     <string name="title_checkbox_gamepad_motion_sensors">Oyun kumandası hareket sensörü kullanımına izin ver</string>
-    <string name="title_checkbox_gamepad_motion_fallback">Oyun kumandası hareket sensörü desteğini taklit et</string>
     <string name="title_checkbox_vibrate_osc">Titreşimi etkinleştir</string>
     <string name="summary_checkbox_vibrate_osc">Ekrandaki kontrollerde gürültüyü taklit etmek için cihazınızı titretir</string>
     <string name="title_only_l3r3">Yalnızca L3 ve R3 göster</string>
@@ -203,8 +195,6 @@
     <string name="title_osc_opacity">Ekrandaki kontrollerin saydamlığını değiştir</string>
     <string name="suffix_osc_opacity">%</string>
     <string name="category_ui_settings">Arayüz Ayarları</string>
-    <string name="title_checkbox_enable_pip">Resim İçinde Resim gözlemci modunu etkinleştir</string>
-    <string name="summary_checkbox_enable_pip">Çoklu görev sırasında akışın görüntülenmesine (ancak kontrol edilmemesine) olanak tanır</string>
     <string name="summary_osc_opacity">Ekrandaki kontrolleri daha fazla/daha az saydam hale getirin</string>
     <string name="summary_checkbox_enable_sops">En iyi akış için GFE oyun ayarlarını değiştirmesine izin ver</string>
     <string name="category_advanced_settings">Gelişmiş Ayarlar</string>
@@ -268,8 +258,6 @@
     <string name="fps_30">30 FPS</string>
     <string name="summary_checkbox_enable_audiofx">Ses efektlerinin akış sırasında çalışmasına izin verir ancak ses gecikmesini artırabilir</string>
     <string name="summary_checkbox_gamepad_motion_sensors">Desteklenen ana bilgisayarların, hareket sensörlü bir oyun kumandasını taklit ederken hareket sensörü verilerini istemesine olanak tanır. Oyunda hareket sensörleri kullanılmıyorsa devre dışı bırakmak, güç ve ağ kullanımını bir miktar azaltabilir.</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">Oyun kumandası sensörleri Android sürümünüz tarafından desteklenmiyorsa cihazınızın yerleşik hareket sensörlerini kullanır.
-\nNot: Bu seçeneğin etkinleştirilmesi, oyun kumandanızın ana bilgisayarda PlayStation denetleyicisi olarak görünmesine neden olabilir.</string>
     <string name="title_enable_perf_overlay">Akış sırasında performans istatistiklerini göster</string>
     <string name="summary_enable_perf_overlay">Akış sırasında gerçek zamanlı akış performansı bilgilerini görüntüleyin</string>
     <string name="title_enable_commit_text">Commit-text girişini etkinleştir (kaydırma/sesli)</string>

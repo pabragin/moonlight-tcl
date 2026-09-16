@@ -27,6 +27,7 @@ public class SmallIconCheckboxPreference extends CheckBoxPreference {
 
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
-        return PreferenceConfiguration.getDefaultSmallMode(getContext());
+        // TV: large icons
+        return false;
     }
 }

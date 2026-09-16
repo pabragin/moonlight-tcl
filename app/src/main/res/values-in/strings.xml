@@ -113,8 +113,6 @@
     <string name="resolution_prefix_native_portrait">(Potret)</string>
     <string name="summary_checkbox_enable_audiofx">Mengizinkan efek audio berfungsi saat streaming, tetapi dapat meningkatkan latensi audio</string>
     <string name="category_input_settings">Pengaturan Masukan</string>
-    <string name="title_checkbox_touchscreen_trackpad">Gunakan layar sentuh sebagai trackpad</string>
-    <string name="title_checkbox_vibrate_fallback">Meniru dukungan gemuruh dengan getaran</string>
     <string name="suffix_seekbar_deadzone">%</string>
     <string name="summary_checkbox_absolute_mouse_mode">Ini dapat membuat akselerasi mouse berperilaku lebih alami untuk penggunaan desktop jarak jauh, tetapi tidak kompatibel dengan banyak game.</string>
     <string name="category_on_screen_controls_settings">Pengaturan Kontrol di Layar</string>
@@ -151,10 +149,8 @@
     <string name="category_audio_settings">Pengaturan Audio</string>
     <string name="title_audio_config_list">Konfigurasi suara surround</string>
     <string name="title_checkbox_enable_audiofx">Aktifkan dukungan equalizer sistem</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Jika diaktifkan, layar sentuh berfungsi seperti trackpad. Jika dinonaktifkan, layar sentuh langsung mengontrol kursor mouse.</string>
     <string name="title_checkbox_multi_controller">Deteksi kehadiran gamepad otomatis</string>
     <string name="summary_checkbox_multi_controller">Menghapus centang opsi ini memaksa gamepad untuk selalu ada</string>
-    <string name="summary_checkbox_vibrate_fallback">Getarkan perangkat Anda untuk meniru gemuruh jika gamepad Anda tidak mendukungnya</string>
     <string name="title_seekbar_deadzone">Sesuaikan zona mati stik analog</string>
     <string name="title_checkbox_xb1_driver">Xbox 360/Satu driver gamepad USB</string>
     <string name="summary_checkbox_xb1_driver">Mengaktifkan driver USB bawaan untuk perangkat tanpa dukungan pengontrol Xbox asli</string>
@@ -172,7 +168,6 @@
     <string name="dialog_title_osc_opacity">Ubah opasitas</string>
     <string name="suffix_osc_opacity">%</string>
     <string name="category_ui_settings">Pengaturan UI</string>
-    <string name="summary_checkbox_enable_pip">Mengizinkan streaming untuk dilihat (tetapi tidak dikontrol) saat melakukan banyak tugas</string>
     <string name="title_language_list">Bahasa</string>
     <string name="title_checkbox_small_icon_mode">Gunakan seni kotak kecil</string>
     <string name="summary_checkbox_host_audio">Putar audio dari komputer dan perangkat ini</string>
@@ -206,7 +201,6 @@
     <string name="summary_checkbox_mouse_emulation">Menekan lama tombol Mulai akan mengalihkan gamepad ke mode mouse</string>
     <string name="title_reset_osc">Hapus tata letak kontrol di layar yang disimpan</string>
     <string name="summary_checkbox_mouse_nav_buttons">Mengaktifkan opsi ini dapat merusak klik kanan pada beberapa perangkat bermasalah</string>
-    <string name="title_checkbox_enable_pip">Aktifkan mode pengamat Gambar-dalam-Gambar</string>
     <string name="summary_language_list">Bahasa yang digunakan untuk Moonlight</string>
     <string name="summary_checkbox_enable_sops">Izinkan GFE mengubah setelan game untuk streaming yang optimal</string>
     <string name="error_code_prefix">Kode galat:</string>

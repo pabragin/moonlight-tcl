@@ -205,8 +205,6 @@
 	<string name="resolution_prefix_custom">自訂</string>
 	<string name="fps_suffix_fps">FPS</string>
 	<string name="title_native_fps_dialog">原生 FPS 警告</string>
-	<string name="title_checkbox_auto_invert_video_resolution">自動反轉解析度</string>
-	<string name="summary_checkbox_auto_invert_video_resolution">當處於直向模式時，自動反轉影片串流的寬度與高度。\n例如：1920x1080 將變為 1080x1920。</string>
 	<string name="title_video_scale_mode">影片縮放模式</string>
 	<string name="summary_video_scale_mode">在「符合」、「填滿」與「拉伸」之間選擇</string>
 	<string name="video_scale_mode_fit">符合</string>
@@ -222,11 +220,6 @@
 	<string name="category_gamepad_settings">遊戲手把設定</string>
 	<string name="title_checkbox_multi_controller">自動偵測手把存在</string>
 	<string name="summary_checkbox_multi_controller">取消勾選此選項將強制手把始終存在</string>
-	<string name="title_checkbox_vibrate_fallback">以震動模擬震撼回饋</string>
-	<string name="summary_checkbox_vibrate_fallback">若您的手把不支援震撼回饋，將以裝置震動進行模擬</string>
-	<string name="title_seekbar_vibrate_fallback_strength">調整模擬震撼強度</string>
-	<string name="summary_seekbar_vibrate_fallback_strength">放大或降低裝置上的震動強度</string>
-	<string name="suffix_seekbar_vibrate_fallback_strength">%</string>
 	<string name="title_seekbar_deadzone">調整類比搖桿死區</string>
 	<string name="summary_seekbar_deadzone">正值設定一般死區，負值則套用死區補償。使用死區補償時，請確保您的手把可調整死區，否則可能難以保持置中。</string>
 	<string name="suffix_seekbar_deadzone">%</string>
@@ -236,23 +229,15 @@
 	<string name="summary_checkbox_usb_bind_all">即使裝置具備原生 Xbox/Nintendo Pro 支援，也對所有支援的手把使用 Artemis 的 USB 驅動程式</string>
 	<string name="title_checkbox_mouse_emulation">以手把模擬滑鼠</string>
 	<string name="summary_checkbox_mouse_emulation">長按 Start 鍵可在手把模式與滑鼠模式間切換</string>
-	<string name="title_checkbox_remember_mouse_mode">記住滑鼠模式</string>
-	<string name="summary_checkbox_remember_mouse_mode">記住串流期間所選的滑鼠模式。停用時，串流期間更改的滑鼠模式將是暫時的。</string>
 	<string name="title_checkbox_flip_face_buttons">交換面板按鍵</string>
 	<string name="summary_checkbox_flip_face_buttons">對手把與螢幕控制將 A/B 與 X/Y 面板按鍵對調</string>
 	<string name="title_checkbox_gamepad_touchpad_as_mouse">一律以觸控板控制滑鼠</string>
 	<string name="summary_checkbox_gamepad_touchpad_as_mouse">即使以觸控板模擬手把，仍強制以手把觸控板輸入控制主機滑鼠。</string>
 	<string name="title_checkbox_gamepad_motion_sensors">允許使用手把陀螺儀</string>
 	<string name="summary_checkbox_gamepad_motion_sensors">在以具陀螺儀的手把進行模擬時，允許支援的主機請求陀螺儀資料。若遊戲未使用陀螺儀，停用可略微降低耗電與網路用量。</string>
-	<string name="title_checkbox_gamepad_motion_fallback">模擬手把陀螺儀支援</string>
-	<string name="summary_checkbox_gamepad_motion_fallback">若連接的手把或 Android 版本不支援手把陀螺儀，則使用裝置內建的陀螺儀。\n注意：啟用後，您的手把在主機上可能會被辨識為 PlayStation 手把。</string>
-	<string name="title_checkbox_force_device_motion">一律使用裝置的陀螺儀</string>
-	<string name="summary_checkbox_force_device_motion">即使手把支援陀螺儀，仍強制使用裝置內建的陀螺儀。</string>
 	<string name="title_enable_rumble">啟用震動回饋</string>
 	<string name="summary_enable_rumble">在支援的手把上啟用震動回饋。</string>
 	<string name="category_input_settings">輸入設定</string>
-	<string name="title_checkbox_touchscreen_trackpad">將觸控螢幕當作觸控板</string>
-	<string name="summary_checkbox_touchscreen_trackpad">啟用時，觸控螢幕行為如同觸控板；停用時，觸控螢幕直接控制滑鼠游標。</string>
 	<string name="title_checkbox_absolute_mouse_mode">遠端桌面滑鼠模式</string>
 	<string name="summary_checkbox_absolute_mouse_mode">可讓滑鼠加速度在遠端桌面使用時更自然，但與許多遊戲不相容。</string>
 	<string name="title_checkbox_mouse_nav_buttons">啟用上一頁/下一頁滑鼠按鍵</string>
@@ -280,8 +265,6 @@
 	<string name="suffix_osc_opacity">%</string>
 
 	<string name="category_ui_settings">介面設定</string>
-	<string name="title_checkbox_enable_pip">啟用子母畫面旁觀模式</string>
-	<string name="summary_checkbox_enable_pip">允許在多工時觀看串流（不可控制）</string>
 	<string name="title_language_list">語言</string>
 	<string name="summary_language_list">Artemis 使用的語言</string>
 	<string name="title_checkbox_small_icon_mode">使用小型封面圖</string>
@@ -370,15 +353,10 @@
 	<string name="game_menu_toggle_keyboard">顯示軟體鍵盤</string>
 	<string name="game_menu_toggle_hud">切換即時效能資訊</string>
 	<string name="game_menu_toggle_floating_button">切換浮動按鈕</string>
-	<string name="game_menu_select_mouse_mode">選擇滑鼠模式</string>
 	<string name="game_menu_select_steam_mode">選擇串流模式</string>
-	<string name="game_menu_enable_zoom_mode">啟用平移/縮放</string>
-	<string name="game_menu_disable_zoom_mode">停用平移/縮放</string>
-	<string name="game_menu_rotate_screen">旋轉螢幕</string>
 	<string name="game_menu_toggle_keyboard_model">切換特殊按鍵</string>
 	<string name="game_menu_toggle_virtual_model">切換虛擬手把</string>
 	<string name="game_menu_toggle_virtual_keyboard_model">切換螢幕完整鍵盤</string>
-	<string name="game_menu_switch_touch_sensitivity_model">切換觸控靈敏度</string>
 
 
 	<string name="game_menu_toggle_mouse_on">啟用手把滑鼠控制</string>
@@ -403,9 +381,6 @@
 	<string name="game_menu_send_keys_ctrl_alt_shift_f1">Ctrl + Alt + Shift + F1（切換顯示器）</string>
 	<string name="game_menu_send_keys_ctrl_alt_shift_f12">Ctrl + Alt + Shift + F12（切換顯示器）</string>
 
-	<string name="toggle_pan_zoom_mode">切換平移/縮放模式</string>
-	<string name="pan_zoom_mode_enabled">已啟用平移/縮放模式</string>
-	<string name="pan_zoom_mode_disabled">已停用平移/縮放模式</string>
 
 	<string name="title_analog_scrolling">使用類比搖桿捲動</string>
 	<string name="summary_analog_scrolling">在滑鼠模擬模式下選擇類比搖桿來進行捲動</string>
@@ -444,15 +419,11 @@
 	<string name="title_render_mode_strength_title">3D 效果強度</string>
 	<string name="title_render_mode_strength_description">參考值：50。數值越高效果越強，但可能造成眼睛疲勞且不自然；數值越低更護眼，體驗更柔和。</string>
 
-	<string name="title_touchscreen_mode">觸控螢幕模式</string>
 	<string name="summary_render_mode">預設為 2D 或 SBS 3D。3D 會自動加倍寬度並套用效果，無需設定。支援 AI 2D 轉 3D。</string>
-	<string name="summary_touchscreen_mode">在多點觸控/單點觸控/觸控板/停用模式間選擇。\n當選擇停用時，手寫筆/觸控筆仍可使用。\n使用外接顯示器時將強制為觸控板（自然）模式。</string>
 
 	<string name="title_checkbox_mouse_local_cursor">使用本機滑鼠游標</string>
 	<string name="summary_checkbox_mouse_local_cursor">預設會擷取外接實體滑鼠游標，本選項可顯示 Android 系統游標</string>
 
-	<string name="title_checkbox_multi_touch_gestures">啟用多點觸控手勢</string>
-	<string name="summary_checkbox_multi_touch_gestures">在多點觸控模式下：三指點擊開啟鍵盤、四指點擊開啟全鍵盤、五指點擊開啟快速選單。</string>
 
 	<string name="title_checkbox_onscreen_style_official">官方虛擬手把外觀</string>
 	<string name="summary_checkbox_onscreen_style_official">若偏好舊版官方虛擬手把按鈕樣式，可選擇此項。\n若選擇底部虛擬按鈕，按鍵外形可為方形【一般按鍵預設為方形】</string>
@@ -466,10 +437,7 @@
 	<string name="title_checkbox_enable_perf_overlay_lite_dialog">精簡模式點擊彈出快速選項</string>
 	<string name="summary_checkbox_enable_perf_overlay_lite_dialog">取代返回鍵邏輯，改為彈出遊戲快速選單。</string>
 
-	<string name="title_show_overlay_zoom_toggle_button">顯示覆蓋層縮放切換按鈕</string>
-	<string name="summary_show_overlay_zoom_toggle_button">在畫面頂部顯示可拖曳的按鈕，用於切換平移/縮放模式。</string>
 
-	<string name="title_virtual_trackpad_settings">虛擬觸控板設定</string>
 
 	<string name="title_quit_dialog">返回選單</string>
 	<string name="summary_quit_dialog">啟用後，在串流介面按下實體返回鍵會顯示相關選項！\n軟體鍵盤、效能資訊、觸控模式切換、傳送特殊按鍵</string>
@@ -481,8 +449,6 @@
 	<string name="summary_custom_resolution">新增自訂解析度，以 x 分隔；不常見的解析度可能無法運作。\n例如：1920x1080\n若非原生解析度，預設可能不會填滿瀏海區域。若長寬比相同，可手動設定拉伸畫面以全螢幕顯示。</string>
 	<string name="title_custom_resolution">自訂解析度</string>
 
-	<string name="title_auto_orientation">自動方向</string>
-	<string name="summary_auto_orientation">串流開始時，畫面將依裝置方向顯示。</string>
 
 	<string name="title_import_special_button">匯入自訂按鍵</string>
 	<string name="summary_import_special_button">可於返回選單與特殊按鍵中使用。\n注意：匯入會覆寫目前設定，請先備份。</string>
@@ -529,34 +495,14 @@
 	<string name="title_free_analog_stick_opacity">自由類比搖桿背景不透明度</string>
 
 	<string name="title_exdisplay_mode">外接顯示模式（Beta）</string>
-	<string name="title_fullexdisplay_mode">全外接顯示模式（Beta）</string>
 	<string name="summary_exdisplay_mode">在外接顯示器上顯示串流畫面；虛擬按鍵、效能資訊與其他控制顯示於手機螢幕。</string>
-	<string name="summary_fullexdisplay_mode">允許沉浸式副螢幕模式並自動匹配更新率與解析度。此模式下手動設定不會生效。</string>
 
-	<string name="title_top_center_display">置頂置中顯示</string>
-	<string name="summary_top_center_display">當解析度非原生時，串流畫面將對齊螢幕頂部而非置中。</string>
 
-	<string name="title_touch_sensitivity">觸控靈敏度</string>
-	<string name="summary_touch_sensitivity">啟用後，可手動調整觸控靈敏度。</string>
-	<string name="title_global_touch_sensitivity">觸控靈敏度全域生效</string>
-	<string name="summary_global_touch_sensitivity">預設不勾選，僅在螢幕右半邊生效（適合原神等）；勾選後在全螢幕範圍生效。</string>
-	<string name="title_auto_touch_sensitivity">觸控座標超出邊界時自動回到螢幕中心</string>
-	<string name="summary_auto_touch_sensitivity">高靈敏度時，小幅滑動即可能超界導致無法移動，可勾選此項。</string>
-	<string name="title_touch_sensitivity_x">螢幕靈敏度調整 X 軸</string>
-	<string name="summary_touch_sensitivity_x">多點觸控模式下，若部分遊戲不符靈敏度需求，可用此選項調整視角靈敏度。</string>
-	<string name="title_touch_sensitivity_y">螢幕靈敏度調整 Y 軸</string>
-	<string name="summary_touch_sensitivity_y">多點觸控模式下，若部分遊戲不符靈敏度需求，可用此選項調整視角靈敏度。</string>
 
 	<string name="title_debug_info">偵錯資訊</string>
 	<string name="summary_debug_info">測試手把震動與其他項目。</string>
 
-	<string name="title_touchpad_sensitivity_x">觸控板靈敏度 X 軸</string>
-	<string name="summary_touchpad_sensitivity_x">適用於滑鼠觸控板模式與虛擬特殊按鍵的觸控板控制；\n兩者共享一個靈敏度值，但實際表現可能不同。\n有人會同時用兩者嗎？</string>
-	<string name="title_touchpad_sensitivity_y">觸控板靈敏度 Y 軸</string>
-	<string name="summary_touchpad_sensitivity_y">適用於滑鼠觸控板模式與虛擬特殊按鍵的觸控板控制；\n兩者共享一個靈敏度值，但實際表現可能不同。\n有人會同時用兩者嗎？</string>
 
-	<string name="title_device_rumble">強制使用裝置震動</string>
-	<string name="summary_device_rumble">若您對連接手把的震動不滿意，可啟用此選項。\n若強制使用 Artemis 內建 USB 驅動程式則無效</string>
 
 	<string name="title_clear_default_special_button">停用預設特殊按鍵</string>
 	<string name="summary_clear_default_special_button">若覺得返回選單中的內建指令無用，可停用並改用您匯入的指令。</string>
@@ -619,15 +565,9 @@
 
 	<string name="virtual_keyboard_hide">隱藏\nKBD</string>
 
-	<string name="mouse_mode_multi_touch">多點觸控</string>
 	<string name="render_mode_2d">預設 2D</string>
 	<string name="render_mode_3d_sbs">AI SBS 3D</string>
 	<string name="render_mode_3d_sbs_movie">AI SBS 3D 電影（同步）</string>
-	<string name="mouse_mode_absolute_touch">單點觸控</string>
-	<string name="mouse_mode_track_pad_natural">觸控板（自然/雙擊拖曳）</string>
-	<string name="mouse_mode_track_pad_gaming">觸控板（遊戲/長按拖曳）</string>
-	<string name="mouse_mode_disabled">停用</string>
-	<string name="mouse_mode_absolute_touch_swapped">單點觸控（左右鍵對調）</string>
 
 	<string name="keyboard_layout_set_1">設定檔 1</string>
 	<string name="keyboard_layout_set_2">設定檔 2</string>
@@ -641,16 +581,9 @@
 	<string name="debug_info_api_version">API 版本：</string>
 	<string name="debug_info_kernel_version">核心版本：</string>
 	<string name="debug_info_brand_model">品牌與型號：</string>
-	<string name="debug_info_has_vibration_motor">具震動馬達</string>
-	<string name="debug_info_no_vibration_motor">無震動馬達</string>
-	<string name="debug_info_test_device_vibration">測試裝置震動（%s）</string>
-	<string name="debug_info_vibration_amplitude">震動振幅（%d）</string>
-	<string name="debug_info_simple_vibration">簡單震動 1 秒</string>
-	<string name="debug_info_continuous_hd_vibration">連續高品質震動</string>
 	<string name="debug_info_please_choose">請選擇</string>
 	<string name="debug_info_no_gamepad_detected">未偵測到手把，請連接手把、點選重新整理後再試！</string>
 	<string name="debug_info_no_vibrator">未在手把上偵測到震動裝置！</string>
-	<string name="debug_info_set_amplitude">設定振幅 0–255（僅對高品質震動有效）</string>
 	<string name="debug_info_name">名稱： </string>
 	<string name="debug_info_sensors">陀螺儀： </string>
 	<string name="debug_info_no_relevant_driver">無（無相關驅動或不支援該手把）</string>
@@ -663,7 +596,6 @@
 	<string name="debug_info_number_of_gamepads">手把數量： </string>
 	<string name="debug_info_accelerometer">+加速度計</string>
 	<string name="debug_info_gyroscope">+陀螺儀</string>
-	<string name="debug_info_stop_vibration">停止震動</string>
 	<string name="debug_info_refresh_gamepad_info">點擊以重新整理手把資訊</string>
 	<string name="debug_info_refresh_gamepad_list">重新整理手把清單</string>
 	<string name="debug_info_test_gamepad_rumble">測試手把震動</string>
@@ -690,13 +622,7 @@
 	<string name="clipboard_sync_unsupported">此伺服器不支援剪貼簿同步。請安裝或將伺服器升級至最新版本的 Apollo。</string>
 	<string name="send_clipboard_failed">傳送剪貼簿失敗： </string>
 
-	<string name="external_display_info">外接顯示器連接：%1$dx%2$d，%3$.1fHz</string>
-	<string name="notification_channel_name">外接顯示控制</string>
-	<string name="notification_title">外接顯示已啟用</string>
-	<string name="notification_text">點擊以開啟觸控板控制器</string>
 	<string name="permission_denied">通知權限被拒</string>
-	<string name="no_external_display">未偵測到外接顯示器</string>
-	<string name="no_game_instance">沒有可用的遊戲實例</string>
 	<string name="get_clipboard_failed">取得剪貼簿失敗： </string>
 	<string name="send_clipboard_success">剪貼簿傳送成功</string>
 	<string name="get_clipboard_success">剪貼簿取得成功</string>
@@ -747,8 +673,6 @@
 
 	<string name="title_enable_commit_text">啟用 commit-text 輸入（滑動/語音）</string>
 	<string name="summary_enable_commit_text">將軟體鍵盤的多字元輸入（手勢輸入、建議字詞、語音聽寫）轉送到主機。可能會影響依賴逐鍵輸入的遊戲。</string>
-	<string name="title_checkbox_remember_zoom_pan">記住縮放與平移</string>
-	<string name="summary_checkbox_remember_zoom_pan">在工作階段之間儲存縮放與平移位置</string>
 	<string name="title_checkbox_enable_perf_overlay_bottom">將效能資訊移至底部</string>
 	<string name="summary_checkbox_enable_perf_overlay_bottom">在非原生解析度串流、同時啟用「置頂置中顯示」與精簡模式時特別有用。</string>
 

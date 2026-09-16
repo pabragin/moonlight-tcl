@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_checkbox_multi_controller">Automatisk oppdaging av spillkontroller</string>
-    <string name="title_checkbox_touchscreen_trackpad">Bruk denne pekeskjermen som pekeflate</string>
     <string name="title_checkbox_stretch_video">Strekk video til hele skjermen</string>
     <string name="title_seekbar_bitrate">Video-bitrate</string>
     <string name="title_fps_list">Videobilderammetakt</string>
@@ -130,9 +129,6 @@
     <string name="summary_checkbox_mouse_emulation">Å lang-trykke «Start»-knappen veksler spillkontroller til musemodus</string>
     <string name="title_checkbox_usb_bind_all">Overstyr systemspesifikk kontrollerstøtte</string>
     <string name="summary_checkbox_xb1_driver">Skrur på en innebygd USB-driver for enheter uten systemspesifikk Xbox-kontrollerstøtte</string>
-    <string name="summary_checkbox_vibrate_fallback">Vibrerer din kontroller for å emulere vibrasjon, hvis din kontroller støtter det</string>
-    <string name="title_checkbox_vibrate_fallback">Vibrasjonsemulering</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Får pekeskjermen til å oppføre seg som en pekeflate. Ellers kontrolleres pekeskjermen musen direkte.</string>
     <string name="title_decoding_reset">Tilbakestilling av videoinnstillinger</string>
     <string name="message_decoding_error">Moonlight har krasjet som følge av inkompatibilitet med denne enhetens videodekoder. Prøv å justere strømmingsinnstillingene hvis problemet vedvarer.</string>
     <string name="error_404">GFE returnerte en HTTP-404-feil. Forsikre deg om at PC-en kjører et støttet skjermkort. Bruk av fjernskrivebordsprogramvare kan også forårsake denne feilen. Prøv å starte maskinen på ny, eller å reinstallere GFE.</string>
@@ -146,8 +142,6 @@
     <string name="summary_enable_perf_overlay">Viser ytelsesinfo i sanntid under strømming</string>
     <string name="title_enable_perf_overlay">Vis ytelsesstatistikk under strømming</string>
     <string name="summary_enable_hdr">Strøm HDR når spillet og PC-ens skjermkort støtter det. HDR krever GTX 1000-eller nyere.</string>
-    <string name="summary_checkbox_enable_pip">Tillater strømmen å vises (men ikke kontrolleres) under fleroppgaveløsning</string>
-    <string name="title_checkbox_enable_pip">Skru på bilde-i-bilde-observatørmodus</string>
     <string name="title_reset_osc">Tøm lagret oppsett for innstillingskontroller som vises på skjermen</string>
     <string name="summary_checkbox_vibrate_osc">Vibrerer din enhet for innstillingskontroller som vises på skjermen</string>
     <string name="summary_checkbox_show_onscreen_controls">Vis virtuelle innstillingskontroller for innstillinger i overleggslag på pekeskjermen</string>

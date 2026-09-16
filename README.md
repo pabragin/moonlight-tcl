@@ -1,3 +1,5 @@
+<p align="center"><img src="store-assets/moonlight-tcl-icon.svg" width="128" alt="Moonlight TCL"></p>
+
 # Moonlight TCL
 
 A build of [Artemis](https://github.com/ClassicOldSong/moonlight-android) (the Moonlight Android fork) for **TCL Google TVs on
@@ -24,16 +26,19 @@ their updates. Android 14 only, `armeabi-v7a` only (that is what these TVs run).
 - Native AAudio low-latency output, no Java between the decoder and the audio driver. Falls back to `AudioTrack` on its own,
   and when the system equalizer is on.
 
-**Rumble: off by default, because it can restart the TV**
+**Rumble: through the Bluetooth stack, not the input service that restarts the TV**
 - TCL's Android 14 firmware has a race in `system_server`'s input service: a gamepad vibration arrives on a binder thread and is
   pushed into the event queue that the input reader thread is draining without the lock. Any rumble sent through the Android
   input stack can hit it; when it does, the system service aborts, the TV shows the boot animation and every app restarts, which
   looks exactly like a reboot (confirmed from the crash dumps and AOSP source; fixed upstream in Android 15, so only TCL can fix
-  it here). Moonlight TCL therefore ships with rumble **off**, and `Settings → Gamepad → Enable rumble` warns before turning it
-  on. With it on, a Bluetooth pad gets at most 10 updates per second, sent right after the pad's own input when the reader thread
-  is idle, and small level changes are not sent at all; that made the crash rare (once in a week of daily play instead of hourly)
-  but not impossible. A gamepad on a USB cable is driven by Moonlight's own USB driver, never touches the input stack and is safe
-  to rumble.
+  it here). Moonlight TCL therefore sends rumble to Bluetooth gamepads through the Bluetooth stack's own HID host instead: the
+  output report reaches the pad by the same Bluetooth path the kernel's force feedback would take, but `system_server` and its
+  input reader are never involved. It needs the Nearby devices (Bluetooth) permission, which the app asks for once. Xbox pads are
+  verified on the TV; DualShock 4, DualSense, Switch Pro and Joy-Con, 8BitDo, Amazon Luna, Google Stadia, NVIDIA Shield 2017 and
+  GameSir 8K pads are written from the Linux and SDL driver sources and still wait for someone with the hardware (an issue saying
+  whether yours rumbles would settle it). Rumble is **on** by default. Other Bluetooth pads stay silent on this TV: there is no
+  switch back to the input service, because that path is what restarts the TV. A gamepad on a USB cable is driven by Moonlight's
+  own USB driver and never touches the input stack either.
 
 **Stability and housekeeping**
 - The whole-TV freezes of the first builds (volume bar, app switch, stream exit) no longer reproduce; the workarounds that fought
@@ -143,11 +148,14 @@ Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
 каталоге); после установки спарьтесь с ПК заново.
 
 **Что сделано.** Возвращён проверенный видеоконвейер; кадры уходят на экран прямо из декодера, без промежуточного потока; кадр
-копируется один раз; декодеру всегда выставляются все опции низкой задержки; звук через нативный AAudio. Вибрация геймпада по умолчанию
-выключена: в прошивке Android 14 есть гонка в системной службе ввода, которую запускает вибрация через системный стек; служба
-падает, телевизор показывает анимацию загрузки, и все приложения перезапускаются (исправлено только в Android 15). По USB-кабелю
-вибрация идёт через собственный драйвер Moonlight и безопасна; по Bluetooth при включении она уходит не чаще 10 раз в секунду
-сразу после ввода геймпада, мелкие изменения уровня не отправляются, что делает сбой редким, но не исключает его. Зависания
+копируется один раз; декодеру всегда выставляются все опции низкой задержки; звук через нативный AAudio. Вибрация геймпада включена по
+умолчанию и идёт в обход системной службы ввода: в прошивке Android 14 у неё есть гонка, которую запускает вибрация через системный
+стек, служба падает, телевизор показывает анимацию загрузки, и все приложения перезапускаются (исправлено только в Android 15).
+Bluetooth-геймпадам вибрация отправляется через собственный HID-хост Bluetooth-стека, для этого нужно разрешение «Устройства
+поблизости»; Xbox проверен на телевизоре, DualShock 4, DualSense, Switch Pro, Joy-Con, 8BitDo, Amazon Luna, Google Stadia, NVIDIA
+Shield 2017 и GameSir 8K сделаны по исходникам драйверов Linux и SDL и ждут проверки на живых геймпадах; остальные Bluetooth-геймпады
+на этом телевизоре не вибрируют, обратного переключения на системную службу нет. По USB-кабелю вибрация идёт через собственный
+драйвер Moonlight. Зависания
 телевизора из первых сборок больше не воспроизводятся. Настроек мало, есть встроенный тест задержки и
 сообщение с временем декодирования после стрима.
 

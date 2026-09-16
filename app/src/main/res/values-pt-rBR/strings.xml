@@ -12,10 +12,8 @@
     <string name="pacing_smoothness">Preferir vídeo mais suave (pode aumentar significativamente a latência)</string>
     <string name="summary_frame_pacing">Especifique o equilíbrio entre latência e suavidade do vídeo</string>
     <string name="title_checkbox_disable_warnings">Desabilitar mensagens de alerta</string>
-    <string name="title_checkbox_enable_pip">Habilitar modo Picture-in-Picture</string>
     <string name="summary_checkbox_small_icon_mode">Diminui o tamanho dos ícones permitindo que mais aplicativos sejam visíveis na tela</string>
     <string name="dialog_text_reset_osc">Tem certeza de que deseja excluir o layout salvo dos controles de tela\?</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Se habilitado, a tela sensível ao toque funciona como um trackpad. Se desativado, a tela controla diretamente o cursor do mouse.</string>
     <string name="summary_checkbox_xb1_driver">Habilita um driver USB integrado para dispositivos sem suporte nativo aos controles Xbox</string>
     <string name="title_checkbox_mouse_nav_buttons">Habilitar os botões de voltar e avançar do mouse</string>
     <string name="addpc_fail">Não foi possível conectar ao computador especificado. Certifique-se de que as portas necessárias sejam permitidas pelo firewall.</string>
@@ -176,11 +174,8 @@
     <string name="title_checkbox_vibrate_osc">Habilitar vibração</string>
     <string name="title_only_l3r3">Mostrar somente L3 e R3</string>
     <string name="summary_only_l3r3">Esconde todos os botões virtuais exceto o L3 e R3</string>
-    <string name="title_checkbox_touchscreen_trackpad">Usar a tela como um trackpad</string>
     <string name="title_checkbox_multi_controller">Detecção automática de gamepad</string>
     <string name="summary_checkbox_multi_controller">Desmarque esta opção para forçar o gamepad a estar sempre presente</string>
-    <string name="title_checkbox_vibrate_fallback">Emular suporte rumble com vibração</string>
-    <string name="summary_checkbox_vibrate_fallback">Vibra seu dispositivo para emular rumble se seu gamepad não suportar</string>
     <string name="title_seekbar_deadzone">Ajustar zona morta do analógico</string>
     <string name="suffix_seekbar_deadzone">%</string>
     <string name="title_checkbox_xb1_driver">Driver de gamepad USB Xbox 360/One</string>
@@ -200,7 +195,6 @@
     <string name="summary_checkbox_enable_sops">Permitir que o GFE modifique as configurações do jogo para otimizar a transmissão</string>
     <string name="title_language_list">Idioma</string>
     <string name="summary_language_list">Idioma para ser usado no Moonlight</string>
-    <string name="summary_checkbox_enable_pip">Permite que a transmissão seja visualizada (mas não controlada) enquanto usa outros apps</string>
     <string name="category_ui_settings">Configurações de Interface</string>
     <string name="suffix_osc_opacity">%</string>
     <string name="category_host_settings">Configurações de Host</string>

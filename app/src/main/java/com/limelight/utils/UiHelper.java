@@ -60,14 +60,6 @@ public class UiHelper {
         setGameModeStatus(context, true, false);
     }
 
-    public static void notifyStreamEnteringPiP(Context context) {
-        setGameModeStatus(context, true, true);
-    }
-
-    public static void notifyStreamExitingPiP(Context context) {
-        setGameModeStatus(context, true, false);
-    }
-
     public static void notifyStreamEnded(Context context) {
         setGameModeStatus(context, false, false);
     }

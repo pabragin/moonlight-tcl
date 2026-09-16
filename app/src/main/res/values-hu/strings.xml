@@ -24,8 +24,6 @@
     <string name="title_checkbox_small_icon_mode">Használjon kis dobozos rajzokat</string>
     <string name="summary_language_list">A Moonlight-hoz használt nyelv</string>
     <string name="title_language_list">Nyelv</string>
-    <string name="summary_checkbox_enable_pip">Lehetővé teszi az adatfolyam megtekintését (de nem vezérlését) multitasking közben</string>
-    <string name="title_checkbox_enable_pip">Engedélyezze a Kép a képben megfigyelő módot</string>
     <string name="category_ui_settings">Felhasználói felület beállításai</string>
     <string name="suffix_osc_opacity">%</string>
     <string name="dialog_title_osc_opacity">Opacitás módosítása</string>
@@ -55,12 +53,8 @@
     <string name="title_checkbox_xb1_driver">Xbox 360 / One USB játékvezérlő</string>
     <string name="suffix_seekbar_deadzone">%</string>
     <string name="title_seekbar_deadzone">Állítsa be az analóg bot holtzónáját</string>
-    <string name="summary_checkbox_vibrate_fallback">Rezeg a készülék, hogy utánozza a dübörgést, ha a gamepad nem támogatja</string>
-    <string name="title_checkbox_vibrate_fallback">A dübörgés támogatását rezgéssel utánozzuk</string>
     <string name="summary_checkbox_multi_controller">Ennek az opciónak a bejelölése arra kényszeríti a játéktáblát, hogy mindig jelen legyen</string>
     <string name="title_checkbox_multi_controller">Automatikus gamepad jelenlét-észlelés</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Ha engedélyezve van, az érintőképernyő úgy működik, mint egy trackpad. Ha le van tiltva, az érintőképernyő közvetlenül vezérli az egér kurzort.</string>
-    <string name="title_checkbox_touchscreen_trackpad">Használja az érintőképernyőt trackpadként</string>
     <string name="category_input_settings">Bemeneti beállítások</string>
     <string name="summary_audio_config_list">Engedélyezze az 5.1 vagy 7.1 térhatású hangot házimozi rendszerekhez</string>
     <string name="title_audio_config_list">Térhatású hang konfigurációja</string>

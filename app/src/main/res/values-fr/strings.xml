@@ -179,8 +179,6 @@
     <string name="resolution_prefix_custom">Personnalisée</string>
     <string name="fps_suffix_fps">FPS</string>
     <string name="title_native_fps_dialog">Avertissement sur le FPS natif</string>
-    <string name="title_checkbox_auto_invert_video_resolution">Inverser automatiquement la résolution</string>
-    <string name="summary_checkbox_auto_invert_video_resolution">Inverse automatiquement la largeur et la hauteur du flux vidéo en mode portrait.\nPar exemple : 1920x1080 deviendra 1080x1920.</string>
     <string name="title_video_scale_mode">Mode d\'échelle vidéo</string>
     <string name="summary_video_scale_mode">Choisissez entre Ajuster, Remplir et Étirer</string>
     <string name="video_scale_mode_fit">Ajuster</string>
@@ -196,11 +194,6 @@
     <string name="category_gamepad_settings">Paramètres manette</string>
     <string name="title_checkbox_multi_controller">Détection automatique de la présence de la manette</string>
     <string name="summary_checkbox_multi_controller">Décocher cette option force une manette à toujours être présente</string>
-    <string name="title_checkbox_vibrate_fallback">Émuler les vibrations de la manette avec l\'appareil</string>
-    <string name="summary_checkbox_vibrate_fallback">Fait vibrer votre appareil pour émuler les vibrations de la manette si elle ne le supporte pas</string>
-    <string name="title_seekbar_vibrate_fallback_strength">Ajuster l\'intensité de la vibration émulée</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">Amplifie ou réduit l\'intensité de la vibration sur votre appareil</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
     <string name="title_seekbar_deadzone">Régler la zone morte du stick analogique</string>
     <string name="summary_seekbar_deadzone">Les valeurs positives définissent une zone morte normale, les valeurs négatives appliquent une compensation de zone morte. Assurez-vous que votre manette peut ajuster les zones mortes lors de l\'utilisation de la compensation de zone morte, sinon le centrage peut être difficile.</string>
     <string name="suffix_seekbar_deadzone">%</string>
@@ -216,14 +209,8 @@
     <string name="summary_checkbox_gamepad_touchpad_as_mouse">Force le pavé tactile de la manette à contrôler la souris de l\'hôte, même lors de l\'émulation d\'une manette avec un pavé tactile.</string>
     <string name="title_checkbox_gamepad_motion_sensors">Autoriser l\'utilisation des capteurs de mouvement de la manette</string>
     <string name="summary_checkbox_gamepad_motion_sensors">Permet aux hôtes pris en charge de demander des données de capteur de mouvement lors de l\'émulation d\'une manette avec des capteurs de mouvement. La désactivation de cette option peut légèrement réduire la consommation d\'énergie et l\'utilisation du réseau si les capteurs de mouvement ne sont pas utilisés dans le jeu.</string>
-    <string name="title_checkbox_gamepad_motion_fallback">Émuler les capteurs de mouvement de la manette</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">Utilise les capteurs de mouvement de votre appareil si la manette connectée n\'en a pas ou si ils ne sont pas pris en charge par votre version d\'Android.\nRemarque : l\'activation de cette option peut faire apparaître votre manette côté hôte comme une manette PlayStation.</string>
-    <string name="title_checkbox_force_device_motion">Toujours utiliser les capteurs de mouvement de l\'appareil</string>
-    <string name="summary_checkbox_force_device_motion">Force l\'utilisation des capteurs de mouvement intégrés de l\'appareil même lorsque la manette signale que les capteurs de mouvement sont pris en charge.</string>
 
     <string name="category_input_settings">Paramètres d\'entrée</string>
-    <string name="title_checkbox_touchscreen_trackpad">Utiliser l\'écran tactile comme trackpad</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Si activé, l\'écran tactile agit comme un trackpad. Si désactivé, l\'écran tactile contrôle directement le curseur de la souris.</string>
     <string name="title_checkbox_absolute_mouse_mode">Mode souris pour bureau à distance</string>
     <string name="summary_checkbox_absolute_mouse_mode">Cela peut rendre l\'accélération de la souris plus naturelle pour l\'utilisation du bureau à distance, mais il est incompatible avec de nombreux jeux.</string>
     <string name="title_checkbox_mouse_nav_buttons">Activer les boutons de navigation arrière et avant de la souris</string>
@@ -251,8 +238,6 @@
     <string name="suffix_osc_opacity">%</string>
 
     <string name="category_ui_settings">Paramètres de l\'interface utilisateur</string>
-    <string name="title_checkbox_enable_pip">Activer le mode observateur Picture-in-Picture</string>
-    <string name="summary_checkbox_enable_pip">Permet de visualiser le flux (sans le contrôler) tout en utilisant une autre application</string>
     <string name="title_language_list">Langue</string>
     <string name="summary_language_list">Langue à utiliser pour Artemis</string>
     <string name="title_checkbox_small_icon_mode">Utiliser des petites icônes</string>
@@ -334,14 +319,9 @@
     <!-- In Game menu -->
     <string name="game_menu_toggle_keyboard">Afficher le clavier logiciel</string>
     <string name="game_menu_toggle_hud">Basculer l\'affichage des performances</string>
-    <string name="game_menu_select_mouse_mode">Sélectionner le mode de la souris</string>
-    <string name="game_menu_enable_zoom_mode">Activer le mode Zoom/Panoramique</string>
-    <string name="game_menu_disable_zoom_mode">Désactiver le mode Zoom/Panoramique</string>
-    <string name="game_menu_rotate_screen">Pivoter l\'écran</string>
     <string name="game_menu_toggle_keyboard_model">Basculer les touches spéciales</string>
     <string name="game_menu_toggle_virtual_model">Basculer le contrôleur à l\'écran</string>
     <string name="game_menu_toggle_virtual_keyboard_model">Basculer le clavier virtuel complet</string>
-    <string name="game_menu_switch_touch_sensitivity_model">Changer la sensibilité tactile</string>
     <string name="game_menu_toggle_mouse_on">Activer l\'émulation de la souris par la manette</string>
     <string name="game_menu_toggle_mouse_off">Désactiver l\'émulation de la souris par la manette</string>
     <string name="game_menu_disconnect">Déconnecter</string>
@@ -386,8 +366,6 @@
     <string name="title_custom_refresh_rate">Taux de rafraîchissement personnalisé</string>
     <string name="summary_custom_refresh_rate">Entrez le taux de rafraîchissement manuellement. Seulement pris en charge par Apollo.</string>
     <string name="dialog_custom_refresh_rate">Entrez le taux de rafraîchissement en Hz. Peut être fractionnaire.</string>
-    <string name="title_touchscreen_mode">Mode de l\'écran tactile</string>
-    <string name="summary_touchscreen_mode">Choisissez entre les modes MultiTouch/SingleTouch/Trackpad/Désactivé.\nLe stylet/stylo sont toujours utilisables lorsque le mode Désactivé est sélectionné.\nForcé en mode Track Pad(Natural) lors de l\'utilisation d\'un affichage externe.</string>
 
     <!-- New Strings -->
     <string name="title_checkbox_mouse_local_cursor">Utiliser le curseur local de la souris</string>
@@ -398,14 +376,11 @@
     <string name="summary_checkbox_enable_perf_overlay_lite">Affiche des informations de performance simplifiées : Vitesse du réseau / Latence / Temps de décodage / Taux de perte de paquets / FPS</string>
     <string name="title_checkbox_enable_perf_overlay_lite_dialog">Mode Lite cliquer pour afficher les options rapides</string>
     <string name="summary_checkbox_enable_perf_overlay_lite_dialog">Remplace la logique du bouton retour, affiche le menu rapide du jeu.</string>
-    <string name="title_virtual_trackpad_settings">Paramètres du trackpad virtuel</string>
     <string name="title_quit_dialog">Menu retour</string>
     <string name="summary_quit_dialog">Lorsqu\'il est activé, cliquer sur le bouton retour physique de l\'interface de streaming affichera les options associées !\nClavier logiciel, informations de performance, basculement du mode tactile, envoi de touches spéciales</string>
     <string name="dialog_custom_resolution">Définissez la résolution et quittez la page des paramètres pour prendre effet !</string>
     <string name="summary_custom_resolution">Ajoutez une résolution personnalisée, séparée par x, les résolutions étranges peuvent ne pas fonctionner.\nPar exemple : 1920x1080\nSi ce n\'est pas une résolution native, elle peut ne pas remplir la zone d\'encoche par défaut. Si l\'aspect ratio est le même, vous pouvez ajuster manuellement les paramètres pour étirer l\'écran afin de remplir tout l\'écran</string>
     <string name="title_custom_resolution">Résolution personnalisée</string>
-    <string name="title_auto_orientation">Orientation automatique</string>
-    <string name="summary_auto_orientation">L\'écran de streaming sera affiché selon l\'orientation de l\'appareil lorsque le streaming commence.</string>
     <string name="title_import_special_button">Importer des touches spéciales personnalisées</string>
     <string name="summary_import_special_button">Disponible dans le menu Retour et les touches spéciales.\nRemarque : l\'importation écrasera la configuration actuelle, veuillez sauvegarder en conséquence.</string>
     <string name="title_software_update">Mise à jour du logiciel</string>
@@ -437,26 +412,8 @@
     <string name="title_free_analog_stick_opacity">Opacité du fond du stick analogique libre</string>
     <string name="title_exdisplay_mode">Mode d\'affichage externe (Beta)</string>
     <string name="summary_exdisplay_mode">Affichage du flux sur le moniteur, boutons virtuels et informations de performance et autres contrôles sur l\'écran du téléphone.</string>
-    <string name="title_top_center_display">Affichage en haut au centre</string>
-    <string name="summary_top_center_display">L\'image de streaming sera alignée en haut de l\'écran au lieu d\'être centrée lorsque la résolution n\'est pas native.</string>
-    <string name="title_touch_sensitivity">Sensibilité de l\'écran tactile</string>
-    <string name="summary_touch_sensitivity">Lorsqu\'il est activé, vous pouvez ajuster manuellement la sensibilité tactile.</string>
-    <string name="title_global_touch_sensitivity">Sensibilité tactile globale</string>
-    <string name="summary_global_touch_sensitivity">Par défaut non sélectionné, efficace uniquement sur la moitié droite de l\'écran (adapté pour jouer à Genshin Impact), sélectionné pour être efficace dans toute la plage de l\'écran.</string>
-    <string name="title_auto_touch_sensitivity">Retour automatique au centre de l\'écran lorsque les coordonnées tactiles dépassent les limites</string>
-    <string name="summary_auto_touch_sensitivity">Haute sensibilité par défaut, un léger glissement dépasse les limites, ce qui rend le déplacement impossible, vous pouvez sélectionner cette option.</string>
-    <string name="title_touch_sensitivity_x">Ajustement de la sensibilité de l\'écran X</string>
-    <string name="summary_touch_sensitivity_x">En mode multitouch, lors de la lecture de certains jeux, les besoins d\'ajustement de la sensibilité peuvent ne pas être satisfaits, vous pouvez utiliser cette option pour modifier la sensibilité du champ de vision.</string>
-    <string name="title_touch_sensitivity_y">Ajustement de la sensibilité de l\'écran Y</string>
-    <string name="summary_touch_sensitivity_y">En mode multitouch, lors de la lecture de certains jeux, les besoins d\'ajustement de la sensibilité peuvent ne pas être satisfaits, vous pouvez utiliser cette option pour modifier la sensibilité du champ de vision.</string>
     <string name="title_debug_info">Infos de débogage</string>
     <string name="summary_debug_info">Tester les vibrations de la manette et d\'autres choses.</string>
-    <string name="title_touchpad_sensitivity_x">Sensibilité du trackpad X</string>
-    <string name="summary_touchpad_sensitivity_x">Pour le mode souris trackpad et le contrôle du bouton tactile spécial du trackpad ;\nLes deux partagent une valeur de sensibilité, mais les performances de sensibilité peuvent être différentes.\nQuelqu\'un utilise-t-il les deux ensemble ?</string>
-    <string name="title_touchpad_sensitivity_y">Sensibilité du trackpad Y</string>
-    <string name="summary_touchpad_sensitivity_y">Pour le mode souris trackpad et le contrôle du bouton tactile spécial du trackpad ;\nLes deux partagent une valeur de sensibilité, mais les performances de sensibilité peuvent être différentes.\nQuelqu\'un utilise-t-il les deux ensemble ?</string>
-    <string name="title_device_rumble">Forcer les vibrations sur l\'appareil</string>
-    <string name="summary_device_rumble">Si vous n\'êtes pas satisfait des vibrations de la manette connectée, vous pouvez activer cette option.\nNon valide pour l\'utilisation forcée du pilote USB intégré d\'Artemis</string>
     <string name="title_clear_default_special_button">Désactiver les touches spéciales par défaut</string>
     <string name="summary_clear_default_special_button">Si vous trouvez que les commandes intégrées dans le menu Retour sont inutiles, vous pouvez les désactiver et utiliser celles que vous avez importées.</string>
     <string name="title_trackpad_sensitivity_x">Sensibilité du trackpad X</string>
@@ -500,12 +457,6 @@
     <string name="title_checkbox_enable_sticky_modifier_key_virtual_keyboard">Touches modificatrices adhésives</string>
     <string name="summary_checkbox_enable_sticky_modifier_key_virtual_keyboard">Utiliser les touches modificatrices adhésives sur le clavier virtuel complet et le clavier personnalisé à l\'écran.</string>
     <string name="virtual_keyboard_hide">Masquer\nCLAVIER</string>
-    <string name="mouse_mode_multi_touch">Multitouch</string>
-    <string name="mouse_mode_absolute_touch">Toucher absolu</string>
-    <string name="mouse_mode_track_pad_natural">Trackpad (Naturel/Double tap pour faire glisser)</string>
-    <string name="mouse_mode_track_pad_gaming">Trackpad (Gaming/Appui long pour faire glisser)</string>
-    <string name="mouse_mode_disabled">Désactivé</string>
-    <string name="mouse_mode_absolute_touch_swapped">Toucher absolu (clic gauche/droit inversé)</string>
     <string name="keyboard_layout_set_1">Profil 1</string>
     <string name="keyboard_layout_set_2">Profil 2</string>
     <string name="keyboard_layout_set_3">Profil 3</string>
@@ -516,16 +467,9 @@
     <string name="debug_info_api_version">Version API :</string>
     <string name="debug_info_kernel_version">Version du noyau :</string>
     <string name="debug_info_brand_model">Marque et modèle :</string>
-    <string name="debug_info_has_vibration_motor">A un moteur de vibration</string>
-    <string name="debug_info_no_vibration_motor">Pas de moteur de vibration</string>
-    <string name="debug_info_test_device_vibration">Tester la vibration de l\'appareil (%s)</string>
-    <string name="debug_info_vibration_amplitude">Amplitude de vibration (%d)</string>
-    <string name="debug_info_simple_vibration">Vibration simple pendant 1 seconde</string>
-    <string name="debug_info_continuous_hd_vibration">Vibration HD continue</string>
     <string name="debug_info_please_choose">Veuillez choisir</string>
     <string name="debug_info_no_gamepad_detected">Aucune manette détectée, veuillez connecter une manette, appuyer sur actualiser, puis réessayer !</string>
     <string name="debug_info_no_vibrator">Aucun vibreur détecté sur la manette !</string>
-    <string name="debug_info_set_amplitude">Définir l\'amplitude 0-255 (Efficace uniquement pour la vibration HD)</string>
     <string name="debug_info_name">Nom : </string>
     <string name="debug_info_sensors">Capteurs : </string>
     <string name="debug_info_no_relevant_driver">Aucun (aucun pilote pertinent ou manette non prise en charge)</string>
@@ -538,7 +482,6 @@
     <string name="debug_info_number_of_gamepads">Nombre de manettes : </string>
     <string name="debug_info_accelerometer">+ Accéléromètre</string>
     <string name="debug_info_gyroscope">+ Gyroscope</string>
-    <string name="debug_info_stop_vibration">Arrêter la vibration</string>
     <string name="debug_info_refresh_gamepad_info">Appuyer pour actualiser les infos de la manette</string>
     <string name="debug_info_refresh_gamepad_list">Actualiser la liste des manettes</string>
     <string name="debug_info_test_gamepad_rumble">Tester la vibration de la manette</string>
@@ -577,9 +520,5 @@
     <string name="permission_sync_clipboard">Synchroniser le presse-papiers</string>
     <string name="title_enable_commit_text">Activer la saisie commit-text (gestes/voix)</string>
     <string name="summary_enable_commit_text">Transfère le texte multi-caractères des claviers virtuels (saisie gestuelle, suggestions, dictée vocale). Peut perturber les jeux qui attendent des frappes une par une.</string>
-    <string name="title_show_overlay_zoom_toggle_button">Afficher le bouton de bascule du zoom de superposition</string>
-    <string name="summary_show_overlay_zoom_toggle_button">Affiche un bouton déplaçable en haut de l\'écran pour activer/désactiver le mode panoramique/zoom.</string>
-    <string name="title_checkbox_remember_zoom_pan">Mémoriser le zoom et le panoramique</string>
-    <string name="summary_checkbox_remember_zoom_pan">Enregistre la position de zoom et de panoramique entre les sessions.</string>
     <string name="title_edit_profile">Modifier le profil</string>
 </resources>

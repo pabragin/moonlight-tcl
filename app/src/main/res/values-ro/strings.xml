@@ -117,16 +117,12 @@
     <string name="summary_unlock_fps">Fluxul video de rate mai mari poate reduce latența folosind dispozitive performante, dar poate introduce erori daca nu sunt suportate.</string>
     <string name="title_checkbox_disable_warnings">Dezactivează mesajele de avertizare</string>
     <string name="summary_checkbox_disable_warnings">Dezactivează mesajele de avertizare privind rețeaua în timpul conexiunii</string>
-    <string name="title_checkbox_enable_pip">Activează modul Picture-In-Picture</string>
-    <string name="summary_checkbox_enable_pip">Permite vizualizarea (dar nu și controlul) când efectuezi multitasking</string>
     <string name="category_audio_settings">Setări Audio</string>
     <string name="title_audio_config_list">Configurarea sunetului surround</string>
     <string name="summary_audio_config_list">Activeaza sunetul 5.1 sau 7.1 pentru sisteme home-theater</string>
     <string name="category_input_settings">Setări de control</string>
     <string name="title_checkbox_multi_controller">Detectează automat prezența controllerelor.</string>
     <string name="summary_checkbox_multi_controller">Dezactivarea acestei opțiuni implică prezența constantă a unui controller</string>
-    <string name="title_checkbox_vibrate_fallback">Simuleaza efectul de vibratie</string>
-    <string name="summary_checkbox_vibrate_fallback">Dacă controllerul nu suportă vibrații, va vibra dispozitivul în schimb.</string>
     <string name="title_seekbar_deadzone">Zona moartă a stickului analogic</string>
     <string name="suffix_seekbar_deadzone">%</string>
     <string name="title_checkbox_xb1_driver">Driver pentru controllerele de Xbox 360/One</string>

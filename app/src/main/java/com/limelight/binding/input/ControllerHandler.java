@@ -1,6 +1,7 @@
 package com.limelight.binding.input;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.Sensor;
@@ -16,15 +17,10 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.AudioAttributes;
 import android.os.Build;
-import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.VibrationAttributes;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.os.VibratorManager;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -67,14 +63,14 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
     private static final int MINIMUM_BUTTON_DOWN_TIME_MS = 25;
 
-    // Deferred rumble (Android TV workaround): never call the vibrator more often than this per
-    // gamepad, and flush a pending request from the main thread after this long without input from
-    // the pad. Every call is one more chance to hit the firmware race, so 10 per second, not 20.
-    private static final int RUMBLE_MIN_INTERVAL_MS = 100;
-    private static final int RUMBLE_IDLE_FLUSH_MS = 100;
-    // A motor level counts as changed only when it starts, stops or moves by at least this much
-    // (about 6% of full scale); smaller wobbles are not worth another call into the input stack.
-    private static final int RUMBLE_MIN_DELTA = 0x1000;
+    // Rumble goes through the Bluetooth stack's HID host (BluetoothHidRumble), never through the Android
+    // input stack (system_server's InputReader crashes on it on this TV's Android 14 firmware). It is paced
+    // for the radio and the pad's firmware: at most one output report per ReportFormat.minIntervalMs() per
+    // gamepad, every level change delivered.
+    // Consecutive failed sendData() calls after which the gamepad leaves the Bluetooth HID path
+    private static final int BT_HID_RUMBLE_MAX_FAILURES = 3;
+    // Delay before a report that did not reach the pad (proxy still binding, transient failure) is retried
+    private static final int BT_HID_RUMBLE_RETRY_MS = 100;
 
     private static final int QUICK_MENU_FIRST_STAGE_MS = 200;
 
@@ -132,12 +128,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     private final InputDeviceContext defaultContext = new InputDeviceContext();
     private final GameGestures gestures;
     private final InputManager inputManager;
-    private final Vibrator deviceVibrator;
-    private final VibratorManager deviceVibratorManager;
-    private final SensorManager deviceSensorManager;
     private final Handler mainThreadHandler;
     private final HandlerThread backgroundHandlerThread;
     private final Handler backgroundThreadHandler;
+    // Rumble for Bluetooth gamepads through the Bluetooth stack (null: rumble off, no permission, Bluetooth off)
+    private final BluetoothHidRumble btHidRumble;
+    // TVs whose input stack crashes on InputDevice vibration: external pads never use InputDevice vibrators
     private boolean hasGameController;
     private boolean stopped = false;
 
@@ -151,9 +147,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         this.prefConfig = prefConfig;
         // VibratorManager.getDefaultVibrator() replaces the deprecated VIBRATOR_SERVICE lookup, which
         // stopped rumbling on newer Android releases (upstream moonlight-android 3c6a0d12).
-        this.deviceVibratorManager = (VibratorManager) activityContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
-        this.deviceVibrator = this.deviceVibratorManager.getDefaultVibrator();
-        this.deviceSensorManager = (SensorManager) activityContext.getSystemService(Context.SENSOR_SERVICE);
         this.inputManager = (InputManager) activityContext.getSystemService(Context.INPUT_SERVICE);
         this.mainThreadHandler = new Handler(Looper.getMainLooper());
 
@@ -162,6 +155,15 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         this.backgroundHandlerThread = new HandlerThread("ControllerHandler");
         this.backgroundHandlerThread.start();
         this.backgroundThreadHandler = new Handler(backgroundHandlerThread.getLooper());
+
+        // Bluetooth gamepads rumble through the Bluetooth stack's HID host, which bypasses system_server's
+        // InputReader and its Android 14 crash (see BluetoothHidRumble). The profile proxy binds
+        // asynchronously while the stream starts.
+        this.btHidRumble = prefConfig.enableRumble ? BluetoothHidRumble.openIfAvailable(activityContext) : null;
+        if (prefConfig.enableRumble) {
+            LimeLog.info("Bluetooth HID rumble: " + (btHidRumble != null ? "binding HID host proxy" :
+                    BluetoothHidRumble.hasPermission(activityContext) ? "unavailable (Bluetooth off)" : "no BLUETOOTH_CONNECT permission"));
+        }
 
         int deadzonePercentage = prefConfig.deadzonePercentage;
 
@@ -285,16 +287,17 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         for (int i = 0; i < inputDeviceContexts.size(); i++) {
             InputDeviceContext deviceContext = inputDeviceContexts.valueAt(i);
-            // Deferred mode skips the cancel in destroy(); at stream end one unaligned cancel is
-            // acceptable so the motors never keep spinning the 60 s one-shot.
-            if (deviceContext.deferredRumble) {
+            // Stop the motors at stream end so they never keep the last level
+            if (deviceContext.usesBtHid()) {
                 boolean running;
                 synchronized (deviceContext.rumbleLock) {
                     running = deviceContext.sentLowFreqMotor != 0 || deviceContext.sentHighFreqMotor != 0 ||
                             deviceContext.sentLeftTriggerMotor != 0 || deviceContext.sentRightTriggerMotor != 0;
                 }
                 if (running) {
-                    deliverRumble(deviceContext, (short)0, (short)0, (short)0, (short)0);
+                    // Blocking binder call: stays on the rumble thread, runs before destroy() quits it
+                    final InputDeviceContext ctx = deviceContext;
+                    backgroundThreadHandler.post(() -> deliverBtHidRumble(ctx, (short)0, (short)0, (short)0, (short)0));
                 }
             }
             deviceContext.destroy();
@@ -304,8 +307,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             UsbDeviceContext deviceContext = usbDeviceContexts.valueAt(i);
             deviceContext.destroy();
         }
-
-        deviceVibrator.cancel();
     }
 
     public void destroy() {
@@ -313,7 +314,11 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             stop();
         }
 
-        backgroundHandlerThread.quit();
+        if (btHidRumble != null) {
+            // Queued after any final zero report from stop()
+            backgroundThreadHandler.post(btHidRumble::close);
+        }
+        backgroundHandlerThread.quitSafely();
     }
 
     public void disableSensors() {
@@ -471,11 +476,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                     LimeLog.info("Not reserving a controller number");
                     context.controllerNumber = 0;
                 }
-
-                // If the gamepad doesn't have motion sensors, use the on-device sensors as a fallback for player 1
-                if (prefConfig.gamepadMotionSensorsFallbackToDevice && context.controllerNumber == 0 && (prefConfig.forceMotionSensorsFallbackToDevice || devContext.sensorManager == null)) {
-                    devContext.sensorManager = deviceSensorManager;
-                }
             } else {
 
                 LimeLog.info(devContext.name+" ("+context.id+") needs a controller number assigned");
@@ -540,11 +540,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 else {
                     LimeLog.info("Not reserving a controller number");
                     context.controllerNumber = 0;
-                }
-
-                // If the gamepad doesn't have motion sensors, use the on-device sensors as a fallback for player 1
-                if (prefConfig.gamepadMotionSensorsFallbackToDevice && context.controllerNumber == 0 && (prefConfig.forceMotionSensorsFallbackToDevice || devContext.sensorManager == null)) {
-                    devContext.sensorManager = deviceSensorManager;
                 }
             }
         }
@@ -690,43 +685,25 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         context.hasPaddles = MoonBridge.guessControllerHasPaddles(context.vendorId, context.productId);
         context.hasShare = MoonBridge.guessControllerHasShareButton(context.vendorId, context.productId);
 
-        // Vibrating an InputDevice goes through system_server's InputReader thread, which has a crashing
-        // data race on TCL's Android 14 firmware (an hour of play, then reboots). Rumble is therefore always
-        // delivered coalesced (at most one update per RUMBLE_MIN_INTERVAL_MS) and timed right after this
-        // gamepad's own input events, when the reader thread is idle (see flushPendingRumble). A gamepad
-        // on USB is driven by Moonlight's own USB driver and never touches the system input stack.
-        context.deferredRumble = true;
-
-        if (prefConfig.enableDeviceRumble) {
-            context.vibrator = deviceVibrator;
-        } else {
-            // Try to use the InputDevice's associated vibrators first
-            if (hasQuadAmplitudeControlledRumbleVibrators(dev.getVibratorManager())) {
-                context.vibratorManager = dev.getVibratorManager();
-                context.quadVibrators = true;
-            }
-            else if (hasDualAmplitudeControlledRumbleVibrators(dev.getVibratorManager())) {
-                context.vibratorManager = dev.getVibratorManager();
-                context.quadVibrators = false;
-            }
-            else if (dev.getVibrator().hasVibrator()) {
-                context.vibrator = dev.getVibrator();
-            }
-            else if (!context.external) {
-                // If this is an internal controller, try to use the device's vibrator
-                if (hasQuadAmplitudeControlledRumbleVibrators(deviceVibratorManager)) {
-                    context.vibratorManager = deviceVibratorManager;
-                    context.quadVibrators = true;
+        // Rumble never goes through the Android input stack here: InputDevice vibrators run on system_server's
+        // InputReader thread, which has a crashing data race on TCL's Android 14 firmware. A Bluetooth pad with a
+        // known report format rumbles through the Bluetooth stack (BluetoothHidRumble), a gamepad on USB is driven
+        // by Moonlight's own USB driver, anything else stays silent.
+        if (btHidRumble != null && context.external) {
+            BluetoothHidRumble.ReportFormat format = BluetoothHidRumble.reportFormatFor(context.vendorId, context.productId);
+            if (format != null) {
+                BluetoothDevice btDevice = btHidRumble.resolve(dev);
+                if (btDevice != null) {
+                    context.btDevice = btDevice;
+                    context.btReport = format;
                 }
-                else if (hasDualAmplitudeControlledRumbleVibrators(deviceVibratorManager)) {
-                    context.vibratorManager = deviceVibratorManager;
-                    context.quadVibrators = false;
-                }
-                else if (deviceVibrator.hasVibrator()) {
-                    context.vibrator = deviceVibrator;
+                else {
+                    LimeLog.info("Bluetooth HID rumble: no Bluetooth device for " + devName + " (" + btHidRumble.lastResolveMethod() + ")");
                 }
             }
         }
+        LimeLog.info("Rumble path for " + devName + ": " + (context.usesBtHid() ? "bluetooth-hid" : "none"));
+
         // On Android 12, we can try to use the InputDevice's sensors. This may not work if the
         // Linux kernel version doesn't have motion sensor support, which is common for third-party
         // gamepads.
@@ -1925,187 +1902,98 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         }
     }
 
-    private boolean hasDualAmplitudeControlledRumbleVibrators(VibratorManager vm) {
-        int[] vibratorIds = vm.getVibratorIds();
-
-        // There must be exactly 2 vibrators on this device
-        if (vibratorIds.length != 2) {
-            return false;
-        }
-
-        // Both vibrators must have amplitude control
-        for (int vid : vibratorIds) {
-            if (!vm.getVibrator(vid).hasAmplitudeControl()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    // This must only be called if hasDualAmplitudeControlledRumbleVibrators() is true!
-    private void rumbleDualVibrators(VibratorManager vm, short lowFreqMotor, short highFreqMotor) {
-        // Normalize motor values to 0-255 amplitudes for VibrationManager
-        highFreqMotor = (short)((highFreqMotor >> 8) & 0xFF);
-        lowFreqMotor = (short)((lowFreqMotor >> 8) & 0xFF);
-
-        // If they're both zero, we can just call cancel().
-        if (lowFreqMotor == 0 && highFreqMotor == 0) {
-            vm.cancel();
+    // Background thread only: sendData() is a blocking binder call into the Bluetooth process.
+    private void deliverBtHidRumble(InputDeviceContext ctx, short lowFreqMotor, short highFreqMotor,
+                                    short leftTriggerMotor, short rightTriggerMotor) {
+        BluetoothHidRumble.ReportFormat format = ctx.btReport;
+        BluetoothDevice device = ctx.btDevice;
+        if (format == null || device == null || btHidRumble == null) {
             return;
         }
-
-        // There's no documentation that states that vibrators for FF_RUMBLE input devices will
-        // always be enumerated in this order, but it seems consistent between Xbox Series X (USB),
-        // PS3 (USB), and PS4 (USB+BT) controllers on Android 12 Beta 3.
-        int[] vibratorIds = vm.getVibratorIds();
-        int[] vibratorAmplitudes = new int[] { highFreqMotor, lowFreqMotor };
-
-        CombinedVibration.ParallelCombination combo = CombinedVibration.startParallel();
-
-        for (int i = 0; i < vibratorIds.length; i++) {
-            // It's illegal to create a VibrationEffect with an amplitude of 0.
-            // Simply excluding that vibrator from our ParallelCombination will turn it off.
-            if (vibratorAmplitudes[i] != 0) {
-                combo.addVibrator(vibratorIds[i], VibrationEffect.createOneShot(60000, vibratorAmplitudes[i]));
+        if (!btHidRumble.isReady()) {
+            if (btHidRumble.isUnavailable()) {
+                dropBtHidRumble(ctx, "HID host proxy did not bind");
             }
-        }
-
-        VibrationAttributes.Builder vibrationAttributes = new VibrationAttributes.Builder();
-
-        vibrationAttributes.setUsage(VibrationAttributes.USAGE_MEDIA);
-
-        vm.vibrate(combo.combine(), vibrationAttributes.build());
-    }
-
-    private boolean hasQuadAmplitudeControlledRumbleVibrators(VibratorManager vm) {
-        int[] vibratorIds = vm.getVibratorIds();
-
-        // There must be exactly 4 vibrators on this device
-        if (vibratorIds.length != 4) {
-            return false;
-        }
-
-        // All vibrators must have amplitude control
-        for (int vid : vibratorIds) {
-            if (!vm.getVibrator(vid).hasAmplitudeControl()) {
-                return false;
+            else if (!stopped) {
+                // Still binding: nothing has reached the pad yet, retry shortly
+                retryBtHidRumbleLater(ctx);
             }
-        }
-
-        return true;
-    }
-
-    // This must only be called if hasQuadAmplitudeControlledRumbleVibrators() is true!
-    private void rumbleQuadVibrators(VibratorManager vm, short lowFreqMotor, short highFreqMotor, short leftTrigger, short rightTrigger) {
-        // Normalize motor values to 0-255 amplitudes for VibrationManager
-        highFreqMotor = (short)((highFreqMotor >> 8) & 0xFF);
-        lowFreqMotor = (short)((lowFreqMotor >> 8) & 0xFF);
-        leftTrigger = (short)((leftTrigger >> 8) & 0xFF);
-        rightTrigger = (short)((rightTrigger >> 8) & 0xFF);
-
-        // If they're all zero, we can just call cancel().
-        if (lowFreqMotor == 0 && highFreqMotor == 0 && leftTrigger == 0 && rightTrigger == 0) {
-            vm.cancel();
             return;
         }
-
-        // This is a guess based upon the behavior of FF_RUMBLE, but untested due to lack of Linux
-        // support for trigger rumble!
-        int[] vibratorIds = vm.getVibratorIds();
-        int[] vibratorAmplitudes = new int[] { highFreqMotor, lowFreqMotor, leftTrigger, rightTrigger };
-
-        CombinedVibration.ParallelCombination combo = CombinedVibration.startParallel();
-
-        for (int i = 0; i < vibratorIds.length; i++) {
-            // It's illegal to create a VibrationEffect with an amplitude of 0.
-            // Simply excluding that vibrator from our ParallelCombination will turn it off.
-            if (vibratorAmplitudes[i] != 0) {
-                combo.addVibrator(vibratorIds[i], VibrationEffect.createOneShot(60000, vibratorAmplitudes[i]));
-            }
+        // Any send, including a zero, supersedes a pending refresh of an older level
+        final int generation = ++ctx.btSendGeneration;
+        if (!ctx.btPreludeDone) {
+            ctx.btPreludeDone = true;
+            btHidRumble.runPrelude(device, format);
         }
-
-        VibrationAttributes.Builder vibrationAttributes = new VibrationAttributes.Builder();
-
-        vibrationAttributes.setUsage(VibrationAttributes.USAGE_MEDIA);
-
-        vm.vibrate(combo.combine(), vibrationAttributes.build());
+        if (btHidRumble.send(device, format.build(lowFreqMotor, highFreqMotor, leftTriggerMotor, rightTriggerMotor))) {
+            ctx.btFailures = 0;
+            if (!ctx.btRumbleAnnounced) {
+                ctx.btRumbleAnnounced = true;
+                LimeLog.info("Bluetooth HID rumble active for " + ctx.name + " (" + device.getAddress() + ", " + format.name() + ")");
+            }
+            scheduleBtHidRefresh(ctx, format, generation, lowFreqMotor, highFreqMotor, leftTriggerMotor, rightTriggerMotor);
+        }
+        else if (++ctx.btFailures >= BT_HID_RUMBLE_MAX_FAILURES) {
+            dropBtHidRumble(ctx, BT_HID_RUMBLE_MAX_FAILURES + " consecutive sendData() failures");
+        }
+        else if (!stopped) {
+            retryBtHidRumbleLater(ctx);
+        }
     }
 
-    private void rumbleSingleVibrator(Vibrator vibrator, short lowFreqMotor, short highFreqMotor) {
-        // Since we can only use a single amplitude value, compute the desired amplitude
-        // by taking 80% of the big motor and 33% of the small motor, then capping to 255.
-        // NB: This value is now 0-255 as required by VibrationEffect.
-        short lowFreqMotorMSB = (short)((lowFreqMotor >> 8) & 0xFF);
-        short highFreqMotorMSB = (short)((highFreqMotor >> 8) & 0xFF);
-        int simulatedAmplitude = Math.min(255, (int)((lowFreqMotorMSB * 0.80) + (highFreqMotorMSB * 0.33)));
-
-        if (simulatedAmplitude == 0) {
-            // This case is easy - just cancel the current effect and get out.
-            // NB: We cannot simply check lowFreqMotor == highFreqMotor == 0
-            // because our simulatedAmplitude could be 0 even though our inputs
-            // are not (ex: lowFreqMotor == 0 && highFreqMotor == 1).
-            vibrator.cancel();
+    // Some pads (Switch) stop their motors unless a running level is repeated: re-send it while it stands.
+    // Cancelled implicitly by the next send (generation bump) or by a newer pending level (rumbleDirty).
+    private void scheduleBtHidRefresh(final InputDeviceContext ctx, final BluetoothHidRumble.ReportFormat format,
+                                      final int generation, final short lowFreqMotor, final short highFreqMotor,
+                                      final short leftTriggerMotor, final short rightTriggerMotor) {
+        int refreshMs = format.refreshIntervalMs();
+        if (refreshMs <= 0 || stopped ||
+                (lowFreqMotor | highFreqMotor | leftTriggerMotor | rightTriggerMotor) == 0) {
             return;
         }
-
-        // Attempt to use amplitude-based control if we're on Oreo and the device
-        // supports amplitude-based vibration control.
-        if (vibrator.hasAmplitudeControl()) {
-            VibrationEffect effect = VibrationEffect.createOneShot(60000, simulatedAmplitude);
-            VibrationAttributes vibrationAttributes = new VibrationAttributes.Builder()
-                    .setUsage(VibrationAttributes.USAGE_MEDIA)
-                    .build();
-            vibrator.vibrate(effect, vibrationAttributes);
-            return;
-        }
-
-        // If we reach this point, we don't have amplitude controls available, so
-        // we must emulate it by PWMing the vibration. Ick.
-        long pwmPeriod = 20;
-        long onTime = (long)((simulatedAmplitude / 255.0) * pwmPeriod);
-        long offTime = pwmPeriod - onTime;
-        VibrationAttributes vibrationAttributes = new VibrationAttributes.Builder()
-                .setUsage(VibrationAttributes.USAGE_MEDIA)
-                .build();
-        vibrator.vibrate(VibrationEffect.createWaveform(new long[]{0, onTime, offTime}, 0), vibrationAttributes);
+        backgroundThreadHandler.postDelayed(() -> {
+            if (stopped || ctx.btSendGeneration != generation || ctx.btReport != format) {
+                return;
+            }
+            synchronized (ctx.rumbleLock) {
+                long now = SystemClock.uptimeMillis();
+                if (ctx.rumbleDirty || now - ctx.rumbleSentAtMs < format.minIntervalMs()) {
+                    return;
+                }
+                ctx.rumbleSentAtMs = now;
+            }
+            deliverBtHidRumble(ctx, lowFreqMotor, highFreqMotor, leftTriggerMotor, rightTriggerMotor);
+        }, refreshMs);
     }
 
-    // Shared by the immediate and the deferred path: pick the right vibration API for this gamepad.
-    private void deliverRumble(InputDeviceContext deviceContext, short lowFreqMotor, short highFreqMotor,
-                               short leftTriggerMotor, short rightTriggerMotor) {
-        // Prefer the documented Android 12 rumble API which can handle dual vibrators on PS/Xbox controllers
-        if (deviceContext.vibratorManager != null) {
-            if (deviceContext.quadVibrators) {
-                rumbleQuadVibrators(deviceContext.vibratorManager, lowFreqMotor, highFreqMotor,
-                        leftTriggerMotor, rightTriggerMotor);
-            }
-            else {
-                rumbleDualVibrators(deviceContext.vibratorManager, lowFreqMotor, highFreqMotor);
-            }
-        }
-        // If all else fails, we have to try the old Vibrator API
-        else if (deviceContext.vibrator != null) {
-            rumbleSingleVibrator(deviceContext.vibrator, lowFreqMotor, highFreqMotor);
+    // The pad has not received the last values: forget what we thought was sent and flush again soon
+    private void retryBtHidRumbleLater(InputDeviceContext ctx) {
+        synchronized (ctx.rumbleLock) {
+            ctx.sentLowFreqMotor = ctx.sentHighFreqMotor = 0;
+            ctx.sentLeftTriggerMotor = ctx.sentRightTriggerMotor = 0;
+            ctx.rumbleDirty = true;
+            armRumbleTimerLocked(ctx, BT_HID_RUMBLE_RETRY_MS);
         }
     }
 
-    // ---- Deferred, coalesced rumble (Android TV workaround, experimental) ----
+    private void dropBtHidRumble(InputDeviceContext ctx, String reason) {
+        ctx.btReport = null;
+        LimeLog.warning("Bluetooth HID rumble disabled for " + ctx.name + ": " + reason + "; no rumble for this gamepad");
+    }
+
+    // ---- Coalesced rumble ----
     //
-    // On TCL Android 14 firmware InputReader::vibrate() pushes into the input reader thread's event
-    // queue from the binder thread while the reader may be iterating it in flush() (AOSP race, fixed
-    // in Android 15). We cannot fix the firmware, but we can make collisions rare: keep only the latest
-    // requested values, call the vibrator at most every RUMBLE_MIN_INTERVAL_MS, and do it from the
-    // main thread right after an input event from the same gamepad was delivered to us (the reader
-    // has just finished its flush and idles until the next report). A pending request on an idle pad
-    // is flushed after RUMBLE_IDLE_FLUSH_MS instead. Invariant: rumbleDirty => rumbleTimerArmed.
+    // Host rumble updates arrive on a binder thread at whatever rate the game emits them. Only the latest
+    // requested levels are kept; the rumble thread sends one HID output report per gamepad at most every
+    // ReportFormat.minIntervalMs(), and every level change is delivered. Invariant: rumbleDirty => rumbleTimerArmed.
 
     private void requestDeferredRumble(InputDeviceContext ctx, short lowFreqMotor, short highFreqMotor) {
         synchronized (ctx.rumbleLock) {
             ctx.lowFreqMotor = lowFreqMotor;
             ctx.highFreqMotor = highFreqMotor;
             ctx.rumbleDirty = true;
-            armRumbleTimerLocked(ctx, RUMBLE_IDLE_FLUSH_MS);
+            armRumbleTimerLocked(ctx, 0);
         }
     }
 
@@ -2113,57 +2001,47 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         synchronized (ctx.rumbleLock) {
             ctx.leftTriggerMotor = leftTrigger;
             ctx.rightTriggerMotor = rightTrigger;
-            if (ctx.quadVibrators) {
+            if (ctx.btHidHasTriggerMotors()) {
                 ctx.rumbleDirty = true;
-                armRumbleTimerLocked(ctx, RUMBLE_IDLE_FLUSH_MS);
+                armRumbleTimerLocked(ctx, 0);
             }
         }
     }
 
-    // Must be called with ctx.rumbleLock held. Never re-posts an armed timer, so a stream of requests
-    // cannot starve the fallback flush.
+    // Must be called with ctx.rumbleLock held. Never re-posts an armed timer.
     private void armRumbleTimerLocked(InputDeviceContext ctx, long delayMs) {
         if (!ctx.rumbleTimerArmed) {
             ctx.rumbleTimerArmed = true;
-            mainThreadHandler.postDelayed(ctx.rumbleFlushRunnable, delayMs);
+            // sendData() blocks on a binder call into the Bluetooth process: keep it off the main thread
+            backgroundThreadHandler.postDelayed(ctx.rumbleFlushRunnable, delayMs);
         }
     }
 
-    /** Called by Game right after an input event from a gamepad has been handled (main thread). */
-    public void flushDeferredRumbleForEvent(InputEvent event) {
-        if (stopped) {
-            return;
-        }
-        InputDeviceContext context = getContextForEvent(event);
-        if (context != null && context.deferredRumble) {
-            flushPendingRumble(context, true);
-        }
-    }
-
-    // Main thread only.
-    private void flushPendingRumble(InputDeviceContext ctx, boolean afterInputEvent) {
+    // Rumble thread only
+    private void flushPendingRumble(InputDeviceContext ctx) {
         short low, high, leftTrigger, rightTrigger;
         synchronized (ctx.rumbleLock) {
             if (!ctx.rumbleDirty) {
                 return;
             }
-            long now = SystemClock.uptimeMillis();
-            long sinceLastSend = now - ctx.rumbleSentAtMs;
-            if (sinceLastSend < RUMBLE_MIN_INTERVAL_MS) {
-                // Too soon: keep the request pending. On the timer path re-arm for the remainder of the
-                // interval; on the input path the armed timer guarantees the trailing flush.
-                if (!afterInputEvent) {
-                    armRumbleTimerLocked(ctx, RUMBLE_MIN_INTERVAL_MS - sinceLastSend);
-                }
+            BluetoothHidRumble.ReportFormat format = ctx.btReport;
+            if (format == null) {
+                ctx.rumbleDirty = false;
                 return;
             }
-            boolean triggersMatter = ctx.quadVibrators;
-            if (!rumbleChangeWorthSending(ctx.lowFreqMotor, ctx.sentLowFreqMotor) &&
-                    !rumbleChangeWorthSending(ctx.highFreqMotor, ctx.sentHighFreqMotor) &&
-                    (!triggersMatter || (!rumbleChangeWorthSending(ctx.leftTriggerMotor, ctx.sentLeftTriggerMotor) &&
-                            !rumbleChangeWorthSending(ctx.rightTriggerMotor, ctx.sentRightTriggerMotor)))) {
-                // Same or nearly the same values already sent (including "still stopped"): nothing to do.
-                // The pad keeps its last level; the next larger change, a start or a stop is delivered.
+            long now = SystemClock.uptimeMillis();
+            long sinceLastSend = now - ctx.rumbleSentAtMs;
+            int minInterval = format.minIntervalMs();
+            if (sinceLastSend < minInterval) {
+                // Too soon for this pad: keep the request pending and come back for the remainder
+                armRumbleTimerLocked(ctx, minInterval - sinceLastSend);
+                return;
+            }
+            boolean triggersMatter = format.hasTriggerMotors();
+            if (ctx.lowFreqMotor == ctx.sentLowFreqMotor && ctx.highFreqMotor == ctx.sentHighFreqMotor &&
+                    (!triggersMatter || (ctx.leftTriggerMotor == ctx.sentLeftTriggerMotor &&
+                            ctx.rightTriggerMotor == ctx.sentRightTriggerMotor))) {
+                // The pad already has these levels
                 ctx.rumbleDirty = false;
                 return;
             }
@@ -2174,74 +2052,25 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             ctx.rumbleSentAtMs = now;
             ctx.rumbleDirty = false;
         }
-        deliverRumble(ctx, low, high, leftTrigger, rightTrigger);
-    }
-
-    private static boolean rumbleChangeWorthSending(short requested, short sent) {
-        int req = requested & 0xFFFF, cur = sent & 0xFFFF;
-        if (req == cur) {
-            return false;
-        }
-        if (req == 0 || cur == 0) {
-            return true;
-        }
-        return Math.abs(req - cur) >= RUMBLE_MIN_DELTA;
+        deliverBtHidRumble(ctx, low, high, leftTrigger, rightTrigger);
     }
 
     public void handleRumble(short controllerNumber, short lowFreqMotor, short highFreqMotor) {
-        boolean foundMatchingDevice = false;
-        boolean vibrated = false;
-
         if (stopped) {
             return;
         }
 
         for (int i = 0; i < inputDeviceContexts.size(); i++) {
             InputDeviceContext deviceContext = inputDeviceContexts.valueAt(i);
-
-            if (deviceContext.controllerNumber == controllerNumber) {
-                foundMatchingDevice = true;
-
-                if (deviceContext.vibratorManager != null || deviceContext.vibrator != null) {
-                    vibrated = true;
-                }
-
-                if (deviceContext.deferredRumble) {
-                    requestDeferredRumble(deviceContext, lowFreqMotor, highFreqMotor);
-                    continue;
-                }
-
-                deviceContext.lowFreqMotor = lowFreqMotor;
-                deviceContext.highFreqMotor = highFreqMotor;
-                deliverRumble(deviceContext, deviceContext.lowFreqMotor, deviceContext.highFreqMotor,
-                        deviceContext.leftTriggerMotor, deviceContext.rightTriggerMotor);
+            if (deviceContext.controllerNumber == controllerNumber && deviceContext.usesBtHid()) {
+                requestDeferredRumble(deviceContext, lowFreqMotor, highFreqMotor);
             }
         }
 
         for (int i = 0; i < usbDeviceContexts.size(); i++) {
             UsbDeviceContext deviceContext = usbDeviceContexts.valueAt(i);
-
             if (deviceContext.controllerNumber == controllerNumber) {
-                foundMatchingDevice = vibrated = true;
                 deviceContext.device.rumble(lowFreqMotor, highFreqMotor);
-            }
-        }
-
-        // We may decide to rumble the device for player 1
-        if (controllerNumber == 0) {
-            if (foundMatchingDevice && !vibrated && prefConfig.vibrateFallbackToDevice) {
-                // We found a device to vibrate but it didn't have rumble support. The user
-                // has requested us to vibrate the device in this case.
-
-                // We cast the unsigned short value to a signed int before multiplying by
-                // the preferred strength. The resulting value is capped at 65534 before
-                // we cast it back to a short so it doesn't go above 100%.
-                short lowFreqMotorAdjusted = (short)(Math.min((((lowFreqMotor & 0xffff)
-                        * prefConfig.vibrateFallbackToDeviceStrength) / 100), Short.MAX_VALUE*2));
-                short highFreqMotorAdjusted = (short)(Math.min((((highFreqMotor & 0xffff)
-                        * prefConfig.vibrateFallbackToDeviceStrength) / 100), Short.MAX_VALUE*2));
-
-                rumbleSingleVibrator(deviceVibrator, lowFreqMotorAdjusted, highFreqMotorAdjusted);
             }
         }
     }
@@ -2253,27 +2082,13 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         for (int i = 0; i < inputDeviceContexts.size(); i++) {
             InputDeviceContext deviceContext = inputDeviceContexts.valueAt(i);
-
-            if (deviceContext.controllerNumber == controllerNumber) {
-                if (deviceContext.deferredRumble) {
-                    requestDeferredRumbleTriggers(deviceContext, leftTrigger, rightTrigger);
-                    continue;
-                }
-
-                deviceContext.leftTriggerMotor = leftTrigger;
-                deviceContext.rightTriggerMotor = rightTrigger;
-
-                if (deviceContext.quadVibrators) {
-                    rumbleQuadVibrators(deviceContext.vibratorManager,
-                            deviceContext.lowFreqMotor, deviceContext.highFreqMotor,
-                            deviceContext.leftTriggerMotor, deviceContext.rightTriggerMotor);
-                }
+            if (deviceContext.controllerNumber == controllerNumber && deviceContext.usesBtHid()) {
+                requestDeferredRumbleTriggers(deviceContext, leftTrigger, rightTrigger);
             }
         }
 
         for (int i = 0; i < usbDeviceContexts.size(); i++) {
             UsbDeviceContext deviceContext = usbDeviceContexts.valueAt(i);
-
             if (deviceContext.controllerNumber == controllerNumber) {
                 deviceContext.device.rumbleTriggers(leftTrigger, rightTrigger);
             }
@@ -2411,7 +2226,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                         // Enable the accelerometer if requested
                         Sensor accelSensor = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                         if (reportRateHz != 0 && accelSensor != null) {
-                            deviceContext.accelListener = createSensorListener(controllerNumber, motionType, sm == deviceSensorManager);
+                            deviceContext.accelListener = createSensorListener(controllerNumber, motionType, false);
                             sm.registerListener(deviceContext.accelListener, accelSensor, 1000000 / reportRateHz);
                         }
                         break;
@@ -2424,7 +2239,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                         // Enable the gyroscope if requested
                         Sensor gyroSensor = sm.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
                         if (reportRateHz != 0 && gyroSensor != null) {
-                            deviceContext.gyroListener = createSensorListener(controllerNumber, motionType, sm == deviceSensorManager);
+                            deviceContext.gyroListener = createSensorListener(controllerNumber, motionType, false);
                             sm.registerListener(deviceContext.gyroListener, gyroSensor, 1000000 / reportRateHz);
                         }
                         break;
@@ -3134,26 +2949,28 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
     class InputDeviceContext extends GenericControllerContext {
         public String name;
-        public VibratorManager vibratorManager;
-        public Vibrator vibrator;
-        public boolean quadVibrators;
         public short lowFreqMotor, highFreqMotor;
         public short leftTriggerMotor, rightTriggerMotor;
 
-        // Deferred rumble state (Android TV experimental mode); everything except deferredRumble is
-        // guarded by rumbleLock. Invariant: rumbleDirty => rumbleTimerArmed.
-        public boolean deferredRumble;
+        // Coalesced rumble state, guarded by rumbleLock. Invariant: rumbleDirty => rumbleTimerArmed.
         final Object rumbleLock = new Object();
         boolean rumbleDirty, rumbleTimerArmed;
         short sentLowFreqMotor, sentHighFreqMotor, sentLeftTriggerMotor, sentRightTriggerMotor;
-        long rumbleSentAtMs = -RUMBLE_MIN_INTERVAL_MS;
+        long rumbleSentAtMs = -1000;
+        // Rumble through the Bluetooth stack (BluetoothHidRumble); btReport == null means "not on that path"
+        public volatile BluetoothDevice btDevice;
+        public volatile BluetoothHidRumble.ReportFormat btReport;
+        // Rumble thread only
+        int btFailures;
+        int btSendGeneration;
+        boolean btRumbleAnnounced, btPreludeDone;
         final Runnable rumbleFlushRunnable = new Runnable() {
             @Override
             public void run() {
                 synchronized (rumbleLock) {
                     rumbleTimerArmed = false;
                 }
-                flushPendingRumble(InputDeviceContext.this, false);
+                flushPendingRumble(InputDeviceContext.this);
             }
         };
 
@@ -3246,25 +3063,23 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             }
         };
 
+        boolean usesBtHid() {
+            return btReport != null;
+        }
+
+        boolean btHidHasTriggerMotors() {
+            BluetoothHidRumble.ReportFormat format = btReport;
+            return format != null && format.hasTriggerMotors();
+        }
+
         @Override
         public void destroy() {
             super.destroy();
 
-            mainThreadHandler.removeCallbacks(rumbleFlushRunnable);
+            backgroundThreadHandler.removeCallbacks(rumbleFlushRunnable);
             synchronized (rumbleLock) {
                 rumbleDirty = false;
                 rumbleTimerArmed = false;
-            }
-
-            // In the deferred (TV workaround) mode the vibrator is only ever touched right after this
-            // gamepad's own input; a device going away must not trigger an unaligned call.
-            if (!deferredRumble) {
-                if (vibratorManager != null) {
-                    vibratorManager.cancel();
-                }
-                else if (vibrator != null) {
-                    vibrator.cancel();
-                }
             }
 
             backgroundThreadHandler.removeCallbacks(enableSensorRunnable);
@@ -3362,12 +3177,11 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
             short capabilities = 0;
 
-            // Most of the advanced InputDevice capabilities came in Android S
-            if (quadVibrators) {
-                capabilities |= MoonBridge.LI_CCAP_RUMBLE | MoonBridge.LI_CCAP_TRIGGER_RUMBLE;
-            }
-            else if (vibratorManager != null || vibrator != null) {
+            if (usesBtHid()) {
                 capabilities |= MoonBridge.LI_CCAP_RUMBLE;
+                if (btHidHasTriggerMotors()) {
+                    capabilities |= MoonBridge.LI_CCAP_TRIGGER_RUMBLE;
+                }
             }
 
             // Calling InputDevice.getBatteryState() to see if a battery is present
@@ -3410,11 +3224,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 reportedType = type;
             }
 
-            // We can perform basic rumble with any vibrator
-            if (vibrator != null) {
-                capabilities |= MoonBridge.LI_CCAP_RUMBLE;
-            }
-
             if ((inputDevice.getSources() & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD) {
                 capabilities |= MoonBridge.LI_CCAP_TOUCHPAD;
 
@@ -3442,11 +3251,13 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             this.ledArgbValue = oldContext.ledArgbValue;
             this.gyroReportRateHz = oldContext.gyroReportRateHz;
             this.accelReportRateHz = oldContext.accelReportRateHz;
+            this.btRumbleAnnounced = oldContext.btRumbleAnnounced;
+            this.btPreludeDone = oldContext.btPreludeDone;
 
             // Don't release the controller number, because we will carry it over if it is present.
             // We also want to make sure the change is invisible to the host PC to avoid an add/remove
             // cycle for the gamepad which may break some games.
-            // Carry the deferred rumble state over: same physical gamepad, no vibrator call needed
+            // Carry the rumble state over: same physical gamepad, nothing to resend
             boolean pendingRumble;
             short mLow, mHigh, mLeft, mRight, sLow, sHigh, sLeft, sRight;
             long sentAt;
@@ -3466,7 +3277,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 this.rumbleSentAtMs = sentAt;
                 this.rumbleDirty = pendingRumble;
                 if (pendingRumble) {
-                    armRumbleTimerLocked(this, RUMBLE_IDLE_FLUSH_MS);
+                    armRumbleTimerLocked(this, 0);
                 }
             }
 
@@ -3476,11 +3287,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             this.assignedControllerNumber = oldContext.assignedControllerNumber;
             this.reservedControllerNumber = oldContext.reservedControllerNumber;
             this.controllerNumber = oldContext.controllerNumber;
-
-            // We may have set this device to use the built-in sensor manager. If so, do that again.
-            if (oldContext.sensorManager == deviceSensorManager) {
-                this.sensorManager = deviceSensorManager;
-            }
 
             // Copy state initialized in reportControllerArrival()
             this.needsClickpadEmulation = oldContext.needsClickpadEmulation;

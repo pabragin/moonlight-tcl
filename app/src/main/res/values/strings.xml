@@ -212,8 +212,6 @@
     <string name="resolution_prefix_custom">Custom</string>
     <string name="fps_suffix_fps">FPS</string>
     <string name="title_native_fps_dialog">Native FPS Warning</string>
-    <string name="title_checkbox_auto_invert_video_resolution">Auto Invert Resolution</string>
-    <string name="summary_checkbox_auto_invert_video_resolution">Automatically invert the width and height of the video stream when in portrait mode.\nFor example: 1920x1080 will become 1080x1920.</string>
     <string name="title_video_scale_mode">Video Scale Mode</string>
     <string name="summary_video_scale_mode">Select between Fit, Fill and Stretch</string>
     <string name="video_scale_mode_fit">Fit</string>
@@ -229,11 +227,6 @@
     <string name="category_gamepad_settings">Gamepad Settings</string>
     <string name="title_checkbox_multi_controller">Automatic gamepad presence detection</string>
     <string name="summary_checkbox_multi_controller">Unchecking this option forces a gamepad to always be present</string>
-    <string name="title_checkbox_vibrate_fallback">Emulate rumble support with vibration</string>
-    <string name="summary_checkbox_vibrate_fallback">Vibrates your device to emulate rumble if your gamepad does not support it</string>
-    <string name="title_seekbar_vibrate_fallback_strength">Adjust emulated rumble intensity</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">Amplify or reduce the vibration intensity on your device</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
     <string name="title_seekbar_deadzone">Adjust analog stick deadzone</string>
     <string name="summary_seekbar_deadzone">Positive values set a normal dead zone, negative values apply dead zone compensation. Ensure your controller can adjust dead zones when using dead zone compensation, or centering may be difficult.</string>
     <string name="suffix_seekbar_deadzone">%</string>
@@ -243,27 +236,16 @@
     <string name="summary_checkbox_usb_bind_all">Use Artemis\'s USB driver for all supported gamepads, even if native Xbox/Nintendo Pro controller support is present. On TCL TVs with Android 14 this is on by default: a gamepad on a USB cable is then driven by Moonlight itself and rumbles without touching the system input stack that crashes.</string>
     <string name="title_checkbox_mouse_emulation">Mouse emulation via gamepad</string>
     <string name="summary_checkbox_mouse_emulation">Long-press the Start button to toggle between gamepad and mouse mode</string>
-    <string name="title_checkbox_remember_mouse_mode">Remember mouse mode</string>
-    <string name="summary_checkbox_remember_mouse_mode">Remember mouse mode selected during stream. When disabled, mouse mode changed during stream will be temporary.</string>
     <string name="title_checkbox_flip_face_buttons">Flip face buttons</string>
     <string name="summary_checkbox_flip_face_buttons">Switches the face buttons A/B and X/Y for gamepads and the on-screen controls</string>
     <string name="title_checkbox_gamepad_touchpad_as_mouse">Always control mouse with touchpad</string>
     <string name="summary_checkbox_gamepad_touchpad_as_mouse">Forces gamepad touchpad input to control the host mouse, even when emulating a gamepad with a touchpad.</string>
     <string name="title_checkbox_gamepad_motion_sensors">Allow use of gamepad motion sensors</string>
     <string name="summary_checkbox_gamepad_motion_sensors">Enables supported hosts to request motion sensor data when emulating a gamepad with motion sensors. Disabling may slightly reduce power and network usage if motion sensors are not being used in game.</string>
-    <string name="title_checkbox_gamepad_motion_fallback">Emulate gamepad motion sensor support</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">Uses your device\'s built-in motion sensors if gamepad sensors are not supported by your connected gamepad or your Android version.\nNote: Enabling this option may cause your gamepad to appear as a PlayStation controller on the host.</string>
-    <string name="title_checkbox_force_device_motion">Always use device\'s motion sensors</string>
-    <string name="summary_checkbox_force_device_motion">Enforce using devices\'s built-in motion sensor even when the controller reported motion sensors are supported.</string>
     <string name="title_enable_rumble">Enable Rumble</string>
-    <string name="summary_enable_rumble">Gamepad rumble. Off by default on Android 14: vibration sent through the system input service can crash it and restart the TV (a firmware race, fixed in Android 15). When on, Moonlight TCL sends at most 10 updates a second right after the pad\'s own input and skips small level changes, which makes the crash rare but not impossible with a Bluetooth pad. A gamepad on a USB cable rumbles through Moonlight\'s own driver and is safe.</string>
-    <string name="rumble_warning_title">Rumble can restart this TV</string>
-    <string name="rumble_warning_text">On Android 14 the TV firmware has a race in the system input service that gamepad vibration can trigger. Moonlight TCL sends rumble sparingly (at most 10 updates a second, timed right after the pad\'s own input), so the crash is rare, but with a Bluetooth gamepad the system service can still die now and then: the TV shows the boot animation and every app restarts.\n\nA gamepad on a USB cable rumbles through Moonlight\'s own driver and is safe.\n\nEnable rumble anyway?</string>
-    <string name="rumble_warning_enable">Enable anyway</string>
-    <string name="rumble_warning_keep_off">Keep off</string>
+    <string name="summary_enable_rumble">Gamepad rumble. Bluetooth gamepads get it straight through the Bluetooth stack, which never touches the Android input service that crashes on vibration on this TV\'s Android 14 firmware (a firmware race, fixed in Android 15); this needs the Nearby devices (Bluetooth) permission. Supported: Xbox (verified), DualShock 4, DualSense, Switch Pro and Joy-Con, 8BitDo, Amazon Luna, Google Stadia, NVIDIA Shield 2017, GameSir 8K (written from the drivers\' sources, not yet verified on real pads). Other Bluetooth pads stay silent on this TV. A gamepad on a USB cable rumbles through Moonlight\'s own driver.</string>
+    <string name="rumble_bluetooth_permission_denied">Without the Nearby devices (Bluetooth) permission a Bluetooth gamepad cannot rumble on this TV</string>
     <string name="category_input_settings">Input Settings</string>
-    <string name="title_checkbox_touchscreen_trackpad">Use the touchscreen as a trackpad</string>
-    <string name="summary_checkbox_touchscreen_trackpad">If enabled, the touchscreen acts like a trackpad. If disabled, the touchscreen directly controls the mouse cursor.</string>
     <string name="title_checkbox_absolute_mouse_mode">Remote desktop mouse mode</string>
     <string name="summary_checkbox_absolute_mouse_mode">This can make mouse acceleration behave more naturally for remote desktop usage, but it is incompatible with many games.</string>
     <string name="title_checkbox_mouse_nav_buttons">Enable forward/back mouse buttons</string>
@@ -291,8 +273,6 @@
     <string name="suffix_osc_opacity">%</string>
 
     <string name="category_ui_settings">UI Settings</string>
-    <string name="title_checkbox_enable_pip">Enable Picture-in-Picture observer mode</string>
-    <string name="summary_checkbox_enable_pip">Allows the stream to be viewed (but not controlled) while multitasking</string>
     <string name="title_language_list">Language</string>
     <string name="summary_language_list">Language to use for Artemis</string>
     <string name="title_checkbox_small_icon_mode">Use small box art</string>
@@ -387,15 +367,10 @@
     <string name="game_menu_toggle_keyboard">Show soft keyboard</string>
     <string name="game_menu_toggle_hud">Toggle Performance Overlay</string>
     <string name="game_menu_toggle_floating_button">Toggle Floating Button</string>
-    <string name="game_menu_select_mouse_mode">Select Mouse mode</string>
     <string name="game_menu_select_steam_mode">Select Stream mode</string>
-    <string name="game_menu_enable_zoom_mode">Enable Pan/Zoom</string>
-    <string name="game_menu_disable_zoom_mode">Disable Pan/Zoom</string>
-    <string name="game_menu_rotate_screen">Rotate Screen</string>
     <string name="game_menu_toggle_keyboard_model">Toggle Special keys</string>s
     <string name="game_menu_toggle_virtual_model">Toggle On-screen controller</string>
     <string name="game_menu_toggle_virtual_keyboard_model">Toggle On-screen full keyboard</string>
-    <string name="game_menu_switch_touch_sensitivity_model">Switch touch sensitivity</string>
 
 
     <string name="game_menu_toggle_mouse_on">Enable Controller Mouse Emulation</string>
@@ -420,9 +395,6 @@
     <string name="game_menu_send_keys_ctrl_alt_shift_f1">Ctrl+Alt+Shift+F1 (Switch Monitor)</string>
     <string name="game_menu_send_keys_ctrl_alt_shift_f12">Ctrl+Alt+Shift+F12 (Switch Monitor)</string>
 
-    <string name="toggle_pan_zoom_mode">Toggle Pan/Zoom Mode</string>
-    <string name="pan_zoom_mode_enabled">Pan/Zoom Mode Enabled</string>
-    <string name="pan_zoom_mode_disabled">Pan/Zoom Mode Disabled</string>
 
     <string name="title_analog_scrolling">Use an analog stick to scroll</string>
     <string name="summary_analog_scrolling">Select an analog stick to scroll when in mouse emulation mode</string>
@@ -456,13 +428,9 @@
     <string name="title_render_mode_balance_shift_description">Reference: 50 - Both eyes share 50% depth far/pop depth effect / 0: Left (100% Pop) - Right (100% Far) /  100 - Left Far - Right Pop // 100 or 0 provide best sharpness as one pixel always exist unshifted on the other eye </string>
     <string name="title_render_mode_strength_title">3D Effect Strength</string>
     <string name="title_render_mode_strength_description">Reference: 50 - Higher more effect, but maybe strain on eyes and unnatural. Lower, easier on eyes and smoother expierence.</string>
-    <string name="title_touchscreen_mode">Touchscreen Mode</string>
     <string name="summary_render_mode">Default 2D or SBS 3D. 3D will simply double your width and add the effect automatically, no setup required. AI 2D to 3D conversion </string>
-    <string name="summary_touchscreen_mode">Select between MultiTouch/SingleTouch/Trackpad/Disabled mode.\nPen/Stylus are still usable when Disabled is selected.\nForced to Track Pad(Natural) mode when useing external display.</string>
     <string name="title_checkbox_mouse_local_cursor">Use local mouse cursor</string>
     <string name="summary_checkbox_mouse_local_cursor">Default external physical mouse cursor will be captured, this option can display Android system cursor</string>
-    <string name="title_checkbox_multi_touch_gestures">Enable multi-touch gestures</string>
-    <string name="summary_checkbox_multi_touch_gestures">Enable 3 finger tap for keyboard, 4 finger tap for full keyboard, 5 finger tap for quick menu when using multi-touch mode.</string>
     <string name="title_checkbox_onscreen_style_official">Official Virtual Gamepad Skin</string>
     <string name="summary_checkbox_onscreen_style_official">If you still like the old style of official virtual gamepad buttons, you can select this option.\nButton shapes can be square if you selected the bottom virtual button [Normal buttons are square buttons]</string>
     <string name="title_checkbox_enable_perf_overlay_lite">Enable Lite mode</string>
@@ -471,9 +439,6 @@
     <string name="summary_checkbox_enable_perf_logging">"Stores performance data per configuration. (Offline only) "</string>
     <string name="title_checkbox_enable_perf_overlay_lite_dialog">Lite mode click to pop up quick options</string>
     <string name="summary_checkbox_enable_perf_overlay_lite_dialog">Replace the back button logic, pop up the game quick menu.</string>
-    <string name="title_show_overlay_zoom_toggle_button">Show overlay zoom toggle button</string>
-    <string name="summary_show_overlay_zoom_toggle_button">Displays a draggable button at the top of the screen to toggle pan/zoom mode.</string>
-    <string name="title_virtual_trackpad_settings">Virtual Trackpad Settings</string>
     <string name="title_quit_dialog">Back Menu</string>
     <string name="summary_quit_dialog">When enabled, clicking the physical back button on the streaming interface will show related options!\nSoft keyboard, performance information, touch mode switching, send special keys</string>
     <string name="title_floating_button">Floating Button</string>
@@ -481,8 +446,6 @@
     <string name="dialog_custom_resolution">Set the resolution and exit the settings page to take effect!</string>
     <string name="summary_custom_resolution">Add a custom resolution, separated by x, strange resolutions may not work.\nFor example: 1920x1080\nIf it is a non-native resolution, it may not fill the notch area by default. If the aspect ratio is the same, you can manually set to stretch the screen to fill the full screen</string>
     <string name="title_custom_resolution">Custom Resolution</string>
-    <string name="title_auto_orientation">Auto Orientation</string>
-    <string name="summary_auto_orientation">The streaming screen will be displayed according to the device\'s orientation when the stream begins.</string>
     <string name="title_import_special_button">Import Custom Keys</string>
     <string name="summary_import_special_button">Available in Back Menu and special keys.\nNote: Importing will overwrite current configuration, please backup accordingly.</string>
     <string name="summary_share_performance_logs">Share your performance with friends or the community</string>
@@ -518,29 +481,9 @@
     <string name="summary_free_analog_stick_opacity">By default, only when the stick moves, the background is displayed. If you don\'t like it, you can adjust the opacity effect.</string>
     <string name="title_free_analog_stick_opacity">Free Analog Stick Background Opacity</string>
     <string name="title_exdisplay_mode">External Display Mode (Beta)</string>
-    <string name="title_fullexdisplay_mode">Fully External Display Mode (Beta)</string>
     <string name="summary_exdisplay_mode">Stream display on the monitor, virtual buttons and performance information and other controls on the phone screen.</string>
-    <string name="summary_fullexdisplay_mode">Allows full immersive secondary screen mode with automatically matched refresh rate and resolution. Manual settings won\'t apply in this mode.</string>
-    <string name="title_top_center_display">Display in Top Center</string>
-    <string name="summary_top_center_display">Streaming picture will be aligned to the top of the screen instead of centered when resolution is not native.</string>
-    <string name="title_touch_sensitivity">Touch Screen Sensitivity</string>
-    <string name="summary_touch_sensitivity">When enabled, you can manually adjust the touch sensitivity.</string>
-    <string name="title_global_touch_sensitivity">Touch Screen Sensitivity Global Effect</string>
-    <string name="summary_global_touch_sensitivity">By default not selected, only effective on the right half of the screen (suitable for playing Genshin Impact), selected to be effective within the full screen range.</string>
-    <string name="title_auto_touch_sensitivity">Automatically return to screen center when touch coordinates exceed boundary</string>
-    <string name="summary_auto_touch_sensitivity">Normally high sensitivity, small sliding distance will exceed the boundary, resulting in unable to move, you can select this option.</string>
-    <string name="title_touch_sensitivity_x">Screen Sensitivity Adjustment X Axis</string>
-    <string name="summary_touch_sensitivity_x">Multi-touch mode, when playing games, some games may not meet the sensitivity adjustment needs, you can use this option to modify the sensitivity of the field of view.</string>
-    <string name="title_touch_sensitivity_y">Screen Sensitivity Adjustment Y Axis</string>
-    <string name="summary_touch_sensitivity_y">Multi-touch mode, when playing games, some games may not meet the sensitivity adjustment needs, you can use this option to modify the sensitivity of the field of view.</string>
     <string name="title_debug_info">Debug Info</string>
     <string name="summary_debug_info">Test gamepad vibration and other stuff.</string>
-    <string name="title_touchpad_sensitivity_x">Touchpad Sensitivity X Axis</string>
-    <string name="summary_touchpad_sensitivity_x">For mouse touchpad mode and virtual special button touchpad control;\nBoth share a sensitivity value, but the sensitivity performance may be different.\nDoes anyone use both together?</string>
-    <string name="title_touchpad_sensitivity_y">Touchpad Sensitivity Y Axis</string>
-    <string name="summary_touchpad_sensitivity_y">For mouse touchpad mode and virtual special button touchpad control;\nBoth share a sensitivity value, but the sensitivity performance may be different.\nDoes anyone use both together?</string>
-    <string name="title_device_rumble">Force vibration on device</string>
-    <string name="summary_device_rumble">If you are not satisfied with the vibration of the connected gamepad, you can enable this option.\nInvalid for forced use of Artemis\'s built-in USB driver</string>
     <string name="title_clear_default_special_button">Disable default Special Keys</string>
     <string name="summary_clear_default_special_button">If you feel the built-in commands in the Back Menu are useless, you can disable them and use your imported ones.</string>
     <string name="title_trackpad_sensitivity_x">Trackpad Sensitivity X</string>
@@ -585,15 +528,9 @@
     <string name="title_checkbox_enable_sticky_modifier_key_virtual_keyboard">Sticky modifier keys</string>
     <string name="summary_checkbox_enable_sticky_modifier_key_virtual_keyboard">Use sticky modifier keys on virtual full keyboard and custom onscreen keyboard.</string>
     <string name="virtual_keyboard_hide">Hide\nKBD</string>
-    <string name="mouse_mode_multi_touch">Multi touch</string>
     <string name="render_mode_2d">Default 2D</string>
     <string name="render_mode_3d_sbs">AI SBS 3D</string>
     <string name="render_mode_3d_sbs_movie">AI SBS 3D Movie (Synced)</string>
-    <string name="mouse_mode_absolute_touch">Absolute touch</string>
-    <string name="mouse_mode_track_pad_natural">Track pad(Natural/Double tap to drag)</string>
-    <string name="mouse_mode_track_pad_gaming">Track pad(Gaming/Long press to drag)</string>
-    <string name="mouse_mode_disabled">Disabled</string>
-    <string name="mouse_mode_absolute_touch_swapped">Absolute touch (left/right click swapped)</string>
     <string name="keyboard_layout_set_1">Profile 1</string>
     <string name="keyboard_layout_set_2">Profile 2</string>
     <string name="keyboard_layout_set_3">Profile 3</string>
@@ -604,16 +541,14 @@
     <string name="debug_info_api_version">API Version:</string>
     <string name="debug_info_kernel_version">Kernel Version:</string>
     <string name="debug_info_brand_model">Brand and Model:</string>
-    <string name="debug_info_has_vibration_motor">Has Vibration Motor</string>
-    <string name="debug_info_no_vibration_motor">No Vibration Motor</string>
-    <string name="debug_info_test_device_vibration">Test Device Vibration (%s)</string>
-    <string name="debug_info_vibration_amplitude">Vibration Amplitude (%d)</string>
-    <string name="debug_info_simple_vibration">Simple Vibration for 1 Second</string>
-    <string name="debug_info_continuous_hd_vibration">Continuous HD Vibration</string>
     <string name="debug_info_please_choose">Please Choose</string>
     <string name="debug_info_no_gamepad_detected">No gamepad detected, please connect a gamepad, tap refresh, and try again!</string>
     <string name="debug_info_no_vibrator">No vibrator detected on the gamepad!</string>
-    <string name="debug_info_set_amplitude">Set Amplitude 0-255 (Effective only for HD Vibration)</string>
+    <string name="debug_info_bt_hid_test">Bluetooth HID output report (rumble test through the Bluetooth stack)</string>
+    <string name="debug_info_bt_hid_running">Bluetooth HID test: about 12 seconds, hold the gamepad</string>
+    <string name="debug_info_bt_hid_result">Bluetooth HID rumble test</string>
+    <string name="debug_info_bt_hid_permission">The Nearby devices (Bluetooth) permission is required. Grant it and try again.</string>
+    <string name="debug_info_bt_hid_granted">Bluetooth permission granted, run the test again</string>
     <string name="debug_info_name">Name: </string>
     <string name="debug_info_sensors">Sensors: </string>
     <string name="debug_info_no_relevant_driver">None (no relevant driver or gamepad not supported)</string>
@@ -626,7 +561,6 @@
     <string name="debug_info_number_of_gamepads">Number of Gamepads: </string>
     <string name="debug_info_accelerometer">+Accelerometer</string>
     <string name="debug_info_gyroscope">+Gyroscope</string>
-    <string name="debug_info_stop_vibration">Stop Vibration</string>
     <string name="debug_info_refresh_gamepad_info">Tap to refresh gamepad info</string>
     <string name="debug_info_refresh_gamepad_list">Refresh gamepad list</string>
     <string name="debug_info_test_gamepad_rumble">Test gamepad rumble</string>
@@ -649,13 +583,7 @@
     <string name="vdisplay_not_supported"><![CDATA[Virtual display isn\'t supported on this server. Please use <a href=\"https://github.com/ClassicOldSong/Apollo\">Apollo</a> as the host streaming software.]]></string>
     <string name="clipboard_sync_unsupported">This server does not support clipboard sync. Please install or upgrade your server to the latest version of Apollo.</string>
     <string name="send_clipboard_failed">Failed to send clipboard: </string>
-    <string name="external_display_info">External Display connected with: %1$dx%2$d at %3$.1fHz</string>
-    <string name="notification_channel_name">External Display Control</string>
-    <string name="notification_title">External Display Active</string>
-    <string name="notification_text">Tap to open touchpad controller</string>
     <string name="permission_denied">Notification permission denied</string>
-    <string name="no_external_display">No external display detected</string>
-    <string name="no_game_instance">No game instance available</string>
     <string name="get_clipboard_failed">Failed to get clipboard: </string>
     <string name="send_clipboard_success">Clipboard sent successfully</string>
     <string name="get_clipboard_success">Clipboard get successfully</string>
@@ -704,8 +632,6 @@
 
     <string name="title_enable_commit_text">Enable commit-text input (swipe/voice)</string>
     <string name="summary_enable_commit_text">Forward multi-character text from soft keyboards (gesture typing, predictions, voice dictation). May break games that rely on key-by-key input.</string>
-    <string name="title_checkbox_remember_zoom_pan">Remember Zoom&amp;Pan</string>
-    <string name="summary_checkbox_remember_zoom_pan">Save changes to zoom and pan position between sessions</string>
     <string name="title_checkbox_enable_perf_overlay_bottom">Move overlay to bottom</string>
     <string name="summary_checkbox_enable_perf_overlay_bottom">Useful when Display in Top Center and Lite mode are enabled during non-native resolution streaming.</string>
     <string name="title_edit_profile">Edit Profile</string>

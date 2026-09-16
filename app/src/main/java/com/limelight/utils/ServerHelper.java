@@ -60,46 +60,13 @@ public class ServerHelper {
         return i;
     }
     public static Display getActiveDisplay(Context context, PreferenceConfiguration prefs) {
-        Display secondary = getSecondaryDisplay(context);
-        if (secondary != null && (prefs.enableFullExDisplay)) {
-            return secondary;
-        } else {
-            return ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE)).getDisplay(Display.DEFAULT_DISPLAY);
-        }
-    }
-
-    public static Display getSecondaryDisplay(Context context) {
-        DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
-        Display display = null;
-        Display[] displays = displayManager.getDisplays();
-        int mainDisplayId = Display.DEFAULT_DISPLAY;
-        int secondaryDisplayId = -1;
-        for (Display displayVariant : displays) {
-            LimeLog.info(displayVariant.toString());
-            if (displayVariant.getDisplayId() != mainDisplayId) {
-                secondaryDisplayId = displayVariant.getDisplayId();
-                break;
-            }
-        }
-
-        if (secondaryDisplayId != -1) {
-            display = displayManager.getDisplay(secondaryDisplayId);
-        }
-        return display;
+        return ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE)).getDisplay(Display.DEFAULT_DISPLAY);
     }
 
     public static Intent createStartIntent(Activity parent, NvApp app, ComputerDetails computer,
                                            ComputerManagerService.ComputerManagerBinder managerBinder,
                                            boolean withVDisplay) {
-        Intent gameIntent = null;
-        PreferenceConfiguration prefConfig = PreferenceConfiguration.readPreferences(parent);
-        // Try to add secondary DisplayContext if supported and connected
-        if (prefConfig.enableFullExDisplay && getSecondaryDisplay(parent) != null) {
-            Context displayContext = parent.createDisplayContext(getSecondaryDisplay(parent)); // use secondary display
-            gameIntent = new Intent(displayContext, Game.class);
-            gameIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        if(gameIntent == null) gameIntent = new Intent(parent, Game.class);
+        Intent gameIntent = new Intent(parent, Game.class);
         gameIntent.putExtra(Game.EXTRA_HOST, computer.activeAddress.address);
         gameIntent.putExtra(Game.EXTRA_PORT, computer.activeAddress.port);
         gameIntent.putExtra(Game.EXTRA_HTTPS_PORT, computer.httpsPort);
@@ -119,17 +86,6 @@ public class ServerHelper {
             }
         } catch (CertificateEncodingException e) {
             e.printStackTrace();
-        }
-
-        if (prefConfig.enableFullExDisplay) {
-            Display secondaryDisplay = getSecondaryDisplay(parent);
-            if (secondaryDisplay != null) {
-                int secondaryDisplayId = secondaryDisplay.getDisplayId();
-                gameIntent.putExtra(Game.EXTRA_DISPLAY_ID, secondaryDisplayId);
-                Intent touchpadIntent = new Intent(parent, ExternalDisplayControlActivity.class);
-                touchpadIntent.putExtra(ExternalDisplayControlActivity.EXTRA_LAUNCH_INTENT, gameIntent);
-                return touchpadIntent;
-            }
         }
 
         return gameIntent;

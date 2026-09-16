@@ -39,3 +39,5 @@
 -dontwarn javax.jmdns.impl.DNSCache
 -dontwarn org.slf4j.**
 
+# HiddenApiBypass reflects on its own helper classes
+-keep class org.lsposed.hiddenapibypass.** {*;}

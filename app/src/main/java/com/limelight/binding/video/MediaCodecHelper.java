@@ -48,9 +48,6 @@ public class MediaCodecHelper {
     private static final List<String> amlogicDecoderPrefixes;
     private static final List<String> knownVendorLowLatencyOptions;
 
-    public static final boolean SHOULD_BYPASS_SOFTWARE_BLOCK =
-            Build.HARDWARE.equals("ranchu") || Build.HARDWARE.equals("cheets") || Build.BRAND.equals("Android-x86");
-
     private static boolean isLowEndSnapdragon = false;
     private static boolean isAdreno620 = false;
     private static boolean initialized = false;
@@ -90,12 +87,9 @@ public class MediaCodecHelper {
     static {
         blacklistedDecoderPrefixes = new LinkedList<>();
 
-        // Blacklist software decoders that don't support H264 high profile except on systems
-        // that are expected to only have software decoders (like emulators).
-        if (!SHOULD_BYPASS_SOFTWARE_BLOCK) {
-            blacklistedDecoderPrefixes.add("omx.google");
-            blacklistedDecoderPrefixes.add("AVCDecoder");
-        }
+        // Blacklist software decoders that don't support H264 high profile
+        blacklistedDecoderPrefixes.add("omx.google");
+        blacklistedDecoderPrefixes.add("AVCDecoder");
 
         // Force these decoders disabled because:
         // 1) They are software decoders, so the performance is terrible
@@ -130,11 +124,6 @@ public class MediaCodecHelper {
     static {
         whitelistedHevcDecoders = new LinkedList<>();
 
-        // Allow software HEVC decoding in the official AOSP emulator
-        if (Build.HARDWARE.equals("ranchu")) {
-            whitelistedHevcDecoders.add("omx.google");
-        }
-
         // Exynos seems to be the only HEVC decoder that works reliably
         whitelistedHevcDecoders.add("omx.exynos");
 
@@ -153,16 +142,7 @@ public class MediaCodecHelper {
         // In case there are some that I missed, I will also exclude pre-Oreo OSes since
         // only Shield ATV got an Oreo update and any newer Tegra devices will not ship
         // with an old OS like Nougat.
-        if (!Build.DEVICE.equalsIgnoreCase("shieldtablet") &&
-                !Build.DEVICE.equalsIgnoreCase("mocha")) {
-            whitelistedHevcDecoders.add("omx.nvidia");
-        }
-
-        // Plot twist: On newer Sony devices (BRAVIA_ATV2, BRAVIA_ATV3_4K, BRAVIA_UR1_4K) the H.264 decoder crashes
-        // on several configurations (> 60 FPS and 1440p) that work with HEVC, so we'll whitelist those devices for HEVC.
-        if (Build.DEVICE.startsWith("BRAVIA_")) {
-            whitelistedHevcDecoders.add("omx.mtk");
-        }
+        whitelistedHevcDecoders.add("omx.nvidia");
 
         // Amlogic requires 1 reference frame for HEVC to avoid hanging. Since it's been years
         // since GFE added support for maxNumReferenceFrames, we'll just enable all Amlogic SoCs
@@ -176,9 +156,7 @@ public class MediaCodecHelper {
         // support, which provides equivalent latency to H.264 now.
         //
         // FIXME: Should we do this for all Amlogic S905X SoCs?
-        if (!Build.DEVICE.equalsIgnoreCase("sabrina")) {
-            whitelistedHevcDecoders.add("omx.amlogic");
-        }
+        whitelistedHevcDecoders.add("omx.amlogic");
 
         // Realtek SoCs are used inside many Android TV devices and can only do 4K60 with HEVC.
         // We'll enable those HEVC decoders by default and see if anything breaks.
@@ -321,38 +299,6 @@ public class MediaCodecHelper {
             return;
         }
 
-        // Older Sony ATVs (SVP-DTV15) have broken MediaTek codecs (decoder hangs after rendering the first frame).
-        // I know the Fire TV 2 and 3 works, so I'll whitelist Amazon devices which seem to actually be tested.
-        // We still have to check Build.MANUFACTURER to catch Amazon Fire tablets.
-        if (context.getPackageManager().hasSystemFeature("amazon.hardware.fire_tv") ||
-                Build.MANUFACTURER.equalsIgnoreCase("Amazon")) {
-            // HEVC and RFI have been confirmed working on Fire TV 2, Fire TV Stick 2, Fire TV 4K Max,
-            // Fire HD 8 2020, and Fire HD 8 2022 models.
-            //
-            // This is probably a good enough sample to conclude that all MediaTek Fire OS devices
-            // are likely to be okay.
-            whitelistedHevcDecoders.add("omx.mtk");
-            refFrameInvalidationHevcPrefixes.add("omx.mtk");
-            refFrameInvalidationHevcPrefixes.add("c2.mtk");
-
-            // This requires setting vdec-lowlatency on the Fire TV 3, otherwise the decoder
-            // never produces any output frames. See comment above for details on why we only
-            // do this for Fire TV devices.
-            whitelistedHevcDecoders.add("omx.amlogic");
-
-            // Fire TV 3 seems to produce random artifacts on HEVC streams after packet loss.
-            // Enabling RFI turns these artifacts into full decoder output hangs, so let's not enable
-            // that for Fire OS 6 Amlogic devices. We will leave HEVC enabled because that's the only
-            // way these devices can hit 4K. Hopefully this is just a problem with the BSP used in
-            // the Fire OS 6 Amlogic devices, so we will leave this enabled for Fire OS 7+.
-            //
-            // Apart from a few TV models, the main Amlogic-based Fire TV devices are the Fire TV
-            // Cubes and Fire TV 3. This check will exclude the Fire TV 3 and Fire TV Cube 1, but
-            // allow the newer Fire TV Cubes to use HEVC RFI.
-            refFrameInvalidationHevcPrefixes.add("omx.amlogic");
-            refFrameInvalidationHevcPrefixes.add("c2.amlogic");
-        }
-
         ActivityManager activityManager =
                 (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         ConfigurationInfo configInfo = activityManager.getDeviceConfigurationInfo();
@@ -370,9 +316,7 @@ public class MediaCodecHelper {
                 // Exclude HEVC RFI on Pixel C and Tegra devices prior to Android 11. Misbehaving RFI
                 // on these devices can cause hundreds of milliseconds of latency, so it's not worth
                 // using it unless we're absolutely sure that it will not cause increased latency.
-                if (!Build.DEVICE.equalsIgnoreCase("dragon")) {
-                    refFrameInvalidationHevcPrefixes.add("omx.nvidia");
-                }
+                refFrameInvalidationHevcPrefixes.add("omx.nvidia");
 
                 refFrameInvalidationAvcPrefixes.add("c2.nvidia"); // Unconfirmed
                 refFrameInvalidationHevcPrefixes.add("c2.nvidia"); // Unconfirmed
@@ -730,12 +674,6 @@ public class MediaCodecHelper {
             return false;
         }
 
-        // This device seems to crash constantly at 720p, so try disabling
-        // RFI to see if we can get that under control.
-        if (Build.DEVICE.equals("b3") || Build.DEVICE.equals("b5")) {
-            return false;
-        }
-
         return isDecoderInList(refFrameInvalidationAvcPrefixes, decoderName);
     }
 
@@ -888,7 +826,7 @@ public class MediaCodecHelper {
 
     private static boolean isCodecBlacklisted(MediaCodecInfo codecInfo) {
         // Use the new isSoftwareOnly() function on Android Q
-        if (!SHOULD_BYPASS_SOFTWARE_BLOCK && codecInfo.isSoftwareOnly()) {
+        if (codecInfo.isSoftwareOnly()) {
             LimeLog.info("Skipping software-only decoder: "+codecInfo.getName());
             return true;
         }

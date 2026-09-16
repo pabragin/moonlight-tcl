@@ -12,21 +12,13 @@
     <string name="title_checkbox_stretch_video">拉伸视频以适应屏幕</string>
 
     <!-- New/Fully External Display Mode -->
-    <string name="title_fullexdisplay_mode">完全外接显示器模式（Beta）</string>
-    <string name="summary_fullexdisplay_mode">允许全沉浸式副屏模式，自动匹配刷新率和分辨率。此模式下手动设置无效。</string>
 
     <!-- On-screen Keyboard Autofit -->
     <string name="title_onscreen_keyboard_autofit">虚拟全键盘禁用自适应</string>
     <string name="summary_onscreen_keyboard_autofit">不自动调整键盘大小和位置，允许自定义大小</string>
 
     <!-- External Display Info -->
-    <string name="external_display_info">外接显示器已连接：%1$dx%2$d，%3$.1fHz</string>
-    <string name="notification_channel_name">外接显示器控制</string>
-    <string name="notification_title">外接显示器已激活</string>
-    <string name="notification_text">点击打开触控板控制器</string>
     <string name="permission_denied">通知权限被拒绝</string>
-    <string name="no_external_display">未检测到外接显示器</string>
-    <string name="no_game_instance">未检测到游戏实例</string>
 
     <!-- Edit Profile -->
     <string name="title_edit_profile">编辑配置</string>
@@ -164,18 +156,12 @@
     <string name="summary_unlock_fps">以90或120帧串流可能会减少在高端设备上的网络延迟，但会在不支持的设备上造成卡顿或崩溃</string>
     <string name="title_checkbox_disable_warnings"> 禁用错误提示 </string>
     <string name="summary_checkbox_disable_warnings"> 串流中禁用连接错误提示 </string>
-    <string name="title_checkbox_enable_pip">启用画中画观察模式</string>
-    <string name="summary_checkbox_enable_pip">允许多任务时观看串流画面（但不操作）</string>
     <string name="category_audio_settings"> 音频设置 </string>
     <string name="title_audio_config_list"> 环绕声设置 </string>
     <string name="summary_audio_config_list"> 为家庭影院系统启用5.1或7.1环绕声 </string>
     <string name="category_input_settings">输入设置</string>
-    <string name="title_checkbox_touchscreen_trackpad">将触控屏作为触控板使用</string>
-    <string name="summary_checkbox_touchscreen_trackpad">如果启用，则将触控屏作为触控板使用。 如果禁止，则触控屏直接控制鼠标光标。</string>
     <string name="title_checkbox_multi_controller"> 自动检测手柄 </string>
     <string name="summary_checkbox_multi_controller"> 禁用此项所有手柄将视为一个手柄 </string>
-    <string name="title_checkbox_vibrate_fallback"> 用设备震动模拟游戏震动效果 </string>
-    <string name="summary_checkbox_vibrate_fallback"> 如果你的手柄不支持震动，则震动设备以模拟游戏震动效果 </string>
     <string name="title_seekbar_deadzone"> 调整摇杆死区 </string>
     <string name="suffix_seekbar_deadzone">%</string>
     <string name="title_checkbox_xb1_driver">Xbox 360/One/Nintendo Pro 手柄驱动 </string>
@@ -184,8 +170,6 @@
     <string name="summary_checkbox_usb_bind_all"> 强制 Artemis 的USB驱动接管所有受支持的Xbox/Nintendo Pro手柄 </string>
     <string name="title_checkbox_mouse_emulation"> 通过手柄模拟鼠标 </string>
     <string name="summary_checkbox_mouse_emulation"> 长按开始键将手柄切换为鼠标模式 </string>
-    <string name="title_checkbox_remember_mouse_mode">记住鼠标模式</string>
-    <string name="summary_checkbox_remember_mouse_mode">记住在串流中选择的鼠标模式。禁用时，串流中改变的鼠标模式将是临时的。</string>
     <string name="title_checkbox_mouse_nav_buttons"> 启用前进后退鼠标键 </string>
     <string name="summary_checkbox_mouse_nav_buttons"> 在一些支持不佳的设备上启用此项可能会使其右键失效 </string>
     <string name="title_checkbox_flip_face_buttons"> 反转技能键 </string>
@@ -289,8 +273,6 @@
     <string name="resolution_1080p">1080p</string>
     <string name="resolution_720p">720p</string>
     <string name="summary_setup_guide">查看有关如何设置游戏电脑以进行流传输的说明</string>
-    <string name="title_checkbox_auto_invert_video_resolution">自动反转分辨率</string>
-    <string name="summary_checkbox_auto_invert_video_resolution">在竖屏时自动反转视频流的宽/高。\n例如: 1920x1080 会变成 1080x1920。</string>
     <string name="title_video_scale_mode">视频缩放模式</string>
     <string name="summary_video_scale_mode">选择适应/填充/拉伸</string>
     <string name="video_scale_mode_fit">适应</string>
@@ -341,29 +323,17 @@
     <string name="toast_controller_type_changed">游戏手柄类型可能会因运动传感器模拟而改变</string>
     <string name="title_special_key_help">自定义按键说明</string>
     <string name="summary_special_key_help">关于如何自定义特殊按键的介绍</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">如果你连接的游戏手柄或 Android 版本不支持游戏手柄传感器，请使用设备的内置运动传感器。
-\n注意：启用此选项可能会导致您的游戏手柄在主机上被识别为 PlayStation 4控制器。</string>
-    <string name="title_checkbox_gamepad_motion_fallback">模拟游戏手柄运动传感器支持</string>
-    <string name="title_checkbox_force_device_motion">强制使用设备的运动传感器</string>
-    <string name="summary_checkbox_force_device_motion">强制使用设备内置的运动传感器，即使手柄报告支持运动传感器。</string>
     <string name="title_enable_rumble">启用手柄震动</string>
     <string name="summary_enable_rumble">为支持的手柄启用震动反馈。</string>
     <string name="error_code_prefix">错误代码:</string>
-    <string name="title_seekbar_vibrate_fallback_strength">调整模拟震动强度</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">％</string>
     <string name="keyboard_service_label"> Artemis 物理键盘</string>
     <string name="accessibility_description_text">此功能仅用于外接实体键盘时，某些系统存在特定的键盘快捷键，此情况会影响串流过程中，无法将相关按键指令传输给目标PC。            Artemis 不会观察您输入的文本，也不会收集您的密码、信用卡号或任何其他信息。</string>
     <string name="game_menu_toggle_keyboard">弹出软键盘</string>
     <string name="game_menu_toggle_hud">(显示/隐藏)性能信息</string>
     <string name="game_menu_toggle_floating_button">(显示/隐藏)悬浮按钮</string>
-    <string name="game_menu_select_mouse_mode">选择鼠标模式</string>
-    <string name="game_menu_enable_zoom_mode">启用平移/缩放</string>
-    <string name="game_menu_disable_zoom_mode">禁用平移/缩放</string>
-    <string name="game_menu_rotate_screen">旋转屏幕</string>
     <string name="game_menu_toggle_keyboard_model">(显示/隐藏)特殊按键</string>
     <string name="game_menu_toggle_virtual_model">(显示/隐藏)虚拟手柄</string>
     <string name="game_menu_toggle_virtual_keyboard_model">(显示/隐藏)虚拟全键盘</string>
-    <string name="game_menu_switch_touch_sensitivity_model">触控灵敏度切换</string>
     <string name="game_menu_toggle_mouse_off">禁用手柄鼠标模拟</string>
     <string name="game_menu_disconnect">断开连接</string>
     <string name="game_menu_cancel">取消</string>
@@ -380,15 +350,11 @@
     <string name="game_menu_send_keys_ctrl_alt_shift_q">Ctrl+Alt+Shift+Q (PC退出串流)</string>
     <string name="game_menu_send_keys_ctrl_alt_shift_f1">Ctrl+Alt+Shift+F1 (切换显示器)</string>
 
-    <string name="toggle_pan_zoom_mode">切换平移/缩放模式</string>
-    <string name="pan_zoom_mode_enabled">已启用平移/缩放模式</string>
-    <string name="pan_zoom_mode_disabled">已禁用平移/缩放模式</string>
 
     <string name="title_analog_scrolling">使用摇杆控制鼠标移动</string>
     <string name="analogscroll_left">左摇杆</string>
     <string name="analogscroll_right">右摇杆</string>
     <string name="summary_analog_scrolling">在鼠标模式下选择用哪个摇杆控制鼠标移动</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">增强或减弱设备的震动强度</string>
     <string name="analogscroll_none">默认 (两个摇杆都控制鼠标)</string>
     <string name="perf_overlay_lite_decoder">解码器： %1$s</string>
     <string name="title_import_keyboard_layout">导入键盘布局</string>
@@ -401,12 +367,8 @@
     <string name="title_custom_refresh_rate">自定义刷新率</string>
     <string name="summary_custom_refresh_rate">手动输入刷新率。仅支持Apollo。</string>
     <string name="dialog_custom_refresh_rate">输入刷新率，单位为 Hz。可以是小数。</string>
-    <string name="title_touchscreen_mode">触摸屏鼠标模拟方式</string>
-    <string name="summary_touchscreen_mode">选择多点触控/单点触控/触摸板/禁用。\n禁用时手写笔仍可使用。\n在使用外接屏幕时强制为触摸板(自然)模式。</string>
     <string name="title_checkbox_mouse_local_cursor">使用本地鼠标光标</string>
     <string name="summary_checkbox_mouse_local_cursor">默认外接物理鼠标的光标会被捕获，此选项可显示安卓系统光标</string>
-    <string name="title_checkbox_multi_touch_gestures">多点触控手势</string>
-    <string name="summary_checkbox_multi_touch_gestures">开启后，可在多点触控时使用三指唤出键盘、四指唤出全键盘、五指唤出快捷菜单。</string>
     <string name="title_checkbox_onscreen_style_official">官方虚拟手柄皮肤</string>
     <string name="summary_checkbox_onscreen_style_official">如果你还是喜欢官方旧版虚拟手柄按键风格可以勾选此选项。\n按键形状可以为方形，如果你勾选了底部虚拟按键【普通按钮为方形按钮】</string>
     <string name="title_checkbox_enable_perf_overlay_lite">开启Lite精简模式</string>
@@ -415,7 +377,6 @@
     <string name="summary_checkbox_enable_perf_logging">存储性能记录（仅本地）</string>
     <string name="title_checkbox_enable_perf_overlay_lite_dialog">Lite精简模式点击弹出快捷选项</string>
     <string name="summary_checkbox_enable_perf_overlay_lite_dialog">代替返回键逻辑，弹出游戏快捷菜单。</string>
-    <string name="title_virtual_trackpad_settings">虚拟触摸板设置</string>
     <string name="title_quit_dialog">返回菜单</string>
     <string name="summary_quit_dialog">启用返回菜单</string>
     <string name="title_floating_button">悬浮按钮</string>
@@ -426,8 +387,6 @@
             \n非原生分辨率如果是刘海屏可能不会默认填充刘海区域，
             \n如果画面比例一样，可手动设置拉伸画面来充满全屏</string>
     <string name="title_custom_resolution">自定义分辨率</string>
-    <string name="title_auto_orientation">自动屏幕方向</string>
-    <string name="summary_auto_orientation">串流画面将以启动时的设备旋转方向呈现。</string>
     <string name="title_joyconfix">兼容Switch JoyCon手柄</string>
     <string name="summary_joyconfix">如果你的JoyCon无法使用或识别按键有问题，可以尝试开启此功能。适配Android 10及以上</string>
     <string name="title_keyboard_opacity">虚拟全键盘透明度</string>
@@ -443,26 +402,8 @@
     <string name="title_free_analog_stick_opacity">自由摇杆背景透明度</string>
     <string name="title_exdisplay_mode">外接显示器模式（Beta）</string>
     <string name="summary_exdisplay_mode">串流画面显示在显示器，虚拟按键及性能信息等控件在手机屏幕。</string>
-    <string name="title_top_center_display">画面顶部居中显示</string>
-    <string name="summary_top_center_display">非原生分辨率时，画面将与顶部对齐而非居中显示。</string>
-    <string name="title_touch_sensitivity">触控屏幕灵敏度</string>
-    <string name="summary_touch_sensitivity">开启后，可手动调整触控灵敏度。</string>
-    <string name="title_global_touch_sensitivity">触控屏幕灵敏度全局生效</string>
-    <string name="summary_global_touch_sensitivity">默认不勾选，只有右半边屏幕生效(适合玩原神)，勾选则全屏幕范围内生效。</string>
-    <string name="title_auto_touch_sensitivity">触控坐标超过边界，自动回屏幕中心点</string>
-    <string name="summary_auto_touch_sensitivity">正常灵敏度太高，滑动很小的距离就会超出边界，导致划不动，可勾选此选项。</string>
-    <string name="title_touch_sensitivity_x">屏幕灵敏度调整X轴</string>
-    <string name="summary_touch_sensitivity_x">多点触控模式，玩游戏时，可能某些游戏灵敏度调节不能满足需求，可使用此选项修改视野的灵敏度。</string>
-    <string name="title_touch_sensitivity_y">屏幕灵敏度调整Y轴</string>
-    <string name="summary_touch_sensitivity_y">多点触控模式，玩游戏时，可能某些游戏灵敏度调节不能满足需求，可使用此选项修改视野的灵敏度。</string>
     <string name="title_debug_info">调试信息</string>
     <string name="summary_debug_info">测试手柄震动及其他内容。</string>
-    <string name="title_touchpad_sensitivity_x">触控板灵敏度X轴</string>
-    <string name="summary_touchpad_sensitivity_x">适用于鼠标触控板模式及虚拟特殊按键触控板控件；\n两者共用一个灵敏度数值，但是灵敏度表现可能不一样。\n有人两个一起用吗？</string>
-    <string name="title_touchpad_sensitivity_y">触控板灵敏度Y轴</string>
-    <string name="summary_touchpad_sensitivity_y">适用于鼠标触控板模式及虚拟特殊按键触控板控件；\n两者共用一个灵敏度数值，但是灵敏度表现可能不一样。\n有人两个一起用吗？</string>
-    <string name="title_device_rumble">强制使用设备本身的震动马达</string>
-    <string name="summary_device_rumble">你如果对连接的手柄本身震动效果不满意，可以开启此选项。\n对强制使用 Artemis 自带USB驱动无效。</string>
     <string name="title_clear_default_special_button">禁用默认的特殊按键指令</string>
     <string name="summary_clear_default_special_button">如果你感觉返回菜单内置的指令对你没什么用的话，可以禁用，只使用自己导入的。</string>
     <string name="title_import_special_button">导入自定义按键</string>
@@ -529,12 +470,6 @@
     <string name="title_checkbox_resume_without_confirm">快速恢复</string>
     <string name="summary_checkbox_resume_without_confirm">在点击恢复按钮时不弹出菜单，直接恢复串流。</string>
     <string name="virtual_keyboard_hide">隐藏\n键盘</string>
-    <string name="mouse_mode_multi_touch">多点触控</string>
-    <string name="mouse_mode_absolute_touch">单点触控</string>
-    <string name="mouse_mode_track_pad_natural">触摸板(自然/双击拖拽)</string>
-    <string name="mouse_mode_track_pad_gaming">触摸板(游戏/长按拖拽)</string>
-    <string name="mouse_mode_disabled">禁用触摸</string>
-    <string name="mouse_mode_absolute_touch_swapped">单点触控(左右键互换)</string>
     <string name="keyboard_layout_set_1">预设 1</string>
     <string name="keyboard_layout_set_2">预设 2</string>
     <string name="keyboard_layout_set_3">预设 3</string>
@@ -545,16 +480,9 @@
     <string name="debug_info_api_version">api版本：</string>
     <string name="debug_info_kernel_version">内核版本：</string>
     <string name="debug_info_brand_model">品牌型号：</string>
-    <string name="debug_info_has_vibration_motor">有震动马达</string>
-    <string name="debug_info_no_vibration_motor">无震动马达</string>
-    <string name="debug_info_test_device_vibration">测试设备震动 (%s)</string>
-    <string name="debug_info_vibration_amplitude">振幅强度 (%d)</string>
-    <string name="debug_info_simple_vibration">简单震一秒</string>
-    <string name="debug_info_continuous_hd_vibration">持续HD震动</string>
     <string name="debug_info_please_choose">请选择</string>
     <string name="debug_info_no_gamepad_detected">目前没有检测到手柄，请连接手柄，点击刷新按钮，再尝试！</string>
     <string name="debug_info_no_vibrator">手柄没有识别到震动马达！</string>
-    <string name="debug_info_set_amplitude">设置振幅0-255(只对HD震动生效)</string>
     <string name="debug_info_name">名称：</string>
     <string name="debug_info_sensors">传感器：</string>
     <string name="debug_info_no_relevant_driver">无（没有相关驱动或者手柄不支持）</string>
@@ -567,7 +495,6 @@
     <string name="debug_info_number_of_gamepads">手柄数量：</string>
     <string name="debug_info_accelerometer">+加速度传感器</string>
     <string name="debug_info_gyroscope">+陀螺仪</string>
-    <string name="debug_info_stop_vibration">停止震动</string>
     <string name="debug_info_refresh_gamepad_info">点击刷新手柄信息</string>
     <string name="debug_info_refresh_gamepad_list">刷新手柄列表</string>
     <string name="debug_info_test_gamepad_rumble">测试手柄震动</string>
@@ -645,10 +572,6 @@
     <string name="message_export_sunshine_launcher_file">为 Sunsihne 导出启动文件不稳定且随时可能失效。你需要在每次修改 APP 名称或图片以后重新导出。\n使用 Apollo 可获得更稳定的体验。</string>
     <string name="title_enable_commit_text">启用 Commit-Text 输入（滑动/语音）</string>
     <string name="summary_enable_commit_text">转发来自屏幕键盘的多字符文本（输入法词组、滑动输入、词语预测、语音输入）。可能会影响依赖逐键输入的游戏。</string>
-    <string name="title_show_overlay_zoom_toggle_button">显示缩放悬浮按钮</string>
-    <string name="summary_show_overlay_zoom_toggle_button">在屏幕上显示一个悬浮按钮以切换拖拽/缩放模式</string>
-    <string name="title_checkbox_remember_zoom_pan">记住缩放及位置</string>
-    <string name="summary_checkbox_remember_zoom_pan">在不同会话间记住缩放及位置</string>
     <string name="title_checkbox_enable_perf_overlay_bottom">移动性能信息至底部</string>
     <string name="summary_checkbox_enable_perf_overlay_bottom">当串流分辨率非本地原生且启用了画面顶部居中显示时有用。</string>
     <string name="profile_manager_new_profile">新配置</string>

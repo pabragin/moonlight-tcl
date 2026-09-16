@@ -1,6 +1,10 @@
 package com.limelight.preferences;
 
 import static com.limelight.utils.ServerHelper.getActiveDisplay;
+import android.Manifest;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import com.limelight.binding.input.BluetoothHidRumble;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,17 +13,14 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.MediaCodecInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Handler;
-import android.os.Vibrator;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
@@ -139,6 +140,32 @@ public class StreamSettings extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
+
+        // Bluetooth gamepad rumble goes through the Bluetooth stack (BluetoothHidRumble) and needs this permission
+
+        private final ActivityResultLauncher<String> bluetoothPermissionLauncher =
+
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+
+                    if (!granted && getContext() != null) {
+
+                        Toast.makeText(getContext(), R.string.rumble_bluetooth_permission_denied, Toast.LENGTH_LONG).show();
+
+                    }
+
+                });
+
+
+        private void requestBluetoothPermissionIfMissing() {
+
+            if (getContext() != null && !BluetoothHidRumble.hasPermission(getContext())) {
+
+                bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT);
+
+            }
+
+        }
+
         private int nativeResolutionStartIndex = Integer.MAX_VALUE;
         private boolean nativeFramerateShown = false;
 
@@ -316,14 +343,6 @@ public class StreamSettings extends AppCompatActivity {
             initializePreferences();
         }
 
-        private void applyDeviceDefault(String key, boolean deviceDefault) {
-            CheckBoxPreference pref = findPreference(key);
-            SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
-            if (pref != null && prefs != null && !prefs.contains(key)) {
-                pref.setChecked(deviceDefault);
-            }
-        }
-
         private void removePreferenceIfPresent(String key) {
             Preference pref = findPreference(key);
             if (pref != null && pref.getParent() != null) {
@@ -342,10 +361,6 @@ public class StreamSettings extends AppCompatActivity {
             AppCompatActivity activity = (AppCompatActivity) requireActivity();
             PackageManager pm = activity.getPackageManager();
 
-            // Device defaults are persisted the first time the settings are shown so the checkboxes
-            // match what PreferenceConfiguration.readPreferences() uses when the key is absent.
-            applyDeviceDefault("checkbox_gamepad_enable_battery_report", !PreferenceConfiguration.isTvDevice(activity));
-
             // AAudio cannot host the system equalizer session: grey it out while audio FX are on
             final CheckBoxPreference aaudioPref = findPreference("checkbox_aaudio_renderer");
             final CheckBoxPreference audioFxPref = findPreference("checkbox_enable_audiofx");
@@ -356,65 +371,19 @@ public class StreamSettings extends AppCompatActivity {
                     return true;
                 });
             }
-            applyDeviceDefault("checkbox_usb_bind_all", PreferenceConfiguration.isTvWithBrokenInputRumble(activity));
-
-            // Rumble through the system input stack can crash system_server on Android 14 (InputReader race,
-            // fixed in Android 15): the TV shows the boot animation and every app restarts. Off by default;
-            // ask before turning it on.
+            // Rumble goes to Bluetooth pads through the Bluetooth stack (BluetoothHidRumble), which needs
+            // the Nearby devices permission; ask for it while rumble is on.
             final CheckBoxPreference rumblePref = findPreference("checkbox_enable_rumble");
-            if (rumblePref != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            if (rumblePref != null) {
+                if (rumblePref.isChecked()) {
+                    requestBluetoothPermissionIfMissing();
+                }
                 rumblePref.setOnPreferenceChangeListener((preference, newValue) -> {
                     if (Boolean.TRUE.equals(newValue)) {
-                        new AlertDialog.Builder(activity)
-                                .setTitle(R.string.rumble_warning_title)
-                                .setMessage(R.string.rumble_warning_text)
-                                .setPositiveButton(R.string.rumble_warning_enable, (d, w) -> rumblePref.setChecked(true))
-                                .setNegativeButton(R.string.rumble_warning_keep_off, null)
-                                .show();
-                        return false;
+                        requestBluetoothPermissionIfMissing();
                     }
                     return true;
                 });
-            }
-
-
-            // TV build: hide the phone/tablet-only options (touch input, on-screen keyboard, screen
-            // orientation, external display, zoom/pan). Hiding only trims the list; defaults stay in effect.
-            if (PreferenceConfiguration.isTvDevice(activity) || !pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
-                for (String key : new String[] {
-                        "category_virtual_trackpad_settings",
-                        "checkbox_multi_touch_gestures", "seekbar_trackpad_sensitivity_x", "seekbar_trackpad_sensitivity_y",
-                        "checkbox_trackpad_drag_drop_vibration", "seekbar_trackpad_drag_drop_threshold", "checkbox_trackpad_swap_axis",
-                        "checkbox_auto_orientation", "checkbox_auto_invert_video_resolution", "checkbox_enable_view_top_center",
-                        "checkbox_enable_fullexdisplay",
-                        "checkbox_show_overlay_zoom_toggle_button", "checkbox_remember_zoom_pan"}) {
-                    removePreferenceIfPresent(key);
-                }
-            }
-
-            // Hide gamepad motion sensor fallback option if the device has no gyro or accelerometer
-            if (!pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) &&
-                    !activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE)) {
-                PreferenceCategory category =
-                        (PreferenceCategory) findPreference("category_gamepad_settings");
-                category.removePreference(findPreference("checkbox_force_device_motion"));
-                category.removePreference(findPreference("checkbox_gamepad_motion_fallback"));
-            }
-
-            // Hide USB driver options on devices without USB host support
-            if (!pm.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
-                PreferenceCategory category =
-                        (PreferenceCategory) findPreference("category_gamepad_settings");
-                category.removePreference(findPreference("checkbox_usb_bind_all"));
-                category.removePreference(findPreference("checkbox_usb_driver"));
-            }
-
-            // Remove PiP mode on TVs, on devices without the feature, and on Fire OS where it
-            // violates the Amazon App Store guidelines for some reason.
-            if (PreferenceConfiguration.isTvDevice(activity) ||
-                    !pm.hasSystemFeature("android.software.picture_in_picture") ||
-                    pm.hasSystemFeature("com.amazon.software.fireos")) {
-                removePreferenceIfPresent("checkbox_enable_pip");
             }
 
             // Fire TV apps are not allowed to use WebViews or browsers, so hide the Help category
@@ -423,19 +392,6 @@ public class StreamSettings extends AppCompatActivity {
                         (PreferenceCategory) findPreference("category_help");
                 screen.removePreference(category);
             }*/
-            PreferenceCategory category_gamepad_settings =
-                    (PreferenceCategory) findPreference("category_gamepad_settings");
-            // Remove the vibration options if the device can't vibrate
-            if (!((Vibrator)getActivity().getSystemService(Context.VIBRATOR_SERVICE)).hasVibrator()) {
-                category_gamepad_settings.removePreference(findPreference("checkbox_vibrate_fallback"));
-                category_gamepad_settings.removePreference(findPreference("seekbar_vibrate_fallback_strength"));
-                removePreferenceIfPresent("checkbox_enable_device_rumble");
-            }
-            else if (!((Vibrator)getActivity().getSystemService(Context.VIBRATOR_SERVICE)).hasAmplitudeControl()) {
-                // Remove the vibration strength selector of the device doesn't have amplitude control
-                category_gamepad_settings.removePreference(findPreference("seekbar_vibrate_fallback_strength"));
-            }
-
             // Check custom resolution
             String customResStr = prevPrefConfig.customResolution;
             if(customResStr != null && !customResStr.isEmpty()){
@@ -507,10 +463,8 @@ public class StreamSettings extends AppCompatActivity {
                 int width = Math.max(candidate.getPhysicalWidth(), candidate.getPhysicalHeight());
                 int height = Math.min(candidate.getPhysicalWidth(), candidate.getPhysicalHeight());
 
-                // Some TVs report strange values here, so let's avoid native resolutions on a TV
-                // unless they report greater than 4K resolutions.
-                if (!activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION) ||
-                        (width > 3840 || height > 2160)) {
+                // TVs report strange values here, so only offer a native resolution above 4K
+                if (width > 3840 || height > 2160) {
                     addNativeResolutionEntries(width, height, hasInsets, false);
                 }
 

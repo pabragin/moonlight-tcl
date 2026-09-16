@@ -138,12 +138,8 @@
     <string name="title_audio_config_list">Surround Sound Konfiguration </string>
     <string name="summary_audio_config_list">Aktivieren von 5.1- oder 7.1-Surround-Sound für Heimkinosysteme</string>
     <string name="category_input_settings">Controller Einstellungen</string>
-    <string name="title_checkbox_touchscreen_trackpad">Touchscreen als Trackpad</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Wenn aktiviert, verhält sich der Touchscreen wie ein Trackpad. Wenn es deaktiviert ist, steuert der Touchscreen den Mauszeiger direkt.</string>
     <string name="title_checkbox_multi_controller">Automatische Controller Erkennung</string>
     <string name="summary_checkbox_multi_controller">Abwählen dieser Option erzwingt dass immer ein Controller präsent ist</string>
-    <string name="title_checkbox_vibrate_fallback">Vibrationsemulation aktivieren</string>
-    <string name="summary_checkbox_vibrate_fallback">Lässt das Gerät vibrieren falls der Controller keine Vibration unterstützt</string>
     <string name="title_seekbar_deadzone">Deadzone des Analogsticks</string>
     <string name="suffix_seekbar_deadzone">%</string>
     <string name="title_checkbox_xb1_driver">Xbox 360/One Controller Treiber</string>
@@ -173,8 +169,6 @@
     <string name="suffix_osc_opacity">%</string>
     <string name="dialog_title_osc_opacity">Transparenz ändern</string>
     <string name="category_ui_settings">UI Einstellungen</string>
-    <string name="title_checkbox_enable_pip">Aktivieren des Bild-in-Bild Modus</string>
-    <string name="summary_checkbox_enable_pip">Ermöglicht die Anzeige (aber nicht die Steuerung) des Streams während des Multitasking</string>
     <string name="title_language_list">Sprache</string>
     <string name="summary_language_list">Sprache die Moonlight verwenden soll</string>
     <string name="title_checkbox_small_icon_mode">Verwende kleine Cover</string>
@@ -274,17 +268,11 @@
     <string name="analogscroll_right">Rechter Analogstick</string>
     <string name="analogscroll_left">Linker Analogstick</string>
     <string name="error_code_prefix">Fehlercode:</string>
-    <string name="title_seekbar_vibrate_fallback_strength">Emulierte Vibrationsintensität einstellen</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">Verstärke oder verringere die Vibrationsintensität deines Geräts</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
     <string name="summary_checkbox_gamepad_touchpad_as_mouse">Erzwingt die Steuerung der Host Maus durch das Gamepad-Touchpad, selbst wenn ein Gamepad mit Touchpad emuliert wird.</string>
     <string name="summary_checkbox_gamepad_motion_sensors">Ermöglicht unterstützten Hosts, Bewegungssensordaten anzufordern, wenn ein Gamepad mit Bewegungssensoren emuliert wird. Das Deaktivieren kann die Strom- und Netzwerknutzung leicht reduzieren, wenn im Spiel keine Bewegungssensoren verwendet werden.</string>
-    <string name="title_checkbox_gamepad_motion_fallback">Emuliere die Unterstützung von Gamepad-Bewegungssensoren</string>
     <string name="title_full_range">Full Range Video erzwingen (Experimentell)</string>
     <string name="toast_controller_type_changed">Der Gamepad-Typ kann sich aufgrund der Bewegungssensor-Emulation ändern</string>
     <string name="summary_full_range">Dies führt zu Detailverlusten in hellen und dunklen Bereichen, wenn Ihr Gerät Full Range Video Inhalte nicht richtig anzeigt.</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">Verwendet die integrierten Bewegungssensoren Ihres Geräts, wenn Gamepad-Sensoren von Ihrem angeschlossenen Gamepad oder Ihrer Android-Version nicht unterstützt werden.
-\nHinweis: Die Aktivierung dieser Option kann dazu führen, dass Ihr Gamepad auf dem Host als PlayStation-Controller angezeigt wird.</string>
     <string name="pcview_menu_eol">NVIDIA GameStream End-of-Service</string>
     <string name="summary_share_performance_logs">Teile deine Leistungsdaten mit Freunden oder unserer Community. Wenn du sie an artemistics.logs@gmail.com sendest, erscheinen sie automatisch auf https://tinyurl.com/artemis-performance.</string>
     <string name="title_share_performance_logs_button">Leistungsdaten teilen</string>
@@ -300,13 +288,8 @@
     <string name="title_enable_commit_text">Commit-Text-Eingabe (Swipe/Spracherkennung) aktivieren</string>
     <string name="summary_enable_commit_text">Überträgt mehrzeilige Texte von Bildschirmtastaturen (Swipeeingabe, Wortvorschläge, Spracherkennung). Kann Spiele stören, die einzelne Tastendrücke erwarten.</string>
 
-    <string name="toggle_pan_zoom_mode">Schwenk-/Zoom-Modus umschalten</string>
     <string name="profile_manager_profiles_description">Profile ermöglichen es Ihnen, verschiedene Streaming-Konfigurationen zu erstellen und zu speichern. Jedes Profil speichert seine eigenen Einstellungen, zwischen denen schnell gewechselt werden kann.</string>
 
-    <string name="title_show_overlay_zoom_toggle_button">Taste zum Umschalten des Zoom-Overlays anzeigen</string>
-    <string name="summary_show_overlay_zoom_toggle_button">Zeigt eine verschiebbare Taste oben auf dem Bildschirm an, um den Schwenk-/Zoom-Modus umzuschalten.</string>
-    <string name="title_checkbox_remember_zoom_pan">Zoom &amp; Pan merken</string>
-    <string name="summary_checkbox_remember_zoom_pan">Speichert Zoom- und Schwenkposition zwischen Sitzungen.</string>
 
     <string name="title_edit_profile">Profil bearbeiten</string>
 

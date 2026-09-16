@@ -185,8 +185,6 @@
     <string name="resolution_prefix_custom">Tùy chỉnh</string>
     <string name="fps_suffix_fps">FPS</string>
     <string name="title_native_fps_dialog">Cảnh báo FPS gốc</string>
-    <string name="title_checkbox_auto_invert_video_resolution">Tự động đảo ngược độ phân giải</string>
-    <string name="summary_checkbox_auto_invert_video_resolution">Tự động đảo ngược chiều rộng và chiều cao của luồng video khi ở chế độ dọc.\nVí dụ: 1920x1080 sẽ trở thành 1080x1920.</string>
     <string name="title_video_scale_mode">Chế độ tỷ lệ video</string>
     <string name="summary_video_scale_mode">Chọn giữa Fit, Fill và Stretch</string>
     <string name="video_scale_mode_fit">Fit</string>
@@ -202,11 +200,6 @@
     <string name="category_gamepad_settings">Cài đặt gamepad</string>
     <string name="title_checkbox_multi_controller">Phát hiện tự động sự hiện diện của gamepad</string>
     <string name="summary_checkbox_multi_controller">Bỏ chọn tùy chọn này buộc một gamepad luôn có mặt</string>
-    <string name="title_checkbox_vibrate_fallback">Mô phỏng hỗ trợ rung</string>
-    <string name="summary_checkbox_vibrate_fallback">Rung thiết bị của bạn để mô phỏng rung nếu gamepad của bạn không hỗ trợ</string>
-    <string name="title_seekbar_vibrate_fallback_strength">Điều chỉnh cường độ rung mô phỏng</string>
-    <string name="summary_seekbar_vibrate_fallback_strength">Khuếch đại hoặc giảm cường độ rung trên thiết bị của bạn</string>
-    <string name="suffix_seekbar_vibrate_fallback_strength">%</string>
     <string name="title_seekbar_deadzone">Điều chỉnh vùng chết của cần analog</string>
     <string name="summary_seekbar_deadzone">Giá trị dương đặt vùng chết bình thường, giá trị âm áp dụng bù vùng chết. Đảm bảo bộ điều khiển của bạn có thể điều chỉnh vùng chết khi sử dụng bù vùng chết, nếu không việc căn giữa có thể khó khăn.</string>
     <string name="suffix_seekbar_deadzone">%</string>
@@ -222,14 +215,8 @@
     <string name="summary_checkbox_gamepad_touchpad_as_mouse">Buộc đầu vào bàn di chuột của gamepad để điều khiển chuột máy chủ, ngay cả khi mô phỏng gamepad với bàn di chuột.</string>
     <string name="title_checkbox_gamepad_motion_sensors">Cho phép sử dụng cảm biến chuyển động của gamepad</string>
     <string name="summary_checkbox_gamepad_motion_sensors">Cho phép các máy chủ được hỗ trợ yêu cầu dữ liệu cảm biến chuyển động khi mô phỏng gamepad với cảm biến chuyển động. Tắt có thể giảm nhẹ việc sử dụng năng lượng và mạng nếu cảm biến chuyển động không được sử dụng trong trò chơi.</string>
-    <string name="title_checkbox_gamepad_motion_fallback">Mô phỏng hỗ trợ cảm biến chuyển động của gamepad</string>
-    <string name="summary_checkbox_gamepad_motion_fallback">Sử dụng cảm biến chuyển động tích hợp của thiết bị của bạn nếu cảm biến chuyển động của gamepad không được hỗ trợ bởi gamepad được kết nối hoặc phiên bản Android của bạn.\nLưu ý: Bật tùy chọn này có thể khiến gamepad của bạn xuất hiện dưới dạng bộ điều khiển PlayStation trên máy chủ.</string>
-    <string name="title_checkbox_force_device_motion">Luôn sử dụng cảm biến chuyển động của thiết bị</string>
-    <string name="summary_checkbox_force_device_motion">Buộc sử dụng cảm biến chuyển động tích hợp của thiết bị ngay cả khi gamepad báo cáo cảm biến chuyển động được hỗ trợ.</string>
 
     <string name="category_input_settings">Cài đặt đầu vào</string>
-    <string name="title_checkbox_touchscreen_trackpad">Sử dụng màn hình cảm ứng như bàn di chuột</string>
-    <string name="summary_checkbox_touchscreen_trackpad">Nếu bật, màn hình cảm ứng hoạt động như bàn di chuột. Nếu tắt, màn hình cảm ứng trực tiếp điều khiển con trỏ chuột.</string>
     <string name="title_checkbox_absolute_mouse_mode">Chế độ chuột máy tính từ xa</string>
     <string name="summary_checkbox_absolute_mouse_mode">Điều này có thể làm cho gia tốc chuột hoạt động tự nhiên hơn cho việc sử dụng máy tính từ xa, nhưng không tương thích với nhiều trò chơi.</string>
     <string name="title_checkbox_mouse_nav_buttons">Bật nút chuột quay lại và tiến</string>
@@ -257,8 +244,6 @@
     <string name="suffix_osc_opacity">%</string>
 
     <string name="category_ui_settings">Cài đặt giao diện người dùng</string>
-    <string name="title_checkbox_enable_pip">Bật chế độ Picture-in-Picture</string>
-    <string name="summary_checkbox_enable_pip">Cho phép xem luồng trong khi thực hiện đa nhiệm</string>
     <string name="title_language_list">Ngôn ngữ</string>
     <string name="summary_language_list">Ngôn ngữ sử dụng cho Artemis</string>
     <string name="title_checkbox_small_icon_mode">Chế độ biểu tượng nhỏ</string>
@@ -342,14 +327,9 @@
     <!-- In Game menu -->
     <string name="game_menu_toggle_keyboard">Hiển thị bàn phím mềm</string>
     <string name="game_menu_toggle_hud">Hiển thị lớp phủ hiệu suất</string>
-    <string name="game_menu_select_mouse_mode">Chọn chế độ chuột</string>
-    <string name="game_menu_enable_zoom_mode">Bật Pan/Zoom</string>
-    <string name="game_menu_disable_zoom_mode">Tắt Pan/Zoom</string>
-    <string name="game_menu_rotate_screen">Xoay màn hình</string>
     <string name="game_menu_toggle_keyboard_model">Hiển thị phím đặc biệt</string>s
     <string name="game_menu_toggle_virtual_model">Hiển thị gamepad</string>
     <string name="game_menu_toggle_virtual_keyboard_model">Hiển thị bàn phím đầy đủ</string>
-    <string name="game_menu_switch_touch_sensitivity_model">Thay đổi độ nhạy cảm ứng</string>
 
 
     <string name="game_menu_toggle_mouse_on">Bật mô phỏng chuột bằng bộ điều khiển</string>
@@ -400,8 +380,6 @@
     <string name="summary_custom_refresh_rate">Nhập tần số quét thủ công. Chỉ hỗ trợ Apollo.</string>
     <string name="dialog_custom_refresh_rate">Nhập tần số quét theo Hz. Có thể là số thập phân.</string>
 
-    <string name="title_touchscreen_mode">Chế độ màn hình cảm ứng</string>
-    <string name="summary_touchscreen_mode">Chọn giữa chế độ Đa điểm/Đơn điểm/Bàn di chuột/Tắt.\nBút cảm ứng vẫn có thể sử dụng khi chọn Tắt.\nBị ép về chế độ Bàn di chuột (Tự nhiên) khi dùng màn hình ngoài.</string>
 
 
     <!-- New Strings -->
@@ -417,7 +395,6 @@
     <string name="title_checkbox_enable_perf_overlay_lite_dialog">Nhấp chế độ đơn giản để hiển thị tùy chọn nhanh</string>
     <string name="summary_checkbox_enable_perf_overlay_lite_dialog">Thay đổi chức năng nút quay lại, hiển thị menu nhanh trong game.</string>
 
-    <string name="title_virtual_trackpad_settings">Cài đặt bàn di chuột ảo</string>
 
     <string name="title_quit_dialog">Menu Quay lại</string>
     <string name="summary_quit_dialog">Khi bật, nhấn nút quay lại vật lý khi đang stream sẽ hiển thị các tùy chọn liên quan!\nBàn phím ảo, thông tin hiệu suất, chuyển đổi chế độ cảm ứng, gửi phím đặc biệt</string>
@@ -426,8 +403,6 @@
     <string name="summary_custom_resolution">Thêm độ phân giải tùy chỉnh, phân tách bằng dấu x, độ phân giải lạ có thể không hoạt động.\nVí dụ: 1920x1080\nNếu là độ phân giải không gốc, có thể sẽ không hiển thị toàn màn hình. Nếu tỷ lệ khung hình giống nhau, bạn có thể chọn kéo giãn để hiển thị toàn màn hình</string>
     <string name="title_custom_resolution">Độ phân giải tùy chỉnh</string>
 
-    <string name="title_auto_orientation">Tự động xoay màn hình</string>
-    <string name="summary_auto_orientation">Màn hình stream sẽ hiển thị theo hướng của thiết bị khi bắt đầu stream.</string>
 
     <string name="title_import_special_button">Nhập phím tùy chỉnh</string>
     <string name="summary_import_special_button">Sử dụng được trong Menu Quay lại và phím đặc biệt.\nLưu ý: Nhập sẽ ghi đè cấu hình hiện tại, vui lòng sao lưu trước.</string>
@@ -470,33 +445,15 @@
     <string name="title_exdisplay_mode">Chế độ màn hình ngoài (Beta)</string>
     <string name="summary_exdisplay_mode">Hiển thị hình ảnh stream trên màn hình ngoài, nút ảo và các điều khiển khác trên điện thoại.</string>
 
-    <string name="title_top_center_display">Hiển thị ở giữa trên</string>
-    <string name="summary_top_center_display">Khi độ phân giải không phải gốc, hình ảnh stream sẽ căn lên trên thay vì ở giữa.</string>
 
-    <string name="title_touch_sensitivity">Độ nhạy cảm ứng</string>
-    <string name="summary_touch_sensitivity">Khi bật, bạn có thể điều chỉnh độ nhạy cảm ứng thủ công.</string>
 
-    <string name="title_global_touch_sensitivity">Hiệu lực toàn màn hình cho độ nhạy cảm ứng</string>
-    <string name="summary_global_touch_sensitivity">Mặc định không bật, chỉ áp dụng bên phải màn hình (hợp với Genshin Impact), bật sẽ có hiệu lực toàn màn hình.</string>
 
-    <string name="title_auto_touch_sensitivity">Tự động trở về trung tâm khi vượt ranh giới cảm ứng</string>
-    <string name="summary_auto_touch_sensitivity">Ở độ nhạy cao, trượt nhẹ có thể vượt ranh giới, gây không thể di chuyển. Bật tùy chọn này để khắc phục.</string>
 
-    <string name="title_touch_sensitivity_x">Điều chỉnh độ nhạy trục X</string>
-    <string name="summary_touch_sensitivity_x">Ở chế độ đa điểm, một số game không đáp ứng yêu cầu độ nhạy, bạn có thể chỉnh trục X ở đây.</string>
 
-    <string name="title_touch_sensitivity_y">Điều chỉnh độ nhạy trục Y</string>
-    <string name="summary_touch_sensitivity_y">Ở chế độ đa điểm, một số game không đáp ứng yêu cầu độ nhạy, bạn có thể chỉnh trục Y ở đây.</string>
 
     <string name="title_debug_info">Thông tin gỡ lỗi</string>
 
         <string name="summary_debug_info">Thử rung tay cầm chơi game và các chức năng khác.</string>
-    <string name="title_touchpad_sensitivity_x">Độ nhạy touchpad - Trục X</string>
-    <string name="summary_touchpad_sensitivity_x">Áp dụng cho chế độ touchpad chuột và điều khiển touchpad bằng nút đặc biệt ảo;\nCả hai dùng chung giá trị độ nhạy, nhưng hiệu suất có thể khác nhau.\nKhông biết có ai dùng cả hai cùng lúc không?</string>
-    <string name="title_touchpad_sensitivity_y">Độ nhạy touchpad - Trục Y</string>
-    <string name="summary_touchpad_sensitivity_y">Áp dụng cho chế độ touchpad chuột và điều khiển touchpad bằng nút đặc biệt ảo;\nCả hai dùng chung giá trị độ nhạy, nhưng hiệu suất có thể khác nhau.\nKhông biết có ai dùng cả hai cùng lúc không?</string>
-    <string name="title_device_rumble">Bắt buộc rung trên thiết bị</string>
-    <string name="summary_device_rumble">Nếu bạn không hài lòng với rung của tay cầm chơi game đã kết nối, bạn có thể bật tùy chọn này.\nKhông có tác dụng nếu buộc sử dụng driver USB tích hợp của Artemis</string>
     <string name="title_clear_default_special_button">Tắt các phím đặc biệt mặc định</string>
     <string name="summary_clear_default_special_button">Nếu bạn thấy các lệnh tích hợp trong menu quay lại không hữu ích, bạn có thể tắt chúng và dùng các phím tự nhập.</string>
     <string name="title_trackpad_sensitivity_x">Độ nhạy trackpad trục X</string>
@@ -541,12 +498,6 @@
     <string name="title_checkbox_enable_sticky_modifier_key_virtual_keyboard">Giữ phím chức năng</string>
     <string name="summary_checkbox_enable_sticky_modifier_key_virtual_keyboard">Tự động giữ phím Shift, Ctrl... trên bàn phím ảo và bàn phím tùy chỉnh.</string>
     <string name="virtual_keyboard_hide">Ẩn\nBàn phím</string>
-    <string name="mouse_mode_multi_touch">Chạm đa điểm</string>
-    <string name="mouse_mode_absolute_touch">Chạm theo vị trí</string>
-    <string name="mouse_mode_track_pad_natural">Bàn di chuột (Tự nhiên - Nhấn đúp để kéo)</string>
-    <string name="mouse_mode_track_pad_gaming">Bàn di chuột (Game - Nhấn giữ để kéo)</string>
-    <string name="mouse_mode_disabled">Tắt chuột</string>
-    <string name="mouse_mode_absolute_touch_swapped">Chạm theo vị trí (Đổi trái/phải chuột)</string>
     <string name="keyboard_layout_set_1">Cấu hình 1</string>
     <string name="keyboard_layout_set_2">Cấu hình 2</string>
     <string name="keyboard_layout_set_3">Cấu hình 3</string>
@@ -557,16 +508,9 @@
     <string name="debug_info_api_version">Phiên bản API:</string>
     <string name="debug_info_kernel_version">Phiên bản Kernel:</string>
     <string name="debug_info_brand_model">Thiết bị:</string>
-    <string name="debug_info_has_vibration_motor">Có rung</string>
-    <string name="debug_info_no_vibration_motor">Không có rung</string>
-    <string name="debug_info_test_device_vibration">Thử rung thiết bị (%s)</string>
-    <string name="debug_info_vibration_amplitude">Mức rung (%d)</string>
-    <string name="debug_info_simple_vibration">Rung đơn giản trong 1 giây</string>
-    <string name="debug_info_continuous_hd_vibration">Rung HD liên tục</string>
     <string name="debug_info_please_choose">Vui lòng chọn</string>
     <string name="debug_info_no_gamepad_detected">Không tìm thấy tay cầm, hãy kết nối rồi bấm làm mới.</string>
     <string name="debug_info_no_vibrator">Tay cầm không có bộ rung!</string>
-    <string name="debug_info_set_amplitude">Chọn độ rung (0–255, chỉ hỗ trợ rung HD)</string>
     <string name="debug_info_name">Tên: </string>
     <string name="debug_info_sensors">Cảm biến: </string>
     <string name="debug_info_no_relevant_driver">Không có (thiếu driver hoặc tay cầm không được hỗ trợ)</string>
@@ -579,7 +523,6 @@
     <string name="debug_info_number_of_gamepads">Số tay cầm đã kết nối: </string>
     <string name="debug_info_accelerometer">+ Cảm biến gia tốc</string>
     <string name="debug_info_gyroscope">+ Cảm biến con quay</string>
-    <string name="debug_info_stop_vibration">Dừng rung</string>
     <string name="debug_info_refresh_gamepad_info">Nhấn để cập nhật thông tin tay cầm</string>
     <string name="debug_info_refresh_gamepad_list">Làm mới danh sách tay cầm</string>
     <string name="debug_info_test_gamepad_rumble">Thử rung tay cầm</string>

@@ -23,8 +23,8 @@ android {
                 "obtainium_deep_link",
                 "obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
 
-        versionName "20.2.10-tcl1"
-        versionCode = 95
+        versionName "20.2.10-tcl2"
+        versionCode = 96
 
         // Generate native debug symbols to allow Google Play to symbolicate our native crashes
         ndk.debugSymbolLevel = 'FULL'
@@ -152,6 +152,8 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.google.android.material:material:1.13.0'
+    // Reaches the hidden BluetoothHidHost API for gamepad rumble over the Bluetooth stack (BluetoothHidRumble)
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:6.1'
 
     // Unit test dependencies
     testImplementation 'junit:junit:4.13.2'
