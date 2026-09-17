@@ -458,7 +458,7 @@
     <string name="perf_overlay_lite_packet_loss">Потери пакетов</string>
     <string name="wrong_import_format">Неверный формат импорта!</string>
     <string name="title_checkbox_gamepad_enable_battery_report">Включить отчёт о заряде батареи геймпада</string>
-    <string name="summary_checkbox_gamepad_enable_battery_report">Отправлять информацию о заряде батареи геймпада, если это возможно.\nОтключение может помочь при редких фризах ввода (тач/трекпад/стилус/мышь).</string>
+    <string name="summary_checkbox_gamepad_enable_battery_report">Сообщать хосту заряд геймпада. Сам телевизор заряд геймпадов не отдаёт, поэтому Bluetooth-геймпад опрашивается напрямую (сервис батареи по Bluetooth LE или отчёт о батарее Xbox по классическому Bluetooth).</string>
     <string name="title_checkbox_enforce_display_mode">Принудительный режим дисплея</string>
     <string name="summary_checkbox_enforce_display_mode">Принудительно использовать оптимальный режим отображения.\nТребуется в некоторых системах (например, ColorOS) для корректной установки частоты/разрешения.\nНе включайте на ChromeCast 4K может вызвать ошибки.</string>
     <string name="summary_checkbox_forceTightThresholds">Более строгие пороги вертикальной синхронизации для снижения задержки; может увеличить количество сбоев.</string>

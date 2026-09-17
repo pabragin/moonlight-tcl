@@ -6,17 +6,22 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.view.InputDevice;
 
 import com.limelight.LimeLog;
+import com.limelight.nvstream.jni.MoonBridge;
 
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +43,8 @@ import java.util.zip.CRC32;
 public final class BluetoothHidRumble {
     /** BluetoothProfile.HID_HOST; the constant itself is a hidden system API. */
     private static final int PROFILE_HID_HOST = 4;
-    /** BluetoothHidHost.REPORT_TYPE_OUTPUT / REPORT_TYPE_FEATURE */
+    /** BluetoothHidHost.REPORT_TYPE_INPUT / REPORT_TYPE_OUTPUT / REPORT_TYPE_FEATURE */
+    private static final byte REPORT_TYPE_INPUT = 1;
     private static final byte REPORT_TYPE_OUTPUT = 2;
     private static final byte REPORT_TYPE_FEATURE = 3;
     /** Pause after a prelude so the pad acts on it before the first rumble report. */
@@ -562,6 +568,77 @@ public final class BluetoothHidRumble {
         return new String(out);
     }
 
+    /** BluetoothHidHost.ACTION_REPORT and its extras (hidden @SystemApi): the reply to a getReport() request. */
+    private static final String ACTION_REPORT = "android.bluetooth.input.profile.action.REPORT";
+    private static final String EXTRA_REPORT = "android.bluetooth.BluetoothHidHost.extra.REPORT";
+    private static final String EXTRA_REPORT_BUFFER_SIZE = "android.bluetooth.BluetoothHidHost.extra.REPORT_BUFFER_SIZE";
+
+    /** Receives the payload of every report the HID host hands back after a getReport() request. */
+    public interface ReportListener {
+        void onReport(BluetoothDevice device, byte[] report);
+    }
+
+    /**
+     * Xbox controllers on Bluetooth carry their battery in input report 0x04, a single status byte. This
+     * TV's kernel creates no power supply for HID devices, so InputDevice.getBatteryState() never has
+     * anything; asking the pad over the same HID host that carries rumble does. Layout as read by the
+     * Linux xpadneo driver: bit 7 online, bit 4 charging, bits 3-2 mode (0 none/USB power, 1 battery,
+     * 2 charging cable), bits 1-0 level (0 critical .. 3 full).
+     */
+    public static final int XBOX_BATTERY_REPORT_ID = 0x04;
+    private static final byte[] XBOX_LEVEL_PERCENT = {10, 35, 65, 100};
+
+    public static final class BatteryInfo {
+        public final byte state;
+        public final byte percentage;
+        public final int rawStatus;
+
+        BatteryInfo(byte state, byte percentage, int rawStatus) {
+            this.state = state;
+            this.percentage = percentage;
+            this.rawStatus = rawStatus;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("state=%d percentage=%d raw=0x%02X", state, percentage, rawStatus);
+        }
+    }
+
+    /** null when the report is not an Xbox battery report. */
+    public static BatteryInfo parseXboxBattery(byte[] report) {
+        if (report == null || report.length == 0) {
+            return null;
+        }
+        int status;
+        if (report.length >= 2 && (report[0] & 0xFF) == XBOX_BATTERY_REPORT_ID) {
+            // The reply carries the report ID first
+            status = report[1] & 0xFF;
+        } else if (report.length == 1) {
+            status = report[0] & 0xFF;
+        } else {
+            return null;
+        }
+        boolean online = (status & 0x80) != 0;
+        boolean charging = (status & 0x10) != 0;
+        int mode = (status & 0x0C) >> 2;
+        int level = status & 0x03;
+        byte state;
+        byte percentage;
+        if (!online || mode == 0) {
+            state = MoonBridge.LI_BATTERY_STATE_NOT_PRESENT;
+            percentage = MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN;
+        } else {
+            percentage = XBOX_LEVEL_PERCENT[level];
+            if (charging) {
+                state = level == 3 ? MoonBridge.LI_BATTERY_STATE_FULL : MoonBridge.LI_BATTERY_STATE_CHARGING;
+            } else {
+                state = MoonBridge.LI_BATTERY_STATE_DISCHARGING;
+            }
+        }
+        return new BatteryInfo(state, percentage, status);
+    }
+
     public static boolean hasPermission(Context context) {
         return context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
     }
@@ -588,6 +665,7 @@ public final class BluetoothHidRumble {
             LimeLog.warning("Bluetooth HID rumble: getProfileProxy(HID_HOST) failed: " + t);
             return null;
         }
+        rumble.registerReportReceiver(context.getApplicationContext());
         return rumble;
     }
 
@@ -599,6 +677,43 @@ public final class BluetoothHidRumble {
     private volatile Method getReportMethod;
     private volatile String lastResolveMethod = "none";
     private volatile boolean closed;
+    private volatile Context receiverContext;
+    private volatile ReportListener reportListener;
+
+    private final BroadcastReceiver reportReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!ACTION_REPORT.equals(intent.getAction())) {
+                return;
+            }
+            ReportListener listener = reportListener;
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
+            byte[] report = intent.getByteArrayExtra(EXTRA_REPORT);
+            if (listener == null || device == null || report == null) {
+                return;
+            }
+            int size = intent.getIntExtra(EXTRA_REPORT_BUFFER_SIZE, report.length);
+            if (size > 0 && size < report.length) {
+                report = Arrays.copyOf(report, size);
+            }
+            listener.onReport(device, report);
+        }
+    };
+
+    private void registerReportReceiver(Context appContext) {
+        try {
+            // Sent by the Bluetooth stack (a protected broadcast); the sender must hold BLUETOOTH_CONNECT
+            appContext.registerReceiver(reportReceiver, new IntentFilter(ACTION_REPORT),
+                    Manifest.permission.BLUETOOTH_CONNECT, null, Context.RECEIVER_EXPORTED);
+            receiverContext = appContext;
+        } catch (Throwable t) {
+            LimeLog.warning("Bluetooth HID rumble: cannot listen for HID reports: " + t);
+        }
+    }
+
+    public void setReportListener(ReportListener listener) {
+        reportListener = listener;
+    }
 
     private final BluetoothProfile.ServiceListener listener = new BluetoothProfile.ServiceListener() {
         @Override
@@ -779,6 +894,11 @@ public final class BluetoothHidRumble {
         return invoke(getReportMethod, device, REPORT_TYPE_FEATURE, (byte) reportId, 64);
     }
 
+    /** GET_REPORT for an input report; the payload arrives through the ReportListener. */
+    public boolean requestInputReport(BluetoothDevice device, int reportId) {
+        return invoke(getReportMethod, device, REPORT_TYPE_INPUT, (byte) reportId, 64);
+    }
+
     /** One-time setup a pad family needs before its first rumble report. Blocking; call on the rumble thread. */
     public void runPrelude(BluetoothDevice device, ReportFormat format) {
         boolean sent = false;
@@ -816,6 +936,14 @@ public final class BluetoothHidRumble {
             return;
         }
         closed = true;
+        Context c = receiverContext;
+        receiverContext = null;
+        if (c != null) {
+            try {
+                c.unregisterReceiver(reportReceiver);
+            } catch (Throwable ignored) {
+            }
+        }
         BluetoothProfile p = proxy;
         proxy = null;
         sendDataMethod = null;

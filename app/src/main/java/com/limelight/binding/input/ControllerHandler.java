@@ -157,7 +157,11 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         // Bluetooth gamepads rumble through the Bluetooth stack's HID host, which bypasses system_server's
         // InputReader and its Android 14 crash (see BluetoothHidRumble). The profile proxy binds
         // asynchronously while the stream starts.
-        this.btHidRumble = prefConfig.enableRumble ? BluetoothHidRumble.openIfAvailable(activityContext) : null;
+        // The battery path needs the same proxy to find the pad's BluetoothDevice (BluetoothHidRumble.resolve)
+        this.btHidRumble = prefConfig.enableRumble || prefConfig.enableBatteryReport ? BluetoothHidRumble.openIfAvailable(activityContext) : null;
+        if (btHidRumble != null) {
+            btHidRumble.setReportListener(this::onBtHidReport);
+        }
         if (prefConfig.enableRumble) {
             LimeLog.info("Bluetooth HID rumble: " + (btHidRumble != null ? "binding HID host proxy" :
                     BluetoothHidRumble.hasPermission(activityContext) ? "unavailable (Bluetooth off)" : "no BLUETOOTH_CONNECT permission"));
@@ -659,16 +663,22 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         // known report format rumbles through the Bluetooth stack (BluetoothHidRumble), a gamepad on USB is driven
         // by Moonlight's own USB driver, anything else stays silent.
         if (btHidRumble != null && context.external) {
-            BluetoothHidRumble.ReportFormat format = BluetoothHidRumble.reportFormatFor(context.vendorId, context.productId);
-            if (format != null) {
-                BluetoothDevice btDevice = btHidRumble.resolve(dev);
-                if (btDevice != null) {
-                    context.btDevice = btDevice;
+            BluetoothHidRumble.ReportFormat format = prefConfig.enableRumble ?
+                    BluetoothHidRumble.reportFormatFor(context.vendorId, context.productId) : null;
+            BluetoothDevice btDevice = format != null || prefConfig.enableBatteryReport ? btHidRumble.resolve(dev) : null;
+            if (btDevice != null) {
+                context.btDevice = btDevice;
+                if (format != null) {
                     context.btReport = format;
                 }
-                else {
-                    LimeLog.info("Bluetooth HID rumble: no Bluetooth device for " + devName + " (" + btHidRumble.lastResolveMethod() + ")");
+                // Charge of a Bluetooth pad: the kernel exposes no battery for HID devices here, so a LE pad is asked
+                // through the standard GATT Battery Service; a classic-Bluetooth Xbox pad through its HID report 0x04
+                if (prefConfig.enableBatteryReport && btDevice.getType() != BluetoothDevice.DEVICE_TYPE_CLASSIC) {
+                    context.btBattery = new BluetoothGattBattery(activityContext, btDevice, this::onBtBatteryLevel);
                 }
+            }
+            else if (format != null) {
+                LimeLog.info("Bluetooth HID rumble: no Bluetooth device for " + devName + " (" + btHidRumble.lastResolveMethod() + ")");
             }
         }
         LimeLog.info("Rumble path for " + devName + ": " + (context.usesBtHid() ? "bluetooth-hid" : "none"));
@@ -1005,6 +1015,16 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         }
 
         if (!batteryPresent) {
+            // No battery from the kernel (this TV exposes none for HID devices): a Bluetooth pad is asked directly,
+            // the answer arrives in onBtBatteryLevel() (GATT) or onBtHidReport() (HID report)
+            if (context.btBattery != null) {
+                context.btBattery.refresh();
+            }
+            else if (btHidRumble != null && btHidRumble.isReady() && context.btDevice != null
+                    && context.btDevice.getType() == BluetoothDevice.DEVICE_TYPE_CLASSIC
+                    && BluetoothHidRumble.reportFormatFor(context.vendorId, context.productId) == BluetoothHidRumble.XBOX_03) {
+                btHidRumble.requestInputReport(context.btDevice, BluetoothHidRumble.XBOX_BATTERY_REPORT_ID);
+            }
             return;
         }
 
@@ -1049,6 +1069,63 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
             context.lastReportedBatteryStatus = currentBatteryStatus;
             context.lastReportedBatteryCapacity = currentBatteryCapacity;
+        }
+    }
+
+    // Reply to requestInputReport(): runs on the main thread, so hop to the background thread that
+    // owns the battery state and the connection calls
+    private void onBtHidReport(final BluetoothDevice device, final byte[] report) {
+        if (stopped) {
+            return;
+        }
+        backgroundThreadHandler.post(() -> {
+            BluetoothHidRumble.BatteryInfo battery = BluetoothHidRumble.parseXboxBattery(report);
+            if (battery == null) {
+                return;
+            }
+            for (int i = 0; i < inputDeviceContexts.size(); i++) {
+                InputDeviceContext ctx = inputDeviceContexts.valueAt(i);
+                if (ctx.btDevice == null || !device.getAddress().equals(ctx.btDevice.getAddress())) {
+                    continue;
+                }
+                reportBtBattery(ctx, "HID report " + battery, battery.state, battery.percentage);
+                break;
+            }
+        });
+    }
+
+    // Battery Level from the pad's GATT Battery Service: a bare percentage, the service says nothing about
+    // charging, so the pad is reported as discharging at that level
+    private void onBtBatteryLevel(final BluetoothDevice device, final int percent) {
+        if (stopped) {
+            return;
+        }
+        backgroundThreadHandler.post(() -> {
+            for (int i = 0; i < inputDeviceContexts.size(); i++) {
+                InputDeviceContext ctx = inputDeviceContexts.valueAt(i);
+                if (ctx.btDevice == null || !device.getAddress().equals(ctx.btDevice.getAddress())) {
+                    continue;
+                }
+                reportBtBattery(ctx, "GATT Battery Level " + percent + "%", MoonBridge.LI_BATTERY_STATE_DISCHARGING, (byte) percent);
+                break;
+            }
+        });
+    }
+
+    // Background thread only (shares lastReportedBattery* with sendControllerBatteryPacket)
+    private void reportBtBattery(InputDeviceContext ctx, String source, byte state, byte percentage) {
+        if (stopped || ctx.controllerNumber < 0) {
+            return;
+        }
+        float capacity = percentage == MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN ? Float.NaN : (percentage & 0xFF) / 100f;
+        if (!ctx.btBatteryLogged) {
+            LimeLog.info("Battery over Bluetooth for " + ctx.name + ": " + source);
+            ctx.btBatteryLogged = true;
+        }
+        if (state != ctx.lastReportedBatteryStatus || !areBatteryCapacitiesEqual(capacity, ctx.lastReportedBatteryCapacity)) {
+            conn.sendControllerBatteryEvent((byte) ctx.controllerNumber, state, percentage);
+            ctx.lastReportedBatteryStatus = state;
+            ctx.lastReportedBatteryCapacity = capacity;
         }
     }
 
@@ -2939,6 +3016,8 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         // These are BatteryState values, not Moonlight values
         public int lastReportedBatteryStatus;
         public float lastReportedBatteryCapacity;
+        public boolean btBatteryLogged;
+        public volatile BluetoothGattBattery btBattery;
 
         public int leftStickXAxis = -1;
         public int leftStickYAxis = -1;
@@ -3025,6 +3104,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         @Override
         public void destroy() {
             super.destroy();
+
+            BluetoothGattBattery battery = btBattery;
+            btBattery = null;
+            if (battery != null) {
+                battery.close();
+            }
 
             backgroundThreadHandler.removeCallbacks(rumbleFlushRunnable);
             synchronized (rumbleLock) {

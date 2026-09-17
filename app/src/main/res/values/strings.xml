@@ -516,7 +516,7 @@
     <string name="perf_overlay_lite_packet_loss">Packet loss</string>
     <string name="wrong_import_format">Wrong import format, please check!</string>
     <string name="title_checkbox_gamepad_enable_battery_report">Enable battery status report for gamepad</string>
-    <string name="summary_checkbox_gamepad_enable_battery_report">Report gamepad battery status when possible.\nDisable this option might help if you experience stutter with touch screen/touch pad/stylus/mouse input occasionally.</string>
+    <string name="summary_checkbox_gamepad_enable_battery_report">Tell the host how charged the gamepad is. This TV reports no gamepad batteries itself, so a Bluetooth pad is asked directly (Battery Service over Bluetooth LE, or the Xbox battery report over classic Bluetooth).</string>
     <string name="title_checkbox_enforce_display_mode">Enforce Display Mode</string>
     <string name="summary_checkbox_enforce_display_mode">Force surface to use the optimal display mode.\nRequired by some systems (such as ColorOS) to set refresh rate/resolution properly.\nDo not enable on ChromeCast 4K as it might lead to bugs.</string>
    	<string name="title_checkbox_forceTightThresholds">Tight Vsync (Experimental)</string>

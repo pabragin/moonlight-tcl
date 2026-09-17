@@ -161,7 +161,7 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_ENABLE_RUMBLE = true;
     private static final boolean DEFAULT_PREVENT_PACKET_LOSS = false;
     // A TV has no battery indicator worth the extra InputReader traffic
-    private static final boolean DEFAULT_GAMEPAD_ENABLE_BATTERY_REPORT = false;
+    private static final boolean DEFAULT_GAMEPAD_ENABLE_BATTERY_REPORT = true;
     private static final boolean DEFAULT_FORCE_QWERTY = true;
     private static final boolean DEFAULT_SEND_META_ON_PHYSICAL_BACK = false;
     private static final boolean DEFAULT_IGNORE_SYNTH_EVENTS = false;

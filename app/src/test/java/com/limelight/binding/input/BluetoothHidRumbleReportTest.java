@@ -188,4 +188,38 @@ public class BluetoothHidRumbleReportTest {
         assertNull(BluetoothHidRumble.reportFormatFor(0x057e, 0x2017));
         assertNull(BluetoothHidRumble.reportFormatFor(0x0000, 0x0000));
     }
+
+    @Test
+    public void xboxBatteryReportParsesXpadneoLayout() {
+        // online, on battery, level 3, not charging -> discharging, 100 %
+        BluetoothHidRumble.BatteryInfo b = BluetoothHidRumble.parseXboxBattery(new byte[] {(byte) 0x87});
+        assertEquals(com.limelight.nvstream.jni.MoonBridge.LI_BATTERY_STATE_DISCHARGING, b.state);
+        assertEquals(100, b.percentage);
+        // the reply may carry the report ID first
+        b = BluetoothHidRumble.parseXboxBattery(new byte[] {0x04, (byte) 0x87});
+        assertEquals(100, b.percentage);
+        // online, charging cable, charging, level 1 -> charging, 35 %
+        b = BluetoothHidRumble.parseXboxBattery(new byte[] {(byte) 0x99});
+        assertEquals(com.limelight.nvstream.jni.MoonBridge.LI_BATTERY_STATE_CHARGING, b.state);
+        assertEquals(35, b.percentage);
+        // charging and full
+        b = BluetoothHidRumble.parseXboxBattery(new byte[] {(byte) 0x9B});
+        assertEquals(com.limelight.nvstream.jni.MoonBridge.LI_BATTERY_STATE_FULL, b.state);
+        // mode 0: USB power without a battery
+        b = BluetoothHidRumble.parseXboxBattery(new byte[] {(byte) 0x80});
+        assertEquals(com.limelight.nvstream.jni.MoonBridge.LI_BATTERY_STATE_NOT_PRESENT, b.state);
+        assertEquals(com.limelight.nvstream.jni.MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN, b.percentage);
+        // anything that is not a one-byte status or an 0x04 report is ignored
+        assertNull(BluetoothHidRumble.parseXboxBattery(new byte[] {0x03, 0x00, 0x00}));
+        assertNull(BluetoothHidRumble.parseXboxBattery(new byte[0]));
+    }
+
+    @Test
+    public void gattBatteryLevelIsOnePercentByte() {
+        assertEquals(Integer.valueOf(87), BluetoothGattBattery.parseLevel(new byte[] {(byte) 87}));
+        assertEquals(Integer.valueOf(100), BluetoothGattBattery.parseLevel(new byte[] {100, 0}));
+        assertNull(BluetoothGattBattery.parseLevel(new byte[] {(byte) 0xFF}));
+        assertNull(BluetoothGattBattery.parseLevel(new byte[0]));
+        assertNull(BluetoothGattBattery.parseLevel(null));
+    }
 }
