@@ -143,14 +143,12 @@ reduction low; under Picture → Motion set *Motion Clarity* to Low or Off (Sett
 
 ![Picture mode chooser](docs/tv/picture-mode.png)
 
-![Clarity](docs/tv/picture-clarity.png) ![Motion](docs/tv/picture-motion.png)
-
 **Close what you are not using.** The TV has 2.4 GB of RAM and swaps to compressed memory; a browser left in the background plus
 the TV settings screen pushed the kernel into reclaiming memory 250 times a second during a stream. Quit them before streaming
 (Settings → Apps → the app → Force stop).
 
 **Developer options, if you have them enabled.** Make sure *Don't keep activities* is off: it destroys every screen you leave.
-*Background process limit* → "At most 2 processes" keeps idle apps out of memory, at the price of other apps restarting more
+*Background process limit* → "No background processes" or "At most 2 processes" keeps idle apps out of memory, at the price of other apps restarting more
 often. Nothing else in there helps streaming.
 
 ![Background process limit](docs/tv/developer-background-limit.png)
@@ -238,7 +236,7 @@ Artemis собраны как тот же пакет, поэтому у обои
 приложений нет, поэтому Filmmaker как режим с минимальной обработкой, в разделе Чёткость выключить суперразрешение, в разделе
 Движение поставить чёткость движения на минимум или выключить; закрывать перед стримом браузер и другие фоновые приложения
 (Настройки → Приложения → приложение → Остановить); в параметрах разработчика, если они включены, убедиться, что «Не сохранять
-действия» выключено, а «Лимит фоновых процессов» при желании поставить «Не более 2»; и дать телевизору воздух сзади: после
+действия» выключено, а «Лимит фоновых процессов» при желании поставить «Без фоновых процессов» или «Не более 2»; и дать телевизору воздух сзади: после
 часа 4K HDR SoC держится на 76–82 °C, и прошивка сама режет декодер, а яркость панели меняет это всего на градус.
 Скриншоты меню на английском лежат в `docs/tv/`.
 
