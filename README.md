@@ -126,6 +126,38 @@ TV, and its Settings screen crashed on open during the test.
 - If latency matters more than sharpness, 2560×1440 decodes in about 7 ms instead of 13 and the TV scales it to the panel. Stay on
   HEVC.
 
+## Set up the TV
+
+The TV's own background work costs frames and heat (see Measurements). On a TCL C8K these settings are worth a look; the
+screenshots are from firmware V655 with the menu switched to English.
+
+**Turn off hands-free "Hey Google".** Settings → Accounts & Profiles → your account → Google Assistant → *Hands-free mic* off.
+With it on, the Assistant's hotword detector used a quarter of a CPU core the whole time the TV was on. The microphone button on
+the remote keeps working.
+
+![Google Assistant settings with Hands-free mic off](docs/tv/assistant-hands-free-mic-off.png)
+
+**Picture mode.** For apps this TV offers Standard, Sports, Filmmaker Mode and Movie only; Game mode and ALLM exist for HDMI
+inputs. Filmmaker Mode is the one with the least processing. Under Picture → Clarity leave *Super Resolution* off and the noise
+reduction low; under Picture → Motion set *Motion Clarity* to Low or Off (Settings → Display & Sound → Picture).
+
+![Picture mode chooser](docs/tv/picture-mode.png)
+
+![Clarity](docs/tv/picture-clarity.png) ![Motion](docs/tv/picture-motion.png)
+
+**Close what you are not using.** The TV has 2.4 GB of RAM and swaps to compressed memory; a browser left in the background plus
+the TV settings screen pushed the kernel into reclaiming memory 250 times a second during a stream. Quit them before streaming
+(Settings → Apps → the app → Force stop).
+
+**Developer options, if you have them enabled.** Make sure *Don't keep activities* is off: it destroys every screen you leave.
+*Background process limit* → "At most 2 processes" keeps idle apps out of memory, at the price of other apps restarting more
+often. Nothing else in there helps streaming.
+
+![Background process limit](docs/tv/developer-background-limit.png)
+
+**Keep it cool.** After an hour of 4K HDR the SoC sits at 76–82 °C and the firmware trims the decoder. Lower panel brightness
+changed that by about a degree; airflow behind the TV matters more.
+
 ## Download and install
 
 APKs are on the [Releases](https://github.com/pabragin/moonlight-tcl/releases) page, one `armeabi-v7a` APK per release. Install with
@@ -199,3 +231,14 @@ Artemis собраны как тот же пакет, поэтому у обои
 всех сценах. 60 Мбит/с, если нужна гарантированная плавность в любой сцене ценой чуть более мягкой картинки. 120 Мбит/с, если
 важны детали в тёмных HDR-сценах и не пугают просадки до 40 кадров в самых тяжёлых моментах. Если задержка важнее чёткости,
 1440p декодируется за 7 мс вместо 13, а до панели телевизор масштабирует сам.
+
+**Настройки телевизора.** Фон телевизора стоит кадров и градусов, поэтому: отключить голосовое управление без пульта
+(Настройки → Аккаунты и вход → аккаунт → Google Assistant → «Микрофон без рук» выкл.; кнопка микрофона на пульте продолжит
+работать); режим изображения для приложений здесь только Стандартный, Спорт, Filmmaker и Кино, игрового режима и ALLM для
+приложений нет, поэтому Filmmaker как режим с минимальной обработкой, в разделе Чёткость выключить суперразрешение, в разделе
+Движение поставить чёткость движения на минимум или выключить; закрывать перед стримом браузер и другие фоновые приложения
+(Настройки → Приложения → приложение → Остановить); в параметрах разработчика, если они включены, убедиться, что «Не сохранять
+действия» выключено, а «Лимит фоновых процессов» при желании поставить «Не более 2»; и дать телевизору воздух сзади: после
+часа 4K HDR SoC держится на 76–82 °C, и прошивка сама режет декодер, а яркость панели меняет это всего на градус.
+Скриншоты меню на английском лежат в `docs/tv/`.
+
