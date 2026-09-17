@@ -1321,6 +1321,11 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         if (event.isMetaPressed()) {
             modifier |= KeyboardPacket.MODIFIER_META;
         }
+        if (event.getKeyCode() == KeyEvent.KEYCODE_PLUS) {
+            // The host protocol has a single US =/+ virtual key, so Android's semantic plus key needs Shift
+            // (upstream moonlight-android b9c5eddd)
+            modifier |= KeyboardPacket.MODIFIER_SHIFT;
+        }
         return modifier;
     }
 
