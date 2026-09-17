@@ -82,6 +82,13 @@ One more thing the numbers depend on: after about an hour of continuous 4K HDR t
 frames per second with either client while still receiving 60, and fifteen minutes of idle brought it back to 60. All figures
 here are from a rested TV.
 
+What else runs on the TV matters as much as the client. In one session the frames on screen came in waves, about 40 per
+second for 20 seconds every 90 seconds, while 60 kept arriving from the network and the socket dropped nothing: Google
+Assistant's hands-free "Hey Google" detection was using a quarter of a core the whole time, a browser and the TV settings
+sat in memory, the kernel was stalling on memory reclaim 250 times a second and the SoC ran at 78–80 °C. With hands-free
+detection switched off and the background apps closed, the same stream held 60 in 86 % of samples instead of 48 %, and the
+SoC ran two degrees cooler. Hands-free detection is turned off in the Assistant settings or with the TV's microphone switch.
+
 ## Compared with the official Artemis 20.2.6
 
 Same TV, same PC, same settings (4K60 HEVC HDR, 100 Mbps, lowest-latency pacing). Artemis 20.2.6 is the release this fork
@@ -180,7 +187,13 @@ Artemis собраны как тот же пакет, поэтому у обои
 упираются в декодер, в более раннем прогоне 5 из 22 против 10 из 22. В игре разрыв был больше, 40–51 кадр против ровных 60, но
 частота хоста там не записывалась. Вибрация у Artemis идёт через системный стек, который перезагружает этот телевизор. Ещё
 одно наблюдение: примерно через час непрерывного 4K HDR декодер этого телевизора начал выдавать 45–50 кадров в секунду с любым
-клиентом, а после пятнадцати минут простоя вернулся к 60; все цифры сняты на отдохнувшем телевизоре.
+клиентом, а после пятнадцати минут простоя вернулся к 60; все цифры сняты на отдохнувшем телевизоре. Фоновая нагрузка телевизора влияет не меньше клиента: в одной
+сессии кадры на экране шли волнами, около 40 в секунду по 20 секунд каждые полторы минуты, хотя из сети приходили все 60 и
+сокет ничего не терял. Причина: Google Assistant с распознаванием «Окей, Google» без пульта постоянно занимал четверть ядра,
+в памяти сидели браузер и настройки телевизора, ядро 250 раз в секунду останавливалось на освобождение памяти, SoC 78–80 °C.
+После отключения голосового управления без пульта и закрытия фоновых приложений тот же стрим держал 60 кадров в 86 % замеров
+вместо 48 %, а SoC стал на два градуса холоднее. Голосовое управление без пульта выключается в настройках Assistant или
+переключателем микрофона на телевизоре.
 
 **Какой битрейт ставить для 4K60 HDR.** 100 Мбит/с по умолчанию: картинка практически без потерь, 60 кадров держатся почти во
 всех сценах. 60 Мбит/с, если нужна гарантированная плавность в любой сцене ценой чуть более мягкой картинки. 120 Мбит/с, если
