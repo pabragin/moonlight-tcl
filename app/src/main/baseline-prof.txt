@@ -1,0 +1,33 @@
+# Baseline profile for the TCL build. AGP compiles this into assets/dexopt/baseline.prof and ART
+# uses it to AOT-compile these methods at install or the next background dexopt, instead of
+# interpreting them until the JIT catches up. Startup path first, then everything a stream touches.
+HSPLcom/limelight/ArtemisApplication;->**(**)**
+HSPLcom/limelight/PcView;->**(**)**
+HSPLcom/limelight/PcView$**;->**(**)**
+HSPLcom/limelight/AppView;->**(**)**
+HSPLcom/limelight/AppView$**;->**(**)**
+HSPLcom/limelight/Game;->**(**)**
+HSPLcom/limelight/Game$**;->**(**)**
+HSPLcom/limelight/GameMenu;->**(**)**
+HSPLcom/limelight/binding/video/**;->**(**)**
+HSPLcom/limelight/binding/audio/**;->**(**)**
+HSPLcom/limelight/binding/input/**;->**(**)**
+HSPLcom/limelight/binding/crypto/**;->**(**)**
+HSPLcom/limelight/nvstream/**;->**(**)**
+HSPLcom/limelight/computers/**;->**(**)**
+HSPLcom/limelight/preferences/PreferenceConfiguration;->**(**)**
+HSPLcom/limelight/profiles/**;->**(**)**
+HSPLcom/limelight/ui/**;->**(**)**
+HSPLcom/limelight/utils/**;->**(**)**
+HSPLcom/limelight/grid/**;->**(**)**
+Lcom/limelight/ArtemisApplication;
+Lcom/limelight/PcView;
+Lcom/limelight/AppView;
+Lcom/limelight/Game;
+Lcom/limelight/binding/video/MediaCodecDecoderRenderer;
+Lcom/limelight/binding/video/MediaCodecHelper;
+Lcom/limelight/binding/audio/AAudioRenderer;
+Lcom/limelight/binding/input/ControllerHandler;
+Lcom/limelight/binding/input/BluetoothHidRumble;
+Lcom/limelight/nvstream/NvConnection;
+Lcom/limelight/nvstream/jni/MoonBridge;

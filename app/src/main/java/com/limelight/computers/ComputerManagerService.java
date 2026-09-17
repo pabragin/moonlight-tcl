@@ -945,12 +945,3 @@ class PollingTuple {
     }
 }
 
-class ReachabilityTuple {
-    public final String reachableAddress;
-    public final ComputerDetails computer;
-
-    public ReachabilityTuple(ComputerDetails computer, String reachableAddress) {
-        this.computer = computer;
-        this.reachableAddress = reachableAddress;
-    }
-}

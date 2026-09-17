@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = {34})
-public class StreamViewCommitTextTest {
+public class StreamContainerCommitTextTest {
     private Context ctx;
 
     @Before
@@ -28,8 +28,8 @@ public class StreamViewCommitTextTest {
 
     @Test
     public void commitText_isForwarded_whenEnabled() {
-        StreamView view = new StreamView(ctx);
-        StreamView.InputCallbacks cb = Mockito.mock(StreamView.InputCallbacks.class);
+        StreamContainer view = new StreamContainer(ctx, null);
+        StreamContainer.InputCallbacks cb = Mockito.mock(StreamContainer.InputCallbacks.class);
         view.setInputCallbacks(cb);
         view.setCommitTextEnabled(true);
 
@@ -44,8 +44,8 @@ public class StreamViewCommitTextTest {
 
     @Test
     public void commitText_notForwarded_whenDisabled() {
-        StreamView view = new StreamView(ctx);
-        StreamView.InputCallbacks cb = Mockito.mock(StreamView.InputCallbacks.class);
+        StreamContainer view = new StreamContainer(ctx, null);
+        StreamContainer.InputCallbacks cb = Mockito.mock(StreamContainer.InputCallbacks.class);
         view.setInputCallbacks(cb);
         view.setCommitTextEnabled(false);
 

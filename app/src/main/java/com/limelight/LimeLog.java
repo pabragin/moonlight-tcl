@@ -5,7 +5,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 public class LimeLog {
-    private static final Logger LOGGER = Logger.getLogger(LimeLog.class.getName());
+    // A literal tag: with obfuscation on, LimeLog.class.getName() would turn the logcat tag into "y0.z"
+    private static final Logger LOGGER = Logger.getLogger("com.limelight.LimeLog");
 
     // Chatty diagnostics (device dumps, polling, periodic counters) only reach logcat in debug builds
     private static volatile boolean verbose;

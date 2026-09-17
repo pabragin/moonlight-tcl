@@ -23,19 +23,6 @@
     <requestFocus />
     </com.limelight.ui.StreamContainer>
 
-<!--    <com.limelight.ui.ApertureViewGroup-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        app:aperture_color1="#5CF950"-->
-<!--        android:layout_gravity="center"-->
-<!--        android:padding="5dp"-->
-<!--        app:aperture_color2="#FC9595"-->
-<!--        app:aperture_border_width="10dp"-->
-<!--        app:aperture_border_angle="24dp"-->
-<!--        app:aperture_duration="6000"-->
-<!--        app:aperture_middle_color="#6CD2F8">-->
-<!--    </com.limelight.ui.ApertureViewGroup>-->
-
     <TextView
         android:id="@+id/notificationOverlay"
         android:layout_width="wrap_content"

@@ -2,16 +2,18 @@
 <resources>
 
     <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-
+        Base application theme. minSdk is 34, so the former res/values-v24 and res/values-v29
+        overrides live here now. The parent is AppCompat; the colors are the Material 3 dark palette
+        the Material3 theme gave the app before the Material library was dropped.
     -->
-    <style name="AppBaseTheme" parent="Theme.MaterialComponents.NoActionBar">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
+    <style name="AppBaseTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#D0BCFF</item>
+        <item name="colorPrimaryDark">#381E72</item>
+        <item name="colorAccent">#D0BCFF</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Avoid some systems like MIUI which break the visibility of games title -->
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 
     <!-- Application theme. -->
@@ -26,8 +28,8 @@
     </style>
 
     <style name="StreamBaseTheme" parent="AppBaseTheme">
-        <!-- Transparent streaming background to avoid extra overdraw -->
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <!-- Black, not transparent: avoids a see-through window while switching apps -->
+        <item name="android:windowBackground">@android:color/black</item>
     </style>
 
     <!-- Stream activity theme -->
@@ -49,20 +51,9 @@
         <item name="colorButtonNormal">@android:color/white</item>
     </style>
 
-    <style name="SettingsTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+    <!-- Settings share the app theme (this is what the API 29+ override did) -->
+    <style name="SettingsTheme" parent="AppTheme">
     </style>
 
-    <declare-styleable name="ApertureViewGroup">
-        <attr name="aperture_color1" format="color" />
-        <attr name="aperture_color2" format="color" />
-        <attr name="aperture_border_width" format="dimension" />
-        <attr name="aperture_border_angle" format="dimension" />
-        <attr name="aperture_duration" format="integer" />
-        <attr name="aperture_middle_color" format="color" />
-    </declare-styleable>
 
 </resources>

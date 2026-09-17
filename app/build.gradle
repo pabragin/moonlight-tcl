@@ -24,7 +24,7 @@ android {
                 "obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"
 
         versionName "20.2.10-tcl3"
-        versionCode = 98
+        versionCode = 99
 
         // Generate native debug symbols to allow Google Play to symbolicate our native crashes
         ndk.debugSymbolLevel = 'FULL'
@@ -64,23 +64,24 @@ android {
 
     packaging {
         resources {
-            pickFirsts.add('META-INF/versions/9/OSGI-INF/MANIFEST.MF')
-            // BouncyCastle 1.85 ships the same LICENSE/NOTICE in bcprov, bcpkix and bcutil
-            pickFirsts.add('META-INF/LICENSE.md')
-            pickFirsts.add('META-INF/NOTICE.md')
-            // BouncyCastle data files nothing here uses: the post-quantum Picnic tables alone are 1.2 MB
-            // compressed, the CertPathReviewer message bundles belong to code the shrinker drops anyway
-            excludes.add('org/bouncycastle/pqc/**')
-            excludes.add('org/bouncycastle/x509/CertPathReviewerMessages*.properties')
-            excludes.add('org/bouncycastle/pkix/CertPathReviewerMessages*.properties')
+            // Metadata the runtime never reads: Kotlin builtins (kotlin-reflect only), library license
+            // texts, dependency version markers, the coroutines debug probe
+            excludes.add('kotlin/**')
+            excludes.add('META-INF/*.version')
+            excludes.add('META-INF/*.kotlin_module')
+            excludes.add('META-INF/LICENSE*')
+            excludes.add('META-INF/NOTICE*')
+            excludes.add('META-INF/androidx/**')
+            excludes.add('META-INF/versions/**')
+            excludes.add('DebugProbesKt.bin')
         }
     }
 
     androidResources {
-        // Only the languages this app is translated into; AndroidX and Material otherwise add their
-        // own strings for some 60 more locales to resources.arsc
-        localeFilters += ["en", "bg", "ckb", "cs", "de", "el", "eo", "es", "fa", "fr", "hu", "in", "it", "iw", "ja", "ko",
-                          "nb-rNO", "nl", "pl", "pt", "pt-rBR", "ro", "ru", "sv", "tr", "uk", "vi", "zh-rCN", "zh-rTW"]
+        // The languages with a (near) complete translation: ru and both Chinese variants cover ~90% of
+        // the strings, fr and vi ~77%, every other locale under half and falls back to English mid-screen.
+        // res/values/arrays.xml (language picker) lists the same set; add a locale in both places.
+        localeFilters += ["en", "ru", "zh-rCN", "zh-rTW", "fr", "vi"]
     }
 
     buildTypes {
@@ -89,7 +90,7 @@ android {
             resValue "string", "app_label", "Moonlight TCL (debug)"
 
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release {
             // To whomever is releasing/using an APK in release mode with
@@ -130,7 +131,9 @@ android {
             minifyEnabled true
             // Drop resources nothing references any more (drawables, layouts, strings in every locale)
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // The -optimize variant lets R8 inline, merge classes and remove unused arguments; the plain
+            // proguard-android.txt carries -dontoptimize and cost 1.4 MB of dex
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -153,17 +156,16 @@ android {
 }
 
 dependencies {
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.85.2'
-    implementation 'org.bouncycastle:bcpkix-jdk18on:1.85'
+    // No BouncyCastle: the client certificate is built by ClientCertificateGenerator with java.security,
+    // pairing uses javax.crypto. No Gson: profiles and shortcut files go through org.json. No Material:
+    // the theme is AppCompat and the two profile buttons are AppCompat widgets.
     implementation 'org.jcodec:jcodec:0.2.5'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'com.google.code.gson:gson:2.14.0'
     implementation 'androidx.annotation:annotation:1.10.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'com.google.android.material:material:1.13.0'
     // Reaches the hidden BluetoothHidHost API for gamepad rumble over the Bluetooth stack (BluetoothHidRumble)
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:6.1'
 

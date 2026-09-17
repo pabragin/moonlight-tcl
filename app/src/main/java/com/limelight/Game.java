@@ -12,7 +12,6 @@ import com.limelight.binding.input.KeyboardTranslator;
 import com.limelight.binding.input.capture.InputCaptureManager;
 import com.limelight.binding.input.capture.InputCaptureProvider;
 import com.limelight.binding.input.driver.UsbDriverService;
-import com.limelight.binding.input.evdev.EvdevListener;
 import com.limelight.binding.input.touch.TouchContext;
 import com.limelight.binding.input.touch.TrackpadContext;
 import com.limelight.binding.video.CrashListener;
@@ -31,7 +30,6 @@ import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.preferences.GlPreferences;
 import com.limelight.preferences.PreferenceConfiguration;
 import com.limelight.profiles.ProfilesManager;
-import com.limelight.ui.ExternalControllerView;
 import com.limelight.ui.GameGestures;
 import com.limelight.ui.StreamContainer;
 import com.limelight.utils.Dialog;
@@ -57,9 +55,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Outline;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.SystemClock;
@@ -86,7 +82,6 @@ import android.view.View;
 import android.view.View.OnGenericMotionListener;
 import android.view.View.OnSystemUiVisibilityChangeListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewOutlineProvider;
 import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
@@ -125,9 +120,8 @@ import android.view.ViewGroup;
 
 
 public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
-        OnGenericMotionListener, OnTouchListener, NvConnectionListener, EvdevListener,
+        OnGenericMotionListener, OnTouchListener, NvConnectionListener,
         OnSystemUiVisibilityChangeListener, GameGestures, StreamContainer.InputCallbacks,
-        ExternalControllerView.InputCallbacks,
         PerfOverlayListener, UsbDriverService.UsbDriverStateListener, View.OnKeyListener {
     public static Game instance;
 
@@ -2889,73 +2883,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     }
 
     @Override
-    public void mouseMove(int deltaX, int deltaY) {
-        conn.sendMouseMove((short) deltaX, (short) deltaY);
-    }
-
-    @Override
-    public void mouseButtonEvent(int buttonId, boolean down) {
-        byte buttonIndex;
-
-        switch (buttonId)
-        {
-            case EvdevListener.BUTTON_LEFT:
-                buttonIndex = MouseButtonPacket.BUTTON_LEFT;
-                break;
-            case EvdevListener.BUTTON_MIDDLE:
-                buttonIndex = MouseButtonPacket.BUTTON_MIDDLE;
-                break;
-            case EvdevListener.BUTTON_RIGHT:
-                buttonIndex = MouseButtonPacket.BUTTON_RIGHT;
-                break;
-            case EvdevListener.BUTTON_X1:
-                buttonIndex = MouseButtonPacket.BUTTON_X1;
-                break;
-            case EvdevListener.BUTTON_X2:
-                buttonIndex = MouseButtonPacket.BUTTON_X2;
-                break;
-            default:
-                LimeLog.warning("Unhandled button: "+buttonId);
-                return;
-        }
-
-        if (down) {
-            conn.sendMouseButtonDown(buttonIndex);
-        }
-        else {
-            conn.sendMouseButtonUp(buttonIndex);
-        }
-    }
-
-    @Override
-    public void mouseVScroll(byte amount) {
-        conn.sendMouseScroll(amount);
-    }
-
-    @Override
-    public void mouseHScroll(byte amount) {
-        conn.sendMouseHScroll(amount);
-    }
-
-    @Override
-    public void keyboardEvent(boolean buttonDown, short keyCode) {
-        short keyMap = keyboardTranslator.translate(keyCode, 0, -1);
-        if (keyMap != 0) {
-            // handleSpecialKeys() takes the Android keycode
-            if (handleSpecialKeys(keyCode, buttonDown)) {
-                return;
-            }
-
-            if (buttonDown) {
-                conn.sendKeyboardInput(keyMap, KeyboardPacket.KEY_DOWN, getModifierState(), (byte)0);
-            }
-            else {
-                conn.sendKeyboardInput(keyMap, KeyboardPacket.KEY_UP, getModifierState(), (byte)0);
-            }
-        }
-    }
-
-    @Override
     public void onSystemUiVisibilityChange(int visibility) {
         // Don't do anything if we're not connected
         if (!connected) {
@@ -3094,12 +3021,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
     }
 
-    public void hideGameMenu() {
-        if (gameMenuCallbacks != null) {
-            gameMenuCallbacks.hideMenu();
-        }
-    }
-
     private void updateFloatingButtonVisibility(boolean show) {
         floatingMenuButton.setVisibility(show ? View.VISIBLE : View.GONE);
     }
@@ -3110,23 +3031,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
     }
 
-
-    // 设置surfaceView的圆角 setSurfaceviewCorner(UiHelper.dpToPx(this,24));
-    private void setSurfaceviewCorner(final float radius) {
-
-        streamContainer.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                Rect rect = new Rect();
-                view.getGlobalVisibleRect(rect);
-                int leftMargin = 0;
-                int topMargin = 0;
-                Rect selfRect = new Rect(leftMargin, topMargin, rect.right - rect.left - leftMargin, rect.bottom - rect.top - topMargin);
-                outline.setRoundRect(selfRect, radius);
-            }
-        });
-        streamContainer.setClipToOutline(true);
-    }
 
     @Override
     public boolean handleCommitText(CharSequence text) {

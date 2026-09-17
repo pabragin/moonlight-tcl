@@ -80,16 +80,25 @@
         android:src="@drawable/ic_add"
         style="?android:attr/borderlessButtonStyle"/>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/profilesButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
+        android:minWidth="56dp"
+        android:minHeight="56dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="24dp"
-        android:layout_marginEnd="24dp"
-        android:contentDescription="@string/profile_manager_choose_profile"
         android:layout_margin="16dp"
-        app:icon="@drawable/ic_profiles" />
+        android:background="@drawable/profile_pill_button"
+        android:contentDescription="@string/profile_manager_choose_profile"
+        android:elevation="6dp"
+        android:gravity="center"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textAllCaps="false"
+        android:textColor="#EADDFF"
+        android:textSize="14sp"
+        app:drawableStartCompat="@drawable/ic_profiles_24"
+        app:drawableTint="#EADDFF" />
 
 </RelativeLayout>

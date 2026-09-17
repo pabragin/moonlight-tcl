@@ -579,26 +579,6 @@ public class NvHTTP {
                 PairState.PAIRED : PairState.NOT_PAIRED;
     }
     
-    public long getMaxLumaPixelsH264(String serverInfo) throws XmlPullParserException, IOException {
-        // MaxLumaPixelsH264 wasn't present on old GFE versions
-        String str = getXmlString(serverInfo, "MaxLumaPixelsH264", false);
-        if (str != null) {
-            return Long.parseLong(str);
-        } else {
-            return 0;
-        }
-    }
-    
-    public long getMaxLumaPixelsHEVC(String serverInfo) throws XmlPullParserException, IOException {
-        // MaxLumaPixelsHEVC wasn't present on old GFE versions
-        String str = getXmlString(serverInfo, "MaxLumaPixelsHEVC", false);
-        if (str != null) {
-            return Long.parseLong(str);
-        } else {
-            return 0;
-        }
-    }
-
     // Possible meaning of bits
     // Bit 0: H.264 Baseline
     // Bit 1: H.264 High
@@ -617,11 +597,6 @@ public class NvHTTP {
         }
     }
     
-    public String getGpuType(String serverInfo) throws XmlPullParserException, IOException {
-        // ServerCodecModeSupport wasn't present on old GFE versions
-        return getXmlString(serverInfo, "gputype", false);
-    }
-
     public String getGfeVersion(String serverInfo) throws XmlPullParserException, IOException {
         // ServerCodecModeSupport wasn't present on old GFE versions
         return getXmlString(serverInfo, "GfeVersion", false);
@@ -681,23 +656,11 @@ public class NvHTTP {
      * @see #getAppByName(String) for alternative.
      * @return app details, or null if no app with that ID exists
      */
-    public NvApp getAppById(int appId) throws IOException, XmlPullParserException {
-        LinkedList<NvApp> appList = getAppList();
-        for (NvApp appFromList : appList) {
-            if (appFromList.getAppId() == appId) {
-                return appFromList;
-            }
-        }
-        return null;
-    }
-
     /**
      * Get an app by name
      * NOTE: It is perfectly valid for multiple apps to have the same name,
      * this function will only return the first one it finds.
-     * Consider using getAppById instead.
      * @param appName The name of the app
-     * @see #getAppById(int) for alternative.
      * @return app details, or null if no app with that name exists
      */
     public NvApp getAppByName(String appName) throws IOException, XmlPullParserException {

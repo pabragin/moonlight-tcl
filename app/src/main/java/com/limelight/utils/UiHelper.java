@@ -19,6 +19,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,16 @@ public class UiHelper {
 
     public static void notifyStreamEnded(Context context) {
         setGameModeStatus(context, false, false);
+    }
+
+    /**
+     * The profile button shows only its icon while no profile is active and icon plus name
+     * otherwise, the way the ExtendedFloatingActionButton it replaced shrank and extended.
+     */
+    public static void showProfileName(Button button, String activeProfileName) {
+        button.setText(activeProfileName);
+        float density = button.getResources().getDisplayMetrics().density;
+        button.setCompoundDrawablePadding(activeProfileName.isEmpty() ? 0 : Math.round(8 * density));
     }
 
     public static void setLocale(Activity activity)

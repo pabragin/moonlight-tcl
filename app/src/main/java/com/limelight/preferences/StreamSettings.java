@@ -45,7 +45,6 @@ import android.view.WindowInsets;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.limelight.DebugInfoActivity;
 import com.limelight.BuildConfig;
 import com.limelight.GameMenu;
@@ -909,7 +908,7 @@ public class StreamSettings extends AppCompatActivity {
             //获取适配电脑的数据库信息
 //            List<ComputerDetails> map= new ComputerDatabaseManager(context).getAllComputers();
             File file1= new File(file,"allJSON.json");
-            String jsonStr=new Gson().toJson(map);
+            String jsonStr = new JSONObject(map).toString();
             if(!FileUriUtils.writerFileString(file1,jsonStr)){
                 return null;
             }

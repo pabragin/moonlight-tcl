@@ -56,17 +56,12 @@ public class PreferenceConfiguration {
     private static final String DISABLE_TOASTS_PREF_STRING = "checkbox_disable_warnings";
     private static final String HOST_AUDIO_PREF_STRING = "checkbox_host_audio";
     private static final String DEADZONE_PREF_STRING = "seekbar_deadzone";
-    private static final String OSC_OPACITY_PREF_STRING = "seekbar_osc_opacity";
     private static final String LANGUAGE_PREF_STRING = "list_languages";
     private static final String SMALL_ICONS_PREF_STRING = "checkbox_small_icon_mode";
     private static final String MULTI_CONTROLLER_PREF_STRING = "checkbox_multi_controller";
     static final String AUDIO_CONFIG_PREF_STRING = "list_audio_config";
     private static final String USB_DRIVER_PREF_SRING = "checkbox_usb_driver";
     private static final String VIDEO_FORMAT_PREF_STRING = "video_format";
-    private static final String ONSCREEN_CONTROLLER_PREF_STRING = "checkbox_show_onscreen_controls";
-    private static final String CHECKBOX_HIDE_OSC_WHEN_HAS_GAMEPAD = "checkbox_hide_osc_when_has_gamepad";
-    private static final String ONLY_L3_R3_PREF_STRING = "checkbox_only_show_L3R3";
-    private static final String SHOW_GUIDE_BUTTON_PREF_STRING = "checkbox_show_guide_button";
     private static final String LEGACY_DISABLE_FRAME_DROP_PREF_STRING = "checkbox_disable_frame_drop";
     private static final String ENABLE_HDR_PREF_STRING = "checkbox_enable_hdr";
     private static final String ENABLE_PERF_OVERLAY_STRING = "checkbox_enable_perf_overlay";
@@ -76,11 +71,9 @@ public class PreferenceConfiguration {
     private static final String ANALOG_SCROLLING_PREF_STRING = "analog_scrolling";
     private static final String MOUSE_NAV_BUTTONS_STRING = "checkbox_mouse_nav_buttons";
     static final String UNLOCK_FPS_STRING = "checkbox_unlock_fps";
-    private static final String VIBRATE_OSC_PREF_STRING = "checkbox_vibrate_osc";
     private static final String FLIP_FACE_BUTTONS_PREF_STRING = "checkbox_flip_face_buttons";
     private static final String LATENCY_TOAST_PREF_STRING = "checkbox_enable_post_stream_toast";
     private static final String FRAME_PACING_PREF_STRING = "frame_pacing";
-    private static final String LOW_LATENCY_FRAME_BALANCE_PREF_STRING = "pref_low_latency_frame_balance";
     private static final String ABSOLUTE_MOUSE_MODE_PREF_STRING = "checkbox_absolute_mouse_mode";
     private static final String ENABLE_AUDIO_FX_PREF_STRING = "checkbox_enable_audiofx";
     private static final String AAUDIO_PREF_STRING = "checkbox_aaudio_renderer";
@@ -94,7 +87,6 @@ public class PreferenceConfiguration {
     private static final String LATENCY_TEST_PREF_STRING = "checkbox_latency_test";
     private static final String PREVENT_PACKET_LOSS_PREF_STRING = "checkbox_prevent_packet_loss";
 
-    private static final String LIST_ONSCREEN_KEYBOARD_ALIGN_MODE = "list_onscreen_keyboard_align_mode";
 
     private static final String CHECKBOX_ENABLE_BATTERY_REPORT = "checkbox_gamepad_enable_battery_report";
     private static final String CHECKBOX_FORCE_QWERTY = "checkbox_force_qwerty";
@@ -105,7 +97,6 @@ public class PreferenceConfiguration {
     private static final String CHECKBOX_SMART_CLIPBOARD_SYNC_TOAST = "checkbox_smart_clipboard_sync_toast";
     private static final String CHECKBOX_HIDE_CLIPBOARD_CONTENT = "checkbox_hide_clipboard_content";
 
-    private static final String CHECKBOX_ENABLE_STICKY_MODIFIER_KEY_VIRTUAL_KEYBOARD = "checkbox_enable_sticky_modifier_key_virtual_keyboard";
 
     private static final String CHECKBOX_ENABLE_QUIT_DIALOG = "checkbox_enable_quit_dialog";
 
@@ -114,13 +105,10 @@ public class PreferenceConfiguration {
 
     //竖屏模式
     //屏幕特殊按键
-    private static final String CHECKBOX_ENABLE_KEYBOARD = "checkbox_enable_keyboard";
 
     //屏幕特殊按键 震动
-    private static final String CHECKBOX_ENABLE_KEYBOARD_VIBRATE = "checkbox_vibrate_keyboard";
 
     //自动摇杆
-    private static final String CHECKBOX_CHECKBOX_ENABLE_ANALOG_STICK_NEW = "checkbox_enable_analog_stick_new";
 
     //触控屏幕灵敏度
     private static final String SEEKBAR_TRACKPAD_SENSITIVITY_X = "seekbar_trackpad_sensitivity_x";
@@ -143,16 +131,11 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_DISABLE_TOASTS = false;
     private static final boolean DEFAULT_HOST_AUDIO = false;
     private static final int DEFAULT_DEADZONE = 5;
-    private static final int DEFAULT_OPACITY = 90;
     public static final String DEFAULT_LANGUAGE = "default";
     private static final boolean DEFAULT_MULTI_CONTROLLER = true;
     private static final boolean DEFAULT_USB_DRIVER = true;
     private static final String DEFAULT_VIDEO_FORMAT = "auto";
 
-    private static final boolean DEFAULT_ONSCREEN_CONTROLLER = false;
-    private static final boolean DEFAULT_HIDE_OSC_WHEN_HAS_GAMEPAD = true;
-    private static final boolean ONLY_L3_R3_DEFAULT = false;
-    private static final boolean SHOW_GUIDE_BUTTON_DEFAULT = true;
     private static final boolean DEFAULT_ENABLE_HDR = true;
     private static final boolean DEFAULT_ENABLE_PERF_OVERLAY = false;
     private static final boolean DEFAULT_PERF_OVERLAY_BOTTOM = false;
@@ -163,7 +146,6 @@ public class PreferenceConfiguration {
     private static final String DEFAULT_ANALOG_STICK_FOR_SCROLLING = "right";
     private static final boolean DEFAULT_MOUSE_NAV_BUTTONS = false;
     private static final boolean DEFAULT_UNLOCK_FPS = false;
-    private static final boolean DEFAULT_VIBRATE_OSC = true;
     private static final boolean DEFAULT_FLIP_FACE_BUTTONS = false;
     private static final String DEFAULT_AUDIO_CONFIG = "2"; // Stereo
     private static final boolean DEFAULT_LATENCY_TOAST = false;
@@ -188,14 +170,12 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_SMART_CLIPBOARD_SYNC = false;
     private static final boolean DEFAULT_SMART_CLIPBOARD_SYNC_TOAST = true;
     private static final boolean DEFAULT_HIDE_CLIPBOARD_CONTENT = true;
-    private static final boolean DEFAULT_ENABLE_STICKY_MODIFIER_KEY_VIRTUAL_KEYBOARD = true;
     private static final int DEFAULT_TRACKPAD_SENSITIVITY_X = 100;
     private static final int DEFAULT_TRACKPAD_SENSITIVITY_Y = 100;
     private static final boolean DEFAULT_TRACKPAD_DRAG_DROP_VIBRATION = false;
     private static final int DEFAULT_TRACKPAD_DRAG_DROP_THRESHOLD = 250;
     private static final boolean DEFAULT_TRACKPAD_SWAP_AXIS = false;
     private static final boolean DEFAULT_ENABLE_COMMIT_TEXT = false;
-    private static final String DEFAULT_ONSCREEN_KEYBOARD_ALIGN_MODE = "center";
 
     private static final boolean DEFAULT_FULL_SCREEN = true;
 
@@ -210,12 +190,10 @@ public class PreferenceConfiguration {
     public static final String RES_1080P = "1920x1080";
     public static final String RES_1440P = "2560x1440";
     public static final String RES_4K = "3840x2160";
-    public static final String RES_NATIVE = "Native";
 
     public int width, height, bitrate;
     public float fps;
 //    public String customBitrate;
-    public boolean forceTightThresholds = false; // default off
     public String customResolution;
     public String customRefreshRate;
     public int meteredBitrate;
@@ -299,7 +277,6 @@ public class PreferenceConfiguration {
     public AnalogStickForScrolling analogStickForScrolling;
     public boolean mouseNavButtons;
     public boolean unlockFps;
-    public boolean preferLowerDelays;
 
     public MoonBridge.AudioConfiguration audioConfiguration;
     public int framePacing;
@@ -533,12 +510,6 @@ public class PreferenceConfiguration {
         return prefs.getString(FRAME_PACING_PREF_STRING, DEFAULT_FRAME_PACING);
     }
 
-    
-    public static boolean getPreferLowerDelays(Context context) {
-        SharedPreferences prefs = ProfilesManager.getInstance().getOverlayingSharedPreferences(context);
-        // default true: favor lower delay unless user opts out
-        return prefs.getBoolean(LOW_LATENCY_FRAME_BALANCE_PREF_STRING, false);
-    }
 private static int getFramePacingValue(Context context) {
         SharedPreferences prefs = ProfilesManager.getInstance().getOverlayingSharedPreferences(context);
 
@@ -740,7 +711,6 @@ private static int getFramePacingValue(Context context) {
 
         config.videoFormat = getVideoFormatValue(context);
         config.framePacing = getFramePacingValue(context);
-        config.preferLowerDelays = getPreferLowerDelays(context);
 
 
         String warpFactorStr = prefs.getString(FRAME_PACING_PREF_STRING, "");

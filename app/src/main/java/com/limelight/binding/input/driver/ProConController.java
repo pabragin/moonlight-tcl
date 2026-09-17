@@ -18,18 +18,12 @@ import java.util.Locale;
 public class ProConController extends AbstractController {
 
     private static final int PACKET_SIZE = 64;
-    private static final byte[] RUMBLE_NEUTRAL = {0x00, 0x01, 0x40, 0x40};
-    private static final byte[] RUMBLE = {0x74, (byte) 0xBE, (byte) 0xBD, 0x6F};
-    private static final int FACTORY_IMU_CALIBRATION_OFFSET = 0x6020;
     private static final int FACTORY_LS_CALIBRATION_OFFSET = 0x603D;
     private static final int FACTORY_RS_CALIBRATION_OFFSET = 0x6046;
-    private static final int USER_IMU_MAGIC_OFFSET = 0x8026;
-    private static final int USER_IMU_CALIBRATION_OFFSET = 0x8028;
     private static final int USER_LS_MAGIC_OFFSET = 0x8010;
     private static final int USER_LS_CALIBRATION_OFFSET = 0x8012;
     private static final int USER_RS_MAGIC_OFFSET = 0x801B;
     private static final int USER_RS_CALIBRATION_OFFSET = 0x801D;
-    private static final int IMU_CALIBRATION_LENGTH = 24;
     private static final int STICK_CALIBRATION_LENGTH = 9;
     private static final int COMMAND_RETRIES = 10;
 

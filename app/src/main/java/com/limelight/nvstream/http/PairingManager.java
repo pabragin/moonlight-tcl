@@ -2,9 +2,6 @@ package com.limelight.nvstream.http;
 
 import android.widget.Toast;
 
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.engines.AESLightEngine;
-import org.bouncycastle.crypto.params.KeyParameter;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -16,6 +13,8 @@ import java.security.*;
 import java.security.cert.*;
 import java.util.Arrays;
 import java.util.Locale;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 public class PairingManager {
 
@@ -136,30 +135,25 @@ public class PairingManager {
         }
     }
 
-    private static byte[] performBlockCipher(BlockCipher blockCipher, byte[] input) {
-        int blockSize = blockCipher.getBlockSize();
-        int blockRoundedSize = (input.length + (blockSize - 1)) & ~(blockSize - 1);
-
-        byte[] blockRoundedInputData = Arrays.copyOf(input, blockRoundedSize);
-        byte[] blockRoundedOutputData = new byte[blockRoundedSize];
-
-        for (int offset = 0; offset < blockRoundedSize; offset += blockSize) {
-            blockCipher.processBlock(blockRoundedInputData, offset, blockRoundedOutputData, offset);
+    private static byte[] performBlockCipher(int mode, byte[] aesKey, byte[] input) {
+        try {
+            // AES-128 ECB over the input padded with zeros to a whole number of blocks
+            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+            cipher.init(mode, new SecretKeySpec(aesKey, "AES"));
+            int blockSize = cipher.getBlockSize();
+            int blockRoundedSize = (input.length + (blockSize - 1)) & ~(blockSize - 1);
+            return cipher.doFinal(Arrays.copyOf(input, blockRoundedSize));
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
         }
-
-        return blockRoundedOutputData;
     }
     
     private static byte[] decryptAes(byte[] encryptedData, byte[] aesKey) {
-        BlockCipher aesEngine = new AESLightEngine();
-        aesEngine.init(false, new KeyParameter(aesKey));
-        return performBlockCipher(aesEngine, encryptedData);
+        return performBlockCipher(Cipher.DECRYPT_MODE, aesKey, encryptedData);
     }
     
     private static byte[] encryptAes(byte[] plaintextData, byte[] aesKey) {
-        BlockCipher aesEngine = new AESLightEngine();
-        aesEngine.init(true, new KeyParameter(aesKey));
-        return performBlockCipher(aesEngine, plaintextData);
+        return performBlockCipher(Cipher.ENCRYPT_MODE, aesKey, plaintextData);
     }
     
     private static byte[] generateAesKey(PairingHashAlgorithm hashAlgo, byte[] keyData) {

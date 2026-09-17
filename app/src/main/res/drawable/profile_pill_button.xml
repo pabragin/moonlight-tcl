@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill background for the profile and add-profile buttons: what the Material FAB looked like
+     (Material 3 primary container, 28dp corners) with a white ring when a TV remote focuses it -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#66FFFFFF">
+    <item>
+        <selector>
+            <item android:state_focused="true">
+                <shape android:shape="rectangle">
+                    <corners android:radius="28dp" />
+                    <solid android:color="#4F378B" />
+                    <stroke
+                        android:width="3dp"
+                        android:color="#FFFFFF" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="28dp" />
+                    <solid android:color="#4F378B" />
+                </shape>
+            </item>
+        </selector>
+    </item>
+</ripple>

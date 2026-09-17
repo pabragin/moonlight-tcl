@@ -133,8 +133,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     private final Handler backgroundThreadHandler;
     // Rumble for Bluetooth gamepads through the Bluetooth stack (null: rumble off, no permission, Bluetooth off)
     private final BluetoothHidRumble btHidRumble;
-    // TVs whose input stack crashes on InputDevice vibration: external pads never use InputDevice vibrators
-    private boolean hasGameController;
     private boolean stopped = false;
 
     private final PreferenceConfiguration prefConfig;
@@ -166,24 +164,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         }
 
         int deadzonePercentage = prefConfig.deadzonePercentage;
-
-        int[] ids = InputDevice.getDeviceIds();
-        for (int id : ids) {
-            InputDevice dev = InputDevice.getDevice(id);
-            if (dev == null) {
-                // This device was removed during enumeration
-                continue;
-            }
-            if ((dev.getSources() & InputDevice.SOURCE_JOYSTICK) != 0 ||
-                    (dev.getSources() & InputDevice.SOURCE_GAMEPAD) != 0) {
-                // This looks like a gamepad, but we'll check X and Y to be sure
-                if (getMotionRangeForJoystickAxis(dev, MotionEvent.AXIS_X) != null &&
-                    getMotionRangeForJoystickAxis(dev, MotionEvent.AXIS_Y) != null) {
-                    // This is a gamepad
-                    hasGameController = true;
-                }
-            }
-        }
 
         this.stickDeadzone = (double)deadzonePercentage / 100.0;
 
@@ -229,10 +209,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         }
 
         return range;
-    }
-
-    public boolean hasController() {
-        return hasGameController;
     }
 
     @Override
@@ -319,13 +295,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             backgroundThreadHandler.post(btHidRumble::close);
         }
         backgroundHandlerThread.quitSafely();
-    }
-
-    public void disableSensors() {
-        for (int i = 0; i < inputDeviceContexts.size(); i++) {
-            InputDeviceContext deviceContext = inputDeviceContexts.valueAt(i);
-            deviceContext.disableSensors();
-        }
     }
 
     public void enableSensors() {
@@ -742,7 +711,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         if (getMotionRangeForJoystickAxis(dev, context.leftStickXAxis) != null &&
                 getMotionRangeForJoystickAxis(dev, context.leftStickYAxis) != null) {
             // This is a gamepad
-            hasGameController = true;
             context.hasJoystickAxes = true;
         }
 
@@ -2764,24 +2732,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         // devices, so we just send them all and deal with some duplicates.
         sendControllerInputPacket(context);
         return true;
-    }
-
-    public void reportOscState(int buttonFlags,
-                               short leftStickX, short leftStickY,
-                               short rightStickX, short rightStickY,
-                               byte leftTrigger, byte rightTrigger) {
-        defaultContext.leftStickX = leftStickX;
-        defaultContext.leftStickY = leftStickY;
-
-        defaultContext.rightStickX = rightStickX;
-        defaultContext.rightStickY = rightStickY;
-
-        defaultContext.leftTrigger = leftTrigger;
-        defaultContext.rightTrigger = rightTrigger;
-
-        defaultContext.inputMap = buttonFlags;
-
-        sendControllerInputPacket(defaultContext);
     }
 
     @Override

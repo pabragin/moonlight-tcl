@@ -1,6 +1,7 @@
-# Obfuscation is on: it takes ~0.8 MB of identifier strings out of the dex. Every class read by name at
-# runtime (Gson models, KeyMapper, the JNI bridge, the hidden-API bypass, BouncyCastle providers) is kept
-# below. Keep out/mapping-<version>.txt of each release to read stack traces.
+# Obfuscation and R8 optimizations are on (proguard-android-optimize.txt): identifiers leave the dex
+# and code gets inlined, so every class reached by name at runtime (KeyMapper reflection, the JNI
+# bridge, the hidden-API bypass) is kept below. Keep out/mapping-<version>.txt of each release to read
+# stack traces.
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
 
@@ -9,17 +10,7 @@
 # KeyMapper - keep all VK_* fields for reflection
 -keep class com.limelight.utils.KeyMapper {*;}
 
-# KeyConfigHelper - keep classes and fields for Gson
--keep class com.limelight.utils.KeyConfigHelper {*;}
--keep class com.limelight.utils.KeyConfigHelper$ShortcutFile {*;}
--keep class com.limelight.utils.KeyConfigHelper$Shortcut {*;}
-
-
-# Profiles
--keep class com.limelight.profiles.ProfilesManager$ProfilesData {*;}
--keep class com.limelight.profiles.SettingsProfile {*;}
-
-# Moonlight common
+# Moonlight common: the JNI side calls these by name
 -keep class com.limelight.nvstream.jni.* {*;}
 
 # Okio
@@ -27,22 +18,6 @@
 -dontwarn java.nio.file.*
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -dontwarn okio.**
-
-# BouncyCastle
--keep class org.bouncycastle.jcajce.provider.asymmetric.* {*;}
--keep class org.bouncycastle.jcajce.provider.asymmetric.util.* {*;}
--keep class org.bouncycastle.jcajce.provider.asymmetric.rsa.* {*;}
--keep class org.bouncycastle.jcajce.provider.digest.** {*;}
--keep class org.bouncycastle.jcajce.provider.symmetric.** {*;}
--keep class org.bouncycastle.jcajce.spec.* {*;}
--keep class org.bouncycastle.jce.** {*;}
-# The JCA provider registers its algorithm classes by string name (Provider$Service.getImplClass), so
-# whatever the shrinker keeps in these trees must also keep its name; the first obfuscated build died in
-# CertificateFactory.getInstance("X.509", "BC") with ClassNotFoundException for asymmetric.x509.CertificateFactory
--keepnames class org.bouncycastle.jcajce.provider.** {*;}
--keepnames class org.bouncycastle.jce.provider.** {*;}
--keepnames class org.bouncycastle.pqc.jcajce.provider.** {*;}
--dontwarn javax.naming.**
 
 # jMDNS
 -dontwarn javax.jmdns.impl.DNSCache
