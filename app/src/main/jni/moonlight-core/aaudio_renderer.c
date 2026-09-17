@@ -40,6 +40,11 @@ static _Atomic int lastLoggedUnderruns;
 static _Atomic int lastLoggedDropped;
 static int64_t lastStatsLogNs;
 static _Atomic bool needReopen;
+// A silent host sends no packets at all, so an empty ring is normal, not a fault. Only a gap that
+// interrupts audio that is actually playing counts as an underrun, and it counts once, not once per
+// callback: three empty bursts (~12 ms) end the current run of audio.
+#define GAP_CALLBACKS_TO_END_RUN 3
+static _Atomic int emptyCallbacks;
 static _Atomic int underruns;
 static _Atomic int dropped;
 static _Atomic int reopens;
@@ -66,8 +71,20 @@ static aaudio_data_callback_result_t dataCallback(AAudioStream* s, void* userDat
     if (n < numFrames) {
         memset(out + (size_t)n * channels, 0, (size_t)(numFrames - n) * channels * sizeof(int16_t));
         if (atomic_load(&producing)) {
-            atomic_fetch_add(&underruns, 1);
+            int empty = atomic_fetch_add(&emptyCallbacks, 1) + 1;
+            if (empty == 1) {
+                // First empty callback of this gap: audio was playing and we ran out
+                atomic_fetch_add(&underruns, 1);
+            }
+            else if (empty >= GAP_CALLBACKS_TO_END_RUN) {
+                // Long enough to be a silent host rather than a late packet; wait for the next
+                // write before calling anything an underrun again
+                atomic_store(&producing, false);
+            }
         }
+    }
+    else {
+        atomic_store(&emptyCallbacks, 0);
     }
     return AAUDIO_CALLBACK_RESULT_CONTINUE;
 }
@@ -140,6 +157,7 @@ int AAudioRenderer_Setup(int channelCount, int rate, int spf, int maxPending) {
     atomic_store(&needReopen, false);
     atomic_store(&started, false);
     atomic_store(&producing, false);
+    atomic_store(&emptyCallbacks, 0);
     atomic_store(&priorityApplied, false);
     atomic_store(&lastLoggedUnderruns, 0);
     atomic_store(&lastLoggedDropped, 0);
@@ -225,6 +243,7 @@ static void reopenLocked(void) {
     atomic_store(&readIdx, 0);
     atomic_store(&writeIdx, 0);
     atomic_store(&producing, false);
+    atomic_store(&emptyCallbacks, 0);
     if (openStreamLocked() == 0 && atomic_load(&started)) {
         AAudioStream_requestStart(stream);
     }
@@ -252,13 +271,16 @@ void AAudioRenderer_Write(const int16_t* frames, int frameCount) {
     }
     int64_t t = nowNs();
     if (t - lastStatsLogNs > 10000000000LL) {
+        // This runs on the write path, so a host that sends no audio for a while pushes the line out
+        // past its window; the elapsed time says how long the counters below actually cover
+        int windowMs = lastStatsLogNs == 0 ? 0 : (int)((t - lastStatsLogNs) / 1000000LL);
         lastStatsLogNs = t;
         int u = atomic_load(&underruns), d = atomic_load(&dropped);
-        // Quiet while the stream is clean; one line per 10 s window in which the counters moved
+        // Quiet while the stream is clean; one line per window in which the counters moved
         if (u != atomic_load(&lastLoggedUnderruns) || d != atomic_load(&lastLoggedDropped)) {
-            LOGI("AAudio stats: underruns +%d (total %d), dropped +%d (total %d), queued %d frames",
+            LOGI("AAudio stats: underruns +%d (total %d), dropped +%d (total %d), queued %d frames, over %d ms",
                  u - atomic_load(&lastLoggedUnderruns), u, d - atomic_load(&lastLoggedDropped), d,
-                 (int)(atomic_load(&writeIdx) - atomic_load(&readIdx)));
+                 (int)(atomic_load(&writeIdx) - atomic_load(&readIdx)), windowMs);
             atomic_store(&lastLoggedUnderruns, u);
             atomic_store(&lastLoggedDropped, d);
         }
@@ -288,6 +310,7 @@ void AAudioRenderer_Write(const int16_t* frames, int frameCount) {
         memcpy(ring, frames + (size_t)first * channels, (size_t)(frameCount - first) * channels * sizeof(int16_t));
     }
     atomic_store_explicit(&writeIdx, w + (uint32_t)frameCount, memory_order_release);
+    atomic_store(&emptyCallbacks, 0);
     atomic_store(&producing, true);
 }
 
