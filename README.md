@@ -40,6 +40,15 @@ their updates. Android 14 only, `armeabi-v7a` only (that is what these TVs run).
   switch back to the input service, because that path is what restarts the TV. A gamepad on a USB cable is driven by Moonlight's
   own USB driver and never touches the input stack either.
 
+**Gamepads on screen**
+- A card over the stream when a gamepad joins, when its battery runs low (20 %, then 10 %) and when it goes on the charger:
+  player number, the pad's name as set in the TV's Bluetooth settings, the charge. Player 1 bottom-left, player 2 bottom-right;
+  while the in-game menu is open every pad's charge stays in the corners, and the PC and app lists show the attached pads as
+  small icons with a battery at the top right. The TV exposes no gamepad battery itself, so the pad is asked over Bluetooth LE
+  (the standard Battery Service); the Xbox Wireless Controller has no charging flag anywhere, but a counter in its statistics
+  table grows at every cable plug-in, and that is where the charger card comes from. The pad never reports the cable coming
+  out, so the state returns to discharging once the level falls. `Settings → Gamepad → Gamepad cards on screen` turns it off.
+
 **Stability and housekeeping**
 - The whole-TV freezes of the first builds (volume bar, app switch, stream exit) no longer reproduce; the workarounds that fought
   them are gone. The "volume change after an hour freezes the screen and the app dies" symptom was the rumble crash all along.
@@ -205,7 +214,11 @@ Shield 2017 и GameSir 8K сделаны по исходникам драйве�
 на этом телевизоре не вибрируют, обратного переключения на системную службу нет. По USB-кабелю вибрация идёт через собственный
 драйвер Moonlight. Зависания
 телевизора из первых сборок больше не воспроизводятся. Настроек мало, есть встроенный тест задержки и
-сообщение с временем декодирования после стрима.
+сообщение с временем декодирования после стрима. Карточки геймпадов на экране: при подключении, при низком заряде и при
+подключении кабеля показываются номер игрока, имя из Bluetooth-настроек телевизора и заряд (игрок 1 слева внизу, игрок 2
+справа); пока открыто меню игры, заряд всех геймпадов стоит по углам, а в списках ПК и приложений подключённые геймпады показаны
+маленькими значками с батарейкой. Сам телевизор заряд не отдаёт, поэтому уровень читается у геймпада по Bluetooth LE, а кабель у
+Xbox определяется по счётчику подключений в его таблице статистики.
 
 **Сравнение с официальным Artemis 20.2.6** на том же телевизоре при одинаковых настройках 4K60 HDR, 100 Мбит/с. Исходники
 Artemis собраны как тот же пакет, поэтому у обоих клиентов одна пара с ПК и один файл настроек; они ставились друг поверх друга

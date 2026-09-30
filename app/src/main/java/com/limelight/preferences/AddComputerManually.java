@@ -389,6 +389,7 @@ public class AddComputerManually extends AppCompatActivity {
 
             AlertDialog dialog = builder.create();
             dialog.show();
+            Dialog.compact(dialog);
         }
     }
 

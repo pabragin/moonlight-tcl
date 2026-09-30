@@ -29,6 +29,8 @@ import com.limelight.profiles.ProfilesManager;
 import com.limelight.ui.AdapterFragment;
 import com.limelight.ui.AdapterFragmentCallbacks;
 import com.limelight.utils.Dialog;
+import com.limelight.binding.input.GamepadBatteryMonitor;
+import com.limelight.ui.GamepadStatusStrip;
 import com.limelight.utils.HelpLauncher;
 import com.limelight.utils.ServerHelper;
 import com.limelight.utils.ShortcutHelper;
@@ -382,6 +384,26 @@ public class PcView extends AppCompatActivity implements AdapterFragmentCallback
         }
     }
 
+    // Attached gamepads and their charge in the strip at the top (GamepadStatusStrip); GATT clients live
+    // only while this screen is in front, a stream opens its own
+    private GamepadBatteryMonitor gamepadMonitor;
+
+    private void startGamepadStrip() {
+        GamepadStatusStrip strip = findViewById(R.id.gamepadStatusStrip);
+        if (strip == null || gamepadMonitor != null) {
+            return;
+        }
+        gamepadMonitor = new GamepadBatteryMonitor(this, strip::setGamepads);
+        gamepadMonitor.start();
+    }
+
+    private void stopGamepadStrip() {
+        if (gamepadMonitor != null) {
+            gamepadMonitor.stop();
+            gamepadMonitor = null;
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -393,6 +415,8 @@ public class PcView extends AppCompatActivity implements AdapterFragmentCallback
 
         inForeground = true;
         startComputerUpdates();
+
+        startGamepadStrip();
     }
 
     @Override
@@ -401,6 +425,7 @@ public class PcView extends AppCompatActivity implements AdapterFragmentCallback
 
         inForeground = false;
         stopComputerUpdates(false);
+        stopGamepadStrip();
     }
 
     @Override
@@ -624,6 +649,7 @@ public class PcView extends AppCompatActivity implements AdapterFragmentCallback
         dialogBuilder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
         AlertDialog dialog = dialogBuilder.create();
         dialog.show();
+        Dialog.compact(dialog);
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String pin = otpInput.getText().toString();

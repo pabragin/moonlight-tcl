@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import com.limelight.R;
@@ -16,6 +17,18 @@ public class Dialog implements Runnable {
     private final Runnable runOnDismiss;
 
     private AlertDialog alert;
+
+    // Width of a message dialog on screen (MoonlightDialogTheme has the floor, this is the ceiling)
+    private static final int COMPACT_WIDTH_DP = 400;
+
+    /** Keeps a shown dialog at a readable width instead of letting a long message stretch it across the screen. */
+    public static void compact(android.app.Dialog dialog) {
+        if (dialog == null || dialog.getWindow() == null) {
+            return;
+        }
+        float density = dialog.getContext().getResources().getDisplayMetrics().density;
+        dialog.getWindow().setLayout(Math.round(COMPACT_WIDTH_DP * density), WindowManager.LayoutParams.WRAP_CONTENT);
+    }
 
     private static final ArrayList<Dialog> rundownDialogs = new ArrayList<>();
 
@@ -107,6 +120,7 @@ public class Dialog implements Runnable {
         synchronized (rundownDialogs) {
             rundownDialogs.add(this);
             alert.show();
+            compact(alert);
         }
     }
 

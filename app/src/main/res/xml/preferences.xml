@@ -245,6 +245,12 @@
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="true"
+            android:key="checkbox_gamepad_notices"
+            android:summary="@string/summary_checkbox_gamepad_notices"
+            android:title="@string/title_checkbox_gamepad_notices"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="true"
             android:key="checkbox_enable_rumble"
             android:summary="@string/summary_enable_rumble"
             android:title="@string/title_enable_rumble"

@@ -14,6 +14,9 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <!-- Avoid some systems like MIUI which break the visibility of games title -->
         <item name="android:forceDarkAllowed">false</item>
+        <!-- Every dialog and context menu of the app: the compact dark panel of the in-game menu -->
+        <item name="android:alertDialogTheme">@style/MoonlightDialogTheme</item>
+        <item name="android:dialogTheme">@style/MoonlightDialogTheme</item>
     </style>
 
     <!-- Application theme. -->
@@ -53,6 +56,44 @@
 
     <!-- Settings share the app theme (this is what the API 29+ override did) -->
     <style name="SettingsTheme" parent="AppTheme">
+    </style>
+
+    <!--
+        Dialogs, menus and progress spinners (the in-game menu, the PC/app context menus, errors, pairing,
+        quit confirmation): a compact dark panel in the gamepad card style, faint dim behind it, small muted
+        heading, white text, a soft rounded highlight on the selected row.
+    -->
+    <style name="MoonlightDialogTheme" parent="@android:style/Theme.Material.Dialog">
+        <item name="android:windowBackground">@drawable/game_menu_bg</item>
+        <!-- A floor for the menus; the ceiling is Dialog.compact() in code (the fixed-width attributes are private) -->
+        <item name="android:windowMinWidthMajor">320dp</item>
+        <item name="android:windowMinWidthMinor">320dp</item>
+        <item name="android:backgroundDimAmount">0.25</item>
+        <item name="android:windowElevation">0dp</item>
+        <item name="android:windowTitleStyle">@style/MoonlightDialogTitle</item>
+        <item name="android:dialogPreferredPadding">20dp</item>
+        <item name="android:listDivider">@null</item>
+        <item name="android:listDividerAlertDialog">@null</item>
+        <item name="android:listChoiceBackgroundIndicator">@drawable/game_menu_item_bg</item>
+        <item name="android:textColorPrimary">#FFFFFFFF</item>
+        <item name="android:textColorSecondary">#DDFFFFFF</item>
+        <item name="android:colorAccent">#FFFFFFFF</item>
+        <item name="android:colorControlActivated">#FFFFFFFF</item>
+        <item name="android:colorControlNormal">#99FFFFFF</item>
+    </style>
+
+    <style name="MoonlightDialogTitle">
+        <item name="android:textAppearance">@style/MoonlightDialogTitleText</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="MoonlightDialogTitleText" parent="@android:style/TextAppearance.Material.DialogWindowTitle">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#99FFFFFF</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
     </style>
 
 

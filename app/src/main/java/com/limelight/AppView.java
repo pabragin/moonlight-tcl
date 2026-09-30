@@ -18,6 +18,8 @@ import com.limelight.profiles.ProfilesManager;
 import com.limelight.ui.AdapterFragment;
 import com.limelight.ui.AdapterFragmentCallbacks;
 import com.limelight.utils.CacheHelper;
+import com.limelight.binding.input.GamepadBatteryMonitor;
+import com.limelight.ui.GamepadStatusStrip;
 import com.limelight.utils.Dialog;
 import com.limelight.utils.ServerHelper;
 import com.limelight.utils.ShortcutHelper;
@@ -386,6 +388,26 @@ public class AppView extends AppCompatActivity implements AdapterFragmentCallbac
         }
     }
 
+    // Attached gamepads and their charge in the strip at the top (GamepadStatusStrip); GATT clients live
+    // only while this screen is in front, a stream opens its own
+    private GamepadBatteryMonitor gamepadMonitor;
+
+    private void startGamepadStrip() {
+        GamepadStatusStrip strip = findViewById(R.id.gamepadStatusStrip);
+        if (strip == null || gamepadMonitor != null) {
+            return;
+        }
+        gamepadMonitor = new GamepadBatteryMonitor(this, strip::setGamepads);
+        gamepadMonitor.start();
+    }
+
+    private void stopGamepadStrip() {
+        if (gamepadMonitor != null) {
+            gamepadMonitor.stop();
+            gamepadMonitor = null;
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -395,6 +417,8 @@ public class AppView extends AppCompatActivity implements AdapterFragmentCallbac
 
         inForeground = true;
         startComputerUpdates();
+
+        startGamepadStrip();
 
         Button profilesButton = findViewById(R.id.profilesButton);
         // User report Samsung and Xiaomi devices have this problem
@@ -412,6 +436,7 @@ public class AppView extends AppCompatActivity implements AdapterFragmentCallbac
 
         inForeground = false;
         stopComputerUpdates();
+        stopGamepadStrip();
     }
 
     @Override

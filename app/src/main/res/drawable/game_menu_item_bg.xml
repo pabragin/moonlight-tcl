@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Game menu row: a soft rounded highlight on the d-pad selection, inset from the panel edge -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <inset
+            android:insetLeft="8dp"
+            android:insetRight="8dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <solid android:color="#4DFFFFFF" />
+            </shape>
+        </inset>
+    </item>
+    <item android:state_selected="true">
+        <inset
+            android:insetLeft="8dp"
+            android:insetRight="8dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <solid android:color="#33FFFFFF" />
+            </shape>
+        </inset>
+    </item>
+    <item android:state_focused="true">
+        <inset
+            android:insetLeft="8dp"
+            android:insetRight="8dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <solid android:color="#33FFFFFF" />
+            </shape>
+        </inset>
+    </item>
+    <item android:drawable="@android:color/transparent" />
+</selector>

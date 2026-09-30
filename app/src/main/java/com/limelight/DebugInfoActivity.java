@@ -243,11 +243,11 @@ public class DebugInfoActivity extends AppCompatActivity implements View.OnClick
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
-                new AlertDialog.Builder(DebugInfoActivity.this)
+                com.limelight.utils.Dialog.compact(new AlertDialog.Builder(DebugInfoActivity.this)
                         .setTitle(R.string.debug_info_bt_hid_result)
                         .setMessage(text)
                         .setPositiveButton(android.R.string.ok, null)
-                        .create().show();
+                        .show());
             }
         });
     }

@@ -89,6 +89,7 @@ public class PreferenceConfiguration {
 
 
     private static final String CHECKBOX_ENABLE_BATTERY_REPORT = "checkbox_gamepad_enable_battery_report";
+    private static final String CHECKBOX_GAMEPAD_NOTICES = "checkbox_gamepad_notices";
     private static final String CHECKBOX_FORCE_QWERTY = "checkbox_force_qwerty";
     private static final String CHECKBOX_BACK_AS_META = "checkbox_back_as_meta";
     private static final String CHECKBOX_IGNORE_SYNTH_EVENTS = "checkbox_ignore_synth_events";
@@ -162,6 +163,8 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_PREVENT_PACKET_LOSS = false;
     // A TV has no battery indicator worth the extra InputReader traffic
     private static final boolean DEFAULT_GAMEPAD_ENABLE_BATTERY_REPORT = true;
+    // Cards over the stream when a gamepad joins or its battery runs low
+    private static final boolean DEFAULT_GAMEPAD_NOTICES = true;
     private static final boolean DEFAULT_FORCE_QWERTY = true;
     private static final boolean DEFAULT_SEND_META_ON_PHYSICAL_BACK = false;
     private static final boolean DEFAULT_IGNORE_SYNTH_EVENTS = false;
@@ -205,6 +208,7 @@ public class PreferenceConfiguration {
     public String language;
     public boolean smallIconMode, multiController, usbDriver, flipFaceButtons;
     public boolean enableBatteryReport;
+    public boolean gamepadNotices;
     public boolean forceQwerty;
     public boolean backAsMeta;
     public boolean ignoreSynthEvents;
@@ -795,6 +799,7 @@ private static int getFramePacingValue(Context context) {
         // Battery polling of the gamepad goes through the same InputReader path as everything else;
         // a TV has no battery indicator worth the extra traffic, so default it off there.
         config.enableBatteryReport = prefs.getBoolean(CHECKBOX_ENABLE_BATTERY_REPORT, DEFAULT_GAMEPAD_ENABLE_BATTERY_REPORT);
+        config.gamepadNotices = prefs.getBoolean(CHECKBOX_GAMEPAD_NOTICES, DEFAULT_GAMEPAD_NOTICES);
         config.forceQwerty = prefs.getBoolean(CHECKBOX_FORCE_QWERTY, DEFAULT_FORCE_QWERTY);
         config.backAsMeta = prefs.getBoolean(CHECKBOX_BACK_AS_META, DEFAULT_SEND_META_ON_PHYSICAL_BACK);
         config.ignoreSynthEvents = prefs.getBoolean(CHECKBOX_IGNORE_SYNTH_EVENTS, DEFAULT_IGNORE_SYNTH_EVENTS);

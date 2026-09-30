@@ -2716,6 +2716,9 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 connected = true;
                 connecting = false;
 
+                // Cards with the name and charge of the gamepads already in the game
+                controllerHandler.announceAttachedGamepads();
+
                 // Hide the mouse cursor now after a short delay.
                 // Doing it before dismissing the spinner seems to be undone
                 // when the spinner gets displayed. On Android Q, even now
@@ -3017,12 +3020,20 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         AlertDialog dialog = builder.create();
         dialog.show();
+        Dialog.compact(dialog);
     }
 
     @Override
     public void showGameMenu(final GameInputDevice device) {
         if (gameMenuCallbacks != null) {
             gameMenuCallbacks.showMenu(device);
+        }
+    }
+
+    /** GameMenu: a menu dialog is on screen. The gamepad charge cards sit in the corners meanwhile. */
+    public void setGameMenuVisible(boolean visible) {
+        if (controllerHandler != null) {
+            controllerHandler.setGamepadStatusPinned(visible);
         }
     }
 

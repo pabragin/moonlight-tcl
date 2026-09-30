@@ -517,6 +517,16 @@
     <string name="wrong_import_format">Wrong import format, please check!</string>
     <string name="title_checkbox_gamepad_enable_battery_report">Enable battery status report for gamepad</string>
     <string name="summary_checkbox_gamepad_enable_battery_report">Tell the host how charged the gamepad is. This TV reports no gamepad batteries itself, so a Bluetooth pad is asked directly (Battery Service over Bluetooth LE, or the Xbox battery report over classic Bluetooth).</string>
+    <string name="title_checkbox_gamepad_notices">Gamepad cards on screen</string>
+    <string name="summary_checkbox_gamepad_notices">When a gamepad joins the stream, goes on the charger or its battery runs low, show its name (as set in the TV\'s Bluetooth settings) and charge for a few seconds; while the game menu is open every gamepad\'s charge stays in the corners. Player 1 bottom-left, player 2 bottom-right.</string>
+    <string name="gamepad_notice_connected">Connected</string>
+    <string name="gamepad_notice_low_battery">Low battery</string>
+    <string name="gamepad_notice_charging">Charging</string>
+    <string name="gamepad_notice_full">Charged</string>
+    <string name="gamepad_notice_no_battery">Charge unknown</string>
+    <string name="gamepad_notice_percent">%1$d%%</string>
+    <string name="gamepad_notice_player">P%1$d</string>
+    <string name="gamepad_notice_level">%1$s · %2$d%%</string>
     <string name="title_checkbox_enforce_display_mode">Enforce Display Mode</string>
     <string name="summary_checkbox_enforce_display_mode">Force surface to use the optimal display mode.\nRequired by some systems (such as ColorOS) to set refresh rate/resolution properly.\nDo not enable on ChromeCast 4K as it might lead to bugs.</string>
    	<string name="title_checkbox_forceTightThresholds">Tight Vsync (Experimental)</string>

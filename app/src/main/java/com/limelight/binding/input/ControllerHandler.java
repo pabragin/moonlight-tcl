@@ -2,7 +2,10 @@ package com.limelight.binding.input;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.BatteryState;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -40,13 +43,16 @@ import com.limelight.nvstream.input.ControllerPacket;
 import com.limelight.nvstream.input.MouseButtonPacket;
 import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.preferences.PreferenceConfiguration;
+import com.limelight.ui.BatteryDrawable;
 import com.limelight.ui.GameGestures;
+import com.limelight.ui.GamepadNoticeOverlay;
 import com.limelight.utils.Vector2d;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ControllerHandler implements InputManager.InputDeviceListener, UsbDriverListener {
 
@@ -81,6 +87,26 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     private static final short MAX_GAMEPADS = 16; // Limited by bits in activeGamepadMask
 
     private static final int BATTERY_RECHECK_INTERVAL_MS = 120 * 1000;
+
+    // On-screen gamepad cards (GamepadNoticeOverlay): how long the connect card waits for the first battery
+    // reading, how long after the stream starts the attached pads are announced, and the second warning
+    // level below GamepadNoticeOverlay.LOW_BATTERY_PERCENT
+    private static final int GAMEPAD_NOTICE_BATTERY_WAIT_MS = 2000;
+    private static final int GAMEPAD_NOTICE_STREAM_START_DELAY_MS = 1000;
+    private static final int CRITICAL_BATTERY_PERCENT = 10;
+    // A Bluetooth pad's Battery Service carries no charging flag: a level that climbs this much above the
+    // lowest reading is the charger (a reading that wobbles under rumble load is not)
+    private static final int CHARGE_DETECT_RISE_PERCENT = 2;
+    // A level that jumps more than this in one reading is not a charger, which raises it slowly; it is the pad's
+    // placeholder giving way to the real value
+    private static final int CHARGE_DETECT_MAX_JUMP_PERCENT = 15;
+    // The Xbox Wireless Controller answers 50 % for the first seconds after it connects and sends the real level
+    // once measured (seen: 50 % at 0.1 s, 100 % at 4 s): readings inside this window after the pad appeared are
+    // provisional, the connect card waits for a settled one
+    private static final int BATTERY_SETTLE_MS = 6000;
+    // `adb shell am broadcast -a com.limelight.DEBUG_BATTERY -p <package>`: re-read every pad's charge now and
+    // log the value even when it did not change
+    private static final String ACTION_DEBUG_BATTERY = "com.limelight.DEBUG_BATTERY";
 
     private static final Map<Integer, Integer> ANDROID_TO_LI_BUTTON_MAP = Map.ofEntries(
             Map.entry(KeyEvent.KEYCODE_BUTTON_A, ControllerPacket.A_FLAG),
@@ -133,6 +159,26 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     private final Handler backgroundThreadHandler;
     // Rumble for Bluetooth gamepads through the Bluetooth stack (null: rumble off, no permission, Bluetooth off)
     private final BluetoothHidRumble btHidRumble;
+    // Cards over the stream about gamepads (connect, low battery); null when turned off in the settings
+    private final GamepadNoticeOverlay notices;
+    private final BroadcastReceiver debugBatteryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            refreshAllBatteries();
+        }
+    };
+    // Answers from a pad's GATT battery client (Bluetooth binder threads)
+    private final BluetoothGattBattery.Listener btBatteryListener = new BluetoothGattBattery.Listener() {
+        @Override
+        public void onBatteryLevel(BluetoothDevice device, int percent) {
+            onBtBatteryLevel(device, percent);
+        }
+
+        @Override
+        public void onChargerConnected(BluetoothDevice device) {
+            onBtChargerConnected(device);
+        }
+    };
     private boolean stopped = false;
 
     private final PreferenceConfiguration prefConfig;
@@ -158,7 +204,9 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         // InputReader and its Android 14 crash (see BluetoothHidRumble). The profile proxy binds
         // asynchronously while the stream starts.
         // The battery path needs the same proxy to find the pad's BluetoothDevice (BluetoothHidRumble.resolve)
-        this.btHidRumble = prefConfig.enableRumble || prefConfig.enableBatteryReport ? BluetoothHidRumble.openIfAvailable(activityContext) : null;
+        // The gamepad cards need it too, for the name given to the pad in the TV's Bluetooth settings
+        this.btHidRumble = prefConfig.enableRumble || prefConfig.enableBatteryReport || prefConfig.gamepadNotices
+                ? BluetoothHidRumble.openIfAvailable(activityContext) : null;
         if (btHidRumble != null) {
             btHidRumble.setReportListener(this::onBtHidReport);
         }
@@ -166,6 +214,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             LimeLog.info("Bluetooth HID rumble: " + (btHidRumble != null ? "binding HID host proxy" :
                     BluetoothHidRumble.hasPermission(activityContext) ? "unavailable (Bluetooth off)" : "no BLUETOOTH_CONNECT permission"));
         }
+
+        // Cards over the stream about gamepads: player number, name from the TV's Bluetooth settings, charge
+        GamepadNoticeOverlay overlay = prefConfig.gamepadNotices ? new GamepadNoticeOverlay(activityContext) : null;
+        this.notices = overlay != null && overlay.isAvailable() ? overlay : null;
+
+        activityContext.registerReceiver(debugBatteryReceiver, new IntentFilter(ACTION_DEBUG_BATTERY), Context.RECEIVER_EXPORTED);
 
         int deadzonePercentage = prefConfig.deadzonePercentage;
 
@@ -217,7 +271,19 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
     @Override
     public void onInputDeviceAdded(int deviceId) {
-        // Nothing happening here yet
+        if (stopped || notices == null) {
+            return;
+        }
+        InputDevice dev = inputManager.getInputDevice(deviceId);
+        if (dev == null || inputDeviceContexts.get(deviceId) != null || !isAnnouncedGamepad(dev)) {
+            return;
+        }
+        // A context normally appears with the pad's first input; the card needs it now (the Bluetooth battery
+        // client lives in it). The controller number is still assigned on the first input, as before.
+        InputDeviceContext context = createInputDeviceContextForDevice(dev);
+        context.attachedAtMs = SystemClock.uptimeMillis();
+        inputDeviceContexts.put(deviceId, context);
+        announceGamepad(context);
     }
 
     @Override
@@ -225,6 +291,9 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         InputDeviceContext context = inputDeviceContexts.get(deviceId);
         if (context != null) {
             LimeLog.info("Removed controller: "+context.name+" ("+deviceId+")");
+            if (notices != null) {
+                notices.dismiss(deviceId);
+            }
             releaseControllerNumber(context);
             context.destroy();
             inputDeviceContexts.remove(deviceId);
@@ -265,6 +334,10 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         // Unregister our input device callbacks
         inputManager.unregisterInputDeviceListener(this);
 
+        if (notices != null) {
+            mainThreadHandler.post(notices::dismissAll);
+        }
+
         for (int i = 0; i < inputDeviceContexts.size(); i++) {
             InputDeviceContext deviceContext = inputDeviceContexts.valueAt(i);
             // Stop the motors at stream end so they never keep the last level
@@ -292,6 +365,11 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     public void destroy() {
         if (!stopped) {
             stop();
+        }
+
+        try {
+            activityContext.unregisterReceiver(debugBatteryReceiver);
+        } catch (IllegalArgumentException ignored) {
         }
 
         if (btHidRumble != null) {
@@ -665,7 +743,9 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         if (btHidRumble != null && context.external) {
             BluetoothHidRumble.ReportFormat format = prefConfig.enableRumble ?
                     BluetoothHidRumble.reportFormatFor(context.vendorId, context.productId) : null;
-            BluetoothDevice btDevice = format != null || prefConfig.enableBatteryReport ? btHidRumble.resolve(dev) : null;
+            // The Bluetooth device also gives the gamepad card its name from the TV's Bluetooth settings
+            BluetoothDevice btDevice = format != null || prefConfig.enableBatteryReport || notices != null
+                    ? btHidRumble.resolve(dev) : null;
             if (btDevice != null) {
                 context.btDevice = btDevice;
                 if (format != null) {
@@ -674,7 +754,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 // Charge of a Bluetooth pad: the kernel exposes no battery for HID devices here, so a LE pad is asked
                 // through the standard GATT Battery Service; a classic-Bluetooth Xbox pad through its HID report 0x04
                 if (prefConfig.enableBatteryReport && btDevice.getType() != BluetoothDevice.DEVICE_TYPE_CLASSIC) {
-                    context.btBattery = new BluetoothGattBattery(activityContext, btDevice, this::onBtBatteryLevel);
+                    context.btBattery = new BluetoothGattBattery(activityContext, btDevice, btBatteryListener);
                 }
             }
             else if (format != null) {
@@ -1065,6 +1145,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 percentage = (byte)(currentBatteryCapacity * 100);
             }
 
+            onBatteryReading(context, state, percentage, true);
+            if (!context.assignedControllerNumber) {
+                // Read for the card only: the host does not know this pad yet
+                return;
+            }
+
             conn.sendControllerBatteryEvent((byte)context.controllerNumber, state, percentage);
 
             context.lastReportedBatteryStatus = currentBatteryStatus;
@@ -1112,21 +1198,298 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         });
     }
 
+    // The pad's plug-in counter grew (BluetoothGattBattery): the cable is in. The pad never says when it comes
+    // out again, so the state stays "charging" until the level falls (inferChargingState).
+    private void onBtChargerConnected(final BluetoothDevice device) {
+        if (stopped) {
+            return;
+        }
+        backgroundThreadHandler.post(() -> {
+            for (int i = 0; i < inputDeviceContexts.size(); i++) {
+                InputDeviceContext ctx = inputDeviceContexts.valueAt(i);
+                if (ctx.btDevice == null || !device.getAddress().equals(ctx.btDevice.getAddress())) {
+                    continue;
+                }
+                LimeLog.info("Charger plugged into " + ctx.name + " at " + ctx.batteryPercent + "%");
+                ctx.chargingByLevel = true;
+                ctx.chargeCeilingPercent = Math.max(ctx.chargeCeilingPercent, ctx.batteryPercent);
+                ctx.chargerCardDue = true;
+                int percent = ctx.batteryPercent;
+                byte percentage = percent < 0 ? MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN : (byte) percent;
+                byte state = percent >= 100 ? MoonBridge.LI_BATTERY_STATE_FULL : MoonBridge.LI_BATTERY_STATE_CHARGING;
+                if (ctx.assignedControllerNumber) {
+                    conn.sendControllerBatteryEvent((byte) ctx.controllerNumber, state, percentage);
+                    ctx.lastReportedBatteryStatus = state;
+                    ctx.lastReportedBatteryCapacity = percent < 0 ? Float.NaN : percent / 100f;
+                }
+                onBatteryReading(ctx, state, percentage, true);
+                break;
+            }
+        });
+    }
+
+    // Every pad's charge read again now, the value logged whatever it is (the debug broadcast). Any thread.
+    private void refreshAllBatteries() {
+        if (stopped) {
+            return;
+        }
+        mainThreadHandler.post(() -> {
+            for (int i = 0; i < inputDeviceContexts.size(); i++) {
+                InputDeviceContext ctx = inputDeviceContexts.valueAt(i);
+                ctx.logNextBattery = true;
+                LimeLog.info("Battery re-read requested for " + ctx.name + " (last " + ctx.batteryPercent + "%)");
+                backgroundThreadHandler.post(() -> sendControllerBatteryPacket(ctx));
+            }
+        });
+    }
+
     // Background thread only (shares lastReportedBattery* with sendControllerBatteryPacket)
     private void reportBtBattery(InputDeviceContext ctx, String source, byte state, byte percentage) {
-        if (stopped || ctx.controllerNumber < 0) {
+        if (stopped) {
             return;
         }
         float capacity = percentage == MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN ? Float.NaN : (percentage & 0xFF) / 100f;
-        if (!ctx.btBatteryLogged) {
-            LimeLog.info("Battery over Bluetooth for " + ctx.name + ": " + source);
+        boolean settled = settledReading(ctx, percentage);
+        if (settled) {
+            state = inferChargingState(ctx, state, percentage);
+        }
+        if (!ctx.btBatteryLogged || ctx.logNextBattery || state != ctx.lastBtBatteryState || !areBatteryCapacitiesEqual(capacity, ctx.lastBtBatteryCapacity)) {
+            ctx.logNextBattery = false;
+            LimeLog.info("Battery over Bluetooth for " + ctx.name + ": " + source
+                    + (state == MoonBridge.LI_BATTERY_STATE_CHARGING ? " (charging)" : state == MoonBridge.LI_BATTERY_STATE_FULL ? " (full)" : "")
+                    + (settled ? "" : " (provisional)"));
             ctx.btBatteryLogged = true;
+            ctx.lastBtBatteryState = state;
+            ctx.lastBtBatteryCapacity = capacity;
+        }
+        onBatteryReading(ctx, state, percentage, settled);
+        if (!ctx.assignedControllerNumber) {
+            // Read for the card only: the host does not know this pad yet
+            return;
         }
         if (state != ctx.lastReportedBatteryStatus || !areBatteryCapacitiesEqual(capacity, ctx.lastReportedBatteryCapacity)) {
             conn.sendControllerBatteryEvent((byte) ctx.controllerNumber, state, percentage);
             ctx.lastReportedBatteryStatus = state;
             ctx.lastReportedBatteryCapacity = capacity;
         }
+    }
+
+    // Background thread. A reading inside BATTERY_SETTLE_MS after the pad appeared is provisional until a
+    // different one follows (the real level replacing the placeholder) or the window has passed. Settled once,
+    // settled for good; pads whose context was created later than their arrival count as settled.
+    private boolean settledReading(InputDeviceContext ctx, byte percentage) {
+        long attachedAt = ctx.attachedAtMs;
+        if (attachedAt == 0) {
+            return true;
+        }
+        int percent = percentage == MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN ? -1 : percentage & 0xFF;
+        boolean settled = SystemClock.uptimeMillis() - attachedAt >= BATTERY_SETTLE_MS
+                || (percent >= 0 && ctx.provisionalPercent >= 0 && percent != ctx.provisionalPercent);
+        if (settled) {
+            ctx.attachedAtMs = 0;
+        }
+        else if (percent >= 0) {
+            ctx.provisionalPercent = percent;
+        }
+        return settled;
+    }
+
+    // Background thread. Charging from the level alone, for readings that do not know better (the GATT Battery
+    // Service is a bare percentage): a level that climbs CHARGE_DETECT_RISE_PERCENT above the lowest reading
+    // means a charger, a level that falls that much below the highest reading while charging means it is gone.
+    // Sets chargerCardDue when the charger appears; onBatteryReading() turns that into the card.
+    private byte inferChargingState(InputDeviceContext ctx, byte state, byte percentage) {
+        int percent = percentage == MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN ? -1 : percentage & 0xFF;
+        if (percent < 0 || (state != MoonBridge.LI_BATTERY_STATE_DISCHARGING && state != MoonBridge.LI_BATTERY_STATE_UNKNOWN)) {
+            // The source knows the state itself (Xbox HID report) or gives no level to reason about
+            ctx.chargingByLevel = false;
+            ctx.chargeFloorPercent = ctx.chargeCeilingPercent = -1;
+            return state;
+        }
+        if (ctx.chargingByLevel) {
+            if (percent > ctx.chargeCeilingPercent) {
+                ctx.chargeCeilingPercent = percent;
+            }
+            else if (percent <= ctx.chargeCeilingPercent - CHARGE_DETECT_RISE_PERCENT) {
+                // Draining again: unplugged
+                ctx.chargingByLevel = false;
+                ctx.chargeFloorPercent = percent;
+            }
+        }
+        else if (ctx.chargeFloorPercent < 0 || percent < ctx.chargeFloorPercent) {
+            ctx.chargeFloorPercent = percent;
+        }
+        else if (percent > ctx.chargeFloorPercent + CHARGE_DETECT_MAX_JUMP_PERCENT) {
+            // Too big a step for a charger: a corrected reading, start over from it
+            ctx.chargeFloorPercent = percent;
+        }
+        else if (percent >= ctx.chargeFloorPercent + CHARGE_DETECT_RISE_PERCENT) {
+            ctx.chargingByLevel = true;
+            ctx.chargeCeilingPercent = percent;
+            ctx.chargerCardDue = true;
+        }
+        if (!ctx.chargingByLevel) {
+            return state;
+        }
+        return percent >= 100 ? MoonBridge.LI_BATTERY_STATE_FULL : MoonBridge.LI_BATTERY_STATE_CHARGING;
+    }
+
+    // ---- Cards over the stream about gamepads (GamepadNoticeOverlay) ----
+
+    /** External pads with sticks; the TV remote (a joystick without axes to Android) stays out. */
+    public static boolean isAnnouncedGamepad(InputDevice dev) {
+        return isExternal(dev) && hasJoystickAxes(dev);
+    }
+
+    /** Cards for the gamepads that are already attached when the stream starts. Any thread. */
+    public void announceAttachedGamepads() {
+        if (notices == null) {
+            return;
+        }
+        mainThreadHandler.postDelayed(() -> {
+            if (!stopped) {
+                forEachAttachedGamepad(this::announceGamepad);
+            }
+        }, GAMEPAD_NOTICE_STREAM_START_DELAY_MS);
+    }
+
+    /** Main thread. Every gamepad's charge in the corners for as long as the game menu is open. */
+    public void setGamepadStatusPinned(boolean pinned) {
+        if (notices == null || stopped) {
+            return;
+        }
+        notices.setPinned(pinned);
+        if (!pinned) {
+            return;
+        }
+        forEachAttachedGamepad(context -> {
+            showGamepadNotice(context, GamepadNoticeOverlay.REASON_STATUS);
+            // A fresh reading follows through onBatteryReading() and refreshes the card
+            backgroundThreadHandler.post(() -> sendControllerBatteryPacket(context));
+        });
+    }
+
+    // Main thread. Every external pad with sticks attached right now, with a context (created when the pad
+    // has not sent anything yet)
+    private void forEachAttachedGamepad(Consumer<InputDeviceContext> action) {
+        for (int id : inputManager.getInputDeviceIds()) {
+            InputDevice dev = inputManager.getInputDevice(id);
+            if (dev == null || !isAnnouncedGamepad(dev)) {
+                continue;
+            }
+            InputDeviceContext context = inputDeviceContexts.get(id);
+            if (context == null) {
+                context = createInputDeviceContextForDevice(dev);
+                inputDeviceContexts.put(id, context);
+            }
+            action.accept(context);
+        }
+    }
+
+    // Main thread. The connect card follows the first battery reading, or the timeout when there is none.
+    private void announceGamepad(InputDeviceContext context) {
+        if (context.noticeShown || context.noticePending) {
+            return;
+        }
+        context.noticePending = true;
+        backgroundThreadHandler.post(() -> sendControllerBatteryPacket(context));
+        // A pad that has just appeared answers with a placeholder first: read again once the window has passed
+        long settleDelay = context.attachedAtMs == 0 ? 0
+                : Math.max(0, context.attachedAtMs + BATTERY_SETTLE_MS - SystemClock.uptimeMillis());
+        if (settleDelay > 0) {
+            backgroundThreadHandler.postDelayed(() -> sendControllerBatteryPacket(context), settleDelay);
+        }
+        mainThreadHandler.postDelayed(context.noticeTimeoutRunnable, settleDelay + GAMEPAD_NOTICE_BATTERY_WAIT_MS);
+    }
+
+    // Main thread
+    private void showGamepadNotice(InputDeviceContext context, int reason) {
+        mainThreadHandler.removeCallbacks(context.noticeTimeoutRunnable);
+        context.noticePending = false;
+        // A context that was removed or migrated in the meantime has nothing to show
+        if (stopped || notices == null || inputDeviceContexts.get(context.id) != context) {
+            return;
+        }
+        if (reason == GamepadNoticeOverlay.REASON_CONNECTED) {
+            context.noticeShown = true;
+        }
+        int player = context.assignedControllerNumber ? context.controllerNumber : predictControllerNumber(context);
+        notices.show(context.id, reason, player, displayNameOf(context), context.batteryPercent, context.batteryCharging);
+    }
+
+    // The number assignControllerNumberIfNeeded() will hand out on the pad's first input
+    private int predictControllerNumber(InputDeviceContext context) {
+        if (context.external && prefConfig.multiController && context.hasJoystickAxes) {
+            for (int i = 0; i < MAX_GAMEPADS; i++) {
+                if ((currentControllers & (1 << i)) == 0) {
+                    return i;
+                }
+            }
+        }
+        return 0;
+    }
+
+    // The name given to the pad in the TV's Bluetooth settings, else the input device's name
+    private static String displayNameOf(InputDeviceContext context) {
+        BluetoothDevice btDevice = context.btDevice;
+        if (btDevice != null) {
+            try {
+                String alias = btDevice.getAlias();
+                if (alias != null && !alias.trim().isEmpty()) {
+                    return alias.trim();
+                }
+            } catch (SecurityException ignored) {
+                // No BLUETOOTH_CONNECT: the input device's name will do
+            }
+        }
+        return context.name;
+    }
+
+    // Background thread. Every battery reading, kernel or Bluetooth, before or after the host knows the pad:
+    // completes the pending connect card, raises the low battery card at 20 % and once more at 10 %
+    private void onBatteryReading(InputDeviceContext context, byte state, byte percentage, boolean settled) {
+        if (!settled) {
+            // The pad's placeholder: neither the cards nor the warnings see it
+            return;
+        }
+        int percent = percentage == MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN ? BatteryDrawable.LEVEL_UNKNOWN : percentage & 0xFF;
+        boolean charging = state == MoonBridge.LI_BATTERY_STATE_CHARGING || state == MoonBridge.LI_BATTERY_STATE_FULL;
+        context.batteryPercent = percent;
+        context.batteryCharging = charging;
+        boolean chargerCard = context.chargerCardDue;
+        context.chargerCardDue = false;
+        if (notices == null) {
+            return;
+        }
+        int stage = percent < 0 || charging ? 0 : percent <= CRITICAL_BATTERY_PERCENT ? 2
+                : percent <= GamepadNoticeOverlay.LOW_BATTERY_PERCENT ? 1 : 0;
+        boolean warn = false;
+        if (stage == 0) {
+            // Charged (or on the charger) again: the next drop warns anew; a few percent above the line do not
+            if (percent < 0 || charging || percent > GamepadNoticeOverlay.LOW_BATTERY_PERCENT + 5) {
+                context.lowBatteryWarnedStage = 0;
+            }
+        }
+        else if (stage > context.lowBatteryWarnedStage) {
+            context.lowBatteryWarnedStage = stage;
+            warn = true;
+        }
+        final boolean warnLow = warn;
+        mainThreadHandler.post(() -> {
+            if (context.noticePending) {
+                // The connect card shows the level (in red when low); no second card for that
+                showGamepadNotice(context, GamepadNoticeOverlay.REASON_CONNECTED);
+            }
+            else if (chargerCard) {
+                showGamepadNotice(context, GamepadNoticeOverlay.REASON_CHARGING);
+            }
+            else if (warnLow) {
+                showGamepadNotice(context, GamepadNoticeOverlay.REASON_LOW_BATTERY);
+            }
+            else {
+                notices.update(context.id, context.batteryPercent, context.batteryCharging);
+            }
+        });
     }
 
     private void sendControllerInputPacket(GenericControllerContext originalContext) {
@@ -3017,7 +3380,27 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         public int lastReportedBatteryStatus;
         public float lastReportedBatteryCapacity;
         public boolean btBatteryLogged;
+        volatile boolean logNextBattery;
         public volatile BluetoothGattBattery btBattery;
+
+        // On-screen card (GamepadNoticeOverlay). noticePending: the connect card is waiting for a battery reading
+        volatile boolean noticePending;
+        boolean noticeShown;
+        volatile int batteryPercent = BatteryDrawable.LEVEL_UNKNOWN;
+        volatile boolean batteryCharging;
+        // Background thread: 0 not warned, 1 warned at the low level, 2 at the critical level
+        int lowBatteryWarnedStage;
+        // Background thread, inferChargingState(): the lowest level seen while draining, the highest while
+        // charging, whether the level says "charger", and a charger card not yet shown
+        int chargeFloorPercent = -1, chargeCeilingPercent = -1;
+        boolean chargingByLevel, chargerCardDue;
+        // When the pad appeared (onInputDeviceAdded), 0 once its readings have settled; the placeholder seen meanwhile
+        volatile long attachedAtMs;
+        int provisionalPercent = -1;
+        // Last value written to the log, so every change is logged once
+        byte lastBtBatteryState = -1;
+        float lastBtBatteryCapacity = Float.NaN;
+        final Runnable noticeTimeoutRunnable = () -> showGamepadNotice(this, GamepadNoticeOverlay.REASON_CONNECTED);
 
         public int leftStickXAxis = -1;
         public int leftStickYAxis = -1;
@@ -3110,6 +3493,9 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             if (battery != null) {
                 battery.close();
             }
+
+            mainThreadHandler.removeCallbacks(noticeTimeoutRunnable);
+            noticePending = false;
 
             backgroundThreadHandler.removeCallbacks(rumbleFlushRunnable);
             synchronized (rumbleLock) {
@@ -3288,6 +3674,20 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             this.accelReportRateHz = oldContext.accelReportRateHz;
             this.btRumbleAnnounced = oldContext.btRumbleAnnounced;
             this.btPreludeDone = oldContext.btPreludeDone;
+            // The card state follows the pad
+            this.noticeShown = oldContext.noticeShown;
+            this.lowBatteryWarnedStage = oldContext.lowBatteryWarnedStage;
+            this.batteryPercent = oldContext.batteryPercent;
+            this.batteryCharging = oldContext.batteryCharging;
+            this.chargeFloorPercent = oldContext.chargeFloorPercent;
+            this.chargeCeilingPercent = oldContext.chargeCeilingPercent;
+            this.chargingByLevel = oldContext.chargingByLevel;
+            this.attachedAtMs = oldContext.attachedAtMs;
+            this.provisionalPercent = oldContext.provisionalPercent;
+            this.btBatteryLogged = oldContext.btBatteryLogged;
+            this.lastBtBatteryState = oldContext.lastBtBatteryState;
+            this.lastBtBatteryCapacity = oldContext.lastBtBatteryCapacity;
+            boolean noticePending = oldContext.noticePending;
 
             // Don't release the controller number, because we will carry it over if it is present.
             // We also want to make sure the change is invisible to the host PC to avoid an add/remove
@@ -3317,6 +3717,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             }
 
             oldContext.destroy();
+
+            if (noticePending) {
+                // The connect card was still waiting for a battery reading: keep waiting on this context
+                this.noticePending = true;
+                mainThreadHandler.postDelayed(noticeTimeoutRunnable, GAMEPAD_NOTICE_BATTERY_WAIT_MS);
+            }
 
             // Copy over existing controller number state
             this.assignedControllerNumber = oldContext.assignedControllerNumber;

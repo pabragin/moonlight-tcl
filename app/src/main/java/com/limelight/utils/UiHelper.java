@@ -143,6 +143,10 @@ public class UiHelper {
 
             rootView.setPadding(horizontalPaddingPixels, verticalPaddingPixels,
                     horizontalPaddingPixels, verticalPaddingPixels);
+            // The gamepad status strip sits in that top margin (a negative top margin in its layout): neither
+            // the padding nor the activity layout's own bounds may clip it
+            ((android.view.ViewGroup) rootView).setClipToPadding(false);
+            ((android.view.ViewGroup) rootView).setClipChildren(false);
         }
         else {
             // Draw under the status bar on Android Q devices

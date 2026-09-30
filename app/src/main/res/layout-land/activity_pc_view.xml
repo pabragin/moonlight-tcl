@@ -4,6 +4,7 @@
     android:background="#1A1A1A"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
     tools:context=".PcView" >
 
     <RelativeLayout
@@ -79,6 +80,18 @@
         android:layout_below="@id/helpButton"
         android:src="@drawable/ic_add"
         style="?android:attr/borderlessButtonStyle"/>
+
+    <!-- Attached gamepads with their charge (GamepadBatteryMonitor) -->
+    <com.limelight.ui.GamepadStatusStrip
+        android:id="@+id/gamepadStatusStrip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="-10dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/profilesButton"

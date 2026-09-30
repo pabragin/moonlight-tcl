@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
     tools:context=".AppView">
 
     <FrameLayout
@@ -29,6 +30,18 @@
         android:paddingBottom="5dp"
         android:preferKeepClear="true"
         android:textSize="28sp" />
+
+    <!-- Attached gamepads with their charge (GamepadBatteryMonitor) -->
+    <com.limelight.ui.GamepadStatusStrip
+        android:id="@+id/gamepadStatusStrip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="-10dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/profilesButton"

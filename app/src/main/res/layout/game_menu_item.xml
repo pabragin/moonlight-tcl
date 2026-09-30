@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row of the game menu (ArrayAdapter row) -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/game_menu_item_bg"
+    android:ellipsize="end"
+    android:gravity="center_vertical"
+    android:minHeight="42dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:singleLine="true"
+    android:textColor="#FFFFFFFF"
+    android:textSize="16sp" />

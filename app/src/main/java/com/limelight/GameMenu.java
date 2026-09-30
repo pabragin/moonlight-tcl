@@ -8,15 +8,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.limelight.binding.input.GameInputDevice;
 import com.limelight.binding.input.KeyboardTranslator;
 import com.limelight.preferences.PreferenceConfiguration;
+import com.limelight.utils.Dialog;
 import com.limelight.utils.KeyConfigHelper;
 import com.limelight.utils.KeyMapper;
 
@@ -57,6 +63,11 @@ public class GameMenu implements Game.GameMenuCallbacks {
 
     private final Game game;
     private final Context dialogScreenContext;
+
+    // The stock dialog spans most of a TV screen and sits over the gamepad cards in the bottom corners:
+    // a compact list near the top instead
+    private static final int MENU_WIDTH_DP = 320;
+    private static final int MENU_TOP_MARGIN_DP = 24;
 
     private AlertDialog currentDialog;
 
@@ -109,10 +120,12 @@ public class GameMenu implements Game.GameMenuCallbacks {
         int themeResId = game.getApplicationInfo().theme;
 
         Context themedContext = new ContextThemeWrapper(dialogScreenContext, themeResId);
-        AlertDialog.Builder builder = new AlertDialog.Builder(themedContext);
-        builder.setTitle(title);
+        AlertDialog.Builder builder = new AlertDialog.Builder(themedContext, R.style.MoonlightDialogTheme);
+        TextView titleView = (TextView) LayoutInflater.from(builder.getContext()).inflate(R.layout.game_menu_title, null);
+        titleView.setText(title);
+        builder.setCustomTitle(titleView);
 
-        final ArrayAdapter<String> actions = new ArrayAdapter<>(themedContext, android.R.layout.simple_list_item_1);
+        final ArrayAdapter<String> actions = new ArrayAdapter<>(builder.getContext(), R.layout.game_menu_item);
 
         builder.setAdapter(actions, (dialog, which) -> {
             String label = actions.getItem(which);
@@ -130,9 +143,39 @@ public class GameMenu implements Game.GameMenuCallbacks {
         }
         currentDialog = builder.show();
 
+        // The gamepad charge cards stay in the corners while a menu is open. Dismissal arrives later, so a
+        // submenu that replaced this dialog has already become currentDialog by then and keeps them.
+        final AlertDialog shown = currentDialog;
+        shown.setOnDismissListener(dialog -> {
+            if (currentDialog == shown) {
+                currentDialog = null;
+            }
+            if (currentDialog == null) {
+                game.setGameMenuVisible(false);
+            }
+        });
+        game.setGameMenuVisible(true);
+
         Window window = currentDialog.getWindow();
 
+        ListView list = currentDialog.getListView();
+        if (list != null) {
+            // The rows draw their own highlight (game_menu_item_bg); no stock selector, divider or side padding
+            list.setSelector(android.R.color.transparent);
+            list.setDivider(null);
+            list.setDividerHeight(0);
+            float density = game.getResources().getDisplayMetrics().density;
+            list.setPadding(0, 0, 0, Math.round(10 * density));
+        }
+
         if (window != null) {
+            float density = game.getResources().getDisplayMetrics().density;
+            window.setLayout(Math.round(MENU_WIDTH_DP * density), WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+            WindowManager.LayoutParams attributes = window.getAttributes();
+            attributes.y = Math.round(MENU_TOP_MARGIN_DP * density);
+            window.setAttributes(attributes);
+
             View decorView = window.getDecorView();
             decorView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -295,10 +338,10 @@ public class GameMenu implements Game.GameMenuCallbacks {
                     if (serverCmds.isEmpty()) {
                         int themeResId = game.getApplicationInfo().theme;
                         Context themedContext = new ContextThemeWrapper(dialogScreenContext, themeResId);
-                        new AlertDialog.Builder(themedContext)
+                        Dialog.compact(new AlertDialog.Builder(themedContext)
                                 .setTitle(R.string.game_dialog_title_server_cmd_empty)
                                 .setMessage(R.string.game_dialog_message_server_cmd_empty)
-                                .show();
+                                .show());
                     } else {
                         hideMenu();
                         this.showServerCmd(serverCmds);
