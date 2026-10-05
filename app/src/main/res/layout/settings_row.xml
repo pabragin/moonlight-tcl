@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One setting. Title and explanation on the left; on the right a column of fixed width where every kind of
+     control sits centred: a switch, a value, a value over a slider track, or a chevron. The row's background
+     and text colours follow the list's own selected state. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/settings_row_bg"
+    android:gravity="center_vertical"
+    android:minHeight="64dp"
+    android:orientation="horizontal"
+    android:paddingStart="20dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:duplicateParentState="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/rowTitle"
+            android:textAlignment="viewStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:duplicateParentState="true"
+            android:textColor="#FFFFFFFF"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/rowSummary"
+            android:textAlignment="viewStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:duplicateParentState="true"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/settings_summary"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/rowControl"
+        android:layout_width="184dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:duplicateParentState="true"
+        android:minHeight="40dp">
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/rowValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:duplicateParentState="true"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:singleLine="true"
+                android:textColor="@color/settings_value"
+                android:textSize="15sp" />
+
+            <com.limelight.ui.SliderTrackView
+                android:id="@+id/rowTrack"
+                android:layout_width="124dp"
+                android:layout_height="12dp"
+                android:layout_marginTop="3dp"
+                android:duplicateParentState="true"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <com.limelight.ui.ToggleView
+            android:id="@+id/rowSwitch"
+            android:layout_width="42dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/rowChevron"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:duplicateParentState="true"
+            android:includeFontPadding="false"
+            android:text="›"
+            android:textColor="@color/settings_value"
+            android:textSize="26sp"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

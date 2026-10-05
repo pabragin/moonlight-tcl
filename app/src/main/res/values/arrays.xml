@@ -54,25 +54,6 @@
         <item>71</item>
     </string-array>
 
-    <!-- Don't forget to update locales_config.xml when you modify this! -->
-    <string-array name="language_names" translatable="false">
-        <item>Default</item>
-        <item>English</item>
-        <item>Русский</item>
-        <item>中文(简体)</item>
-        <item>中文(繁體)</item>
-        <item>Français</item>
-        <item>Tiếng Việt</item>
-    </string-array>
-    <string-array name="language_values" translatable="false">
-        <item>default</item>
-        <item>en</item>
-        <item>ru</item>
-        <item>zh-CN</item>
-        <item>zh-TW</item>
-        <item>fr</item>
-        <item>vi</item>
-    </string-array>
 
     <string-array name="video_format_names">
         <item>@string/videoformat_auto</item>
@@ -88,16 +69,12 @@
     </string-array>
 
     <string-array name="video_frame_pacing_names">
-        <item>@string/pacing_warp2</item>
-        <item>@string/pacing_warp</item>
         <item>@string/pacing_latency</item>
         <item>@string/pacing_balanced</item>
         <item>@string/pacing_balanced_alt</item>
         <item>@string/pacing_smoothness</item>
     </string-array>
     <string-array name="video_frame_pacing_values" translatable="false">
-        <item>warp2</item>
-        <item>warp</item>
         <item>latency</item>
         <item>balanced</item>
         <item>cap-fps</item>
@@ -116,40 +93,6 @@
     </string-array>
 
 
-    <string-array name="keyboard_axi_names">
-        <item>@string/keyboard_layout_set_1</item>
-        <item>@string/keyboard_layout_set_1</item>
-        <item>@string/keyboard_layout_set_1</item>
-        <item>@string/keyboard_layout_set_1</item>
-        <item>@string/keyboard_layout_set_1</item>
-    </string-array>
-    <string-array name="keyboard_axi_values" translatable="false">
-        <item>OSC_Keyboard</item>
-        <item>OSC_Keyboard_2</item>
-        <item>OSC_Keyboard_3</item>
-        <item>OSC_Keyboard_4</item>
-        <item>OSC_Keyboard_5</item>
-    </string-array>
-    <string-array name="render_mode_names">
-        <item>@string/render_mode_2d</item>
-        <item>@string/render_mode_3d_sbs</item>
-        <item>@string/render_mode_3d_sbs_movie</item>
-    </string-array>
-    <string-array name="render_mode_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
 
-    <string-array name="onscreen_keyboard_align_modes">
-        <item>@string/align_left</item>
-        <item>@string/align_center</item>
-        <item>@string/align_right</item>
-    </string-array>
-    <string-array name="onscreen_keyboard_align_values" translatable="false">
-        <item>left</item>
-        <item>center</item>
-        <item>right</item>
-    </string-array>
 
 </resources>

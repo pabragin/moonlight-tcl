@@ -31,6 +31,7 @@ import com.limelight.preferences.GlPreferences;
 import com.limelight.preferences.PreferenceConfiguration;
 import com.limelight.profiles.ProfilesManager;
 import com.limelight.ui.GameGestures;
+import com.limelight.ui.OnScreenKeyboardView;
 import com.limelight.ui.StreamContainer;
 import com.limelight.utils.Dialog;
 import com.limelight.utils.PerformanceDataTracker;
@@ -86,13 +87,10 @@ import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ImageButton;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
+import android.app.Activity;
+import android.preference.PreferenceManager;
 
 import android.os.Looper;
 import java.nio.charset.StandardCharsets;
@@ -119,7 +117,7 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 
 
-public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
+public class Game extends Activity implements SurfaceHolder.Callback,
         OnGenericMotionListener, OnTouchListener, NvConnectionListener,
         OnSystemUiVisibilityChangeListener, GameGestures, StreamContainer.InputCallbacks,
         PerfOverlayListener, UsbDriverService.UsbDriverStateListener, View.OnKeyListener {
@@ -167,6 +165,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private InputCaptureProvider inputCaptureProvider;
     private int modifierFlags = 0;
     private boolean grabbedInput = true;
+    private OnScreenKeyboardView onScreenKeyboard;
     private boolean cursorVisible = false;
     private boolean synthClickPending = false;
     private boolean pointerSwiping = false;
@@ -257,7 +256,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
     public GameMenuCallbacks gameMenuCallbacks;
 
-    private ImageButton floatingMenuButton;
     private float floatingButtonDX, floatingButtonDY;
     private boolean isButtonMoving = false;
     private static final float CLICK_ACTION_THRESHOLD = 5;
@@ -301,7 +299,6 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         instance = this;
         timerHandler = new Handler(Looper.getMainLooper());
 
-        UiHelper.setLocale(this);
 
         // We don't want a title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -369,6 +366,46 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         streamContainer.setOnKeyListener(this);
         streamContainer.setInputCallbacks(this);
         streamContainer.setCommitTextEnabled(prefConfig.enableCommitText);
+
+        // Keyboard drawn over the stream, opened from the game menu and driven from the gamepad
+        onScreenKeyboard = findViewById(R.id.onScreenKeyboard);
+        onScreenKeyboard.setListener(new OnScreenKeyboardView.Listener() {
+            @Override
+            public void onOskKey(int keyCode, boolean down, byte modifiers) {
+                if (conn == null) {
+                    return;
+                }
+                short vk = keyboardTranslator.translate(keyCode, 0, -1);
+                if (vk == 0) {
+                    return;
+                }
+                // The keys are laid out as a US keyboard, so they are already normalized for the host
+                conn.sendKeyboardInput(vk, down ? KeyboardPacket.KEY_DOWN : KeyboardPacket.KEY_UP, modifiers, (byte) 0);
+            }
+
+            @Override
+            public void onOskText(String text) {
+                if (conn != null) {
+                    conn.sendUtf8Text(text);
+                }
+            }
+
+            @Override
+            public void onOskCombo(int[] keyCodes) {
+                if (conn == null) {
+                    return;
+                }
+                short[] keys = new short[keyCodes.length];
+                for (int i = 0; i < keyCodes.length; i++) {
+                    keys[i] = keyboardTranslator.translate(keyCodes[i], 0, -1);
+                }
+                sendKeys(keys);
+            }
+
+            @Override
+            public void onOskClosed() {
+            }
+        });
 
         rootView = streamContainer.getParent();
 
@@ -703,65 +740,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
         gameMenuCallbacks = new GameMenu(this);
 
-        floatingMenuButton = findViewById(R.id.floatingMenuButton);
-        updateFloatingButtonVisibility(prefConfig.enableBackMenu && prefConfig.enableFloatingButton);
-        initFloatingButton();
 
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void initFloatingButton() {
-        // Touch listener for drag and click
-        if (floatingMenuButton != null) {
-            floatingMenuButton.setOnTouchListener((view, event) -> {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        floatingButtonStartX = event.getRawX();
-                        floatingButtonStartY = event.getRawY();
-                        floatingButtonDX = view.getX() - event.getRawX();
-                        floatingButtonDY = view.getY() - event.getRawY();
-                        isButtonMoving = false;
-                        return true;
-                    case MotionEvent.ACTION_MOVE:
-                        float newX = event.getRawX() + floatingButtonDX;
-                        float newY = event.getRawY() + floatingButtonDY;
-
-                        // Check if it's a move or just a tap
-                        if (Math.abs(event.getRawX() - floatingButtonStartX) > CLICK_ACTION_THRESHOLD ||
-                                Math.abs(event.getRawY() - floatingButtonStartY) > CLICK_ACTION_THRESHOLD) {
-                            isButtonMoving = true;
-                        }
-
-                        // Ensure the button stays within screen bounds
-                        if (newX < 0) newX = 0;
-                        if (newY < 0) newY = 0;
-
-                        int maxOffsetX = getWindow().getDecorView().getWidth() - view.getWidth();
-                        if (newX > maxOffsetX) {
-                            newX = maxOffsetX;
-                        }
-
-                        int maxOffsetY = getWindow().getDecorView().getHeight() - view.getHeight();
-                        if (newY > maxOffsetY) {
-                            newY = maxOffsetY;
-                        }
-
-                        view.setX(newX);
-                        view.setY(newY);
-                        return true;
-                    case MotionEvent.ACTION_UP:
-                        if (!isButtonMoving) {
-                            // It's a click event, show menu
-                            showGameMenu(null);
-                        }
-                        isButtonMoving = false;
-                        return true;
-                    default:
-                        return false;
-                }
-            });
-        }
-    }
 
     private void setPreferredOrientationForActivity() {
         // A TV is always landscape
@@ -1370,6 +1352,11 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             return true;
         }
 
+        // The on-screen keyboard takes the gamepad and the remote while it is open
+        if (onScreenKeyboard != null && onScreenKeyboard.isShowing() && onScreenKeyboard.handleKey(event)) {
+            return true;
+        }
+
         boolean handled = false;
 
         if (ControllerHandler.isGameControllerDevice(event.getDevice())) {
@@ -1457,6 +1444,10 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
             // Always return true, otherwise the back press will be propagated
             // up to the parent and finish the activity.
+            return true;
+        }
+
+        if (onScreenKeyboard != null && onScreenKeyboard.isShowing() && onScreenKeyboard.handleKey(event)) {
             return true;
         }
 
@@ -1591,7 +1582,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         return null;
     }
 
-    private static @NonNull ClipData cloneClipData(ClipDescription clipDescription, ClipData.Item item) {
+    private static ClipData cloneClipData(ClipDescription clipDescription, ClipData.Item item) {
         ClipDescription clonedDescription = new ClipDescription(clipDescription);
         PersistableBundle extras = clipDescription.getExtras();
         if (extras == null) {
@@ -1699,10 +1690,26 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == OnScreenKeyboardView.REQUEST_RECORD_AUDIO && onScreenKeyboard != null) {
+            onScreenKeyboard.onMicPermissionResult(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+        }
+    }
+
+    /** Game menu: shows or hides the on-screen keyboard. */
+    @Override
     public void toggleKeyboard() {
-        LimeLog.info("Toggling keyboard overlay");
-        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.toggleSoftInput(0, 0);
+        if (onScreenKeyboard == null) {
+            return;
+        }
+        if (onScreenKeyboard.isShowing()) {
+            onScreenKeyboard.hide(true);
+        }
+        else {
+            LimeLog.info("Showing the on-screen keyboard");
+            onScreenKeyboard.show();
+        }
     }
 
     private byte getLiTouchTypeFromEvent(MotionEvent event) {
@@ -1957,6 +1964,13 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     // Returns true if the event was consumed
     // NB: View is only present if called from a view callback
     public boolean handleMotionEvent(View view, MotionEvent event) {
+        // Sticks, hat and triggers drive the on-screen keyboard while it is open
+        if (onScreenKeyboard != null && onScreenKeyboard.isShowing() &&
+                (event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+            onScreenKeyboard.handleJoystick(event);
+            return true;
+        }
+
         // Pass through mouse/touch/joystick input if we're not grabbing
         if (!grabbedInput) {
             return false;
@@ -2498,6 +2512,9 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             connecting = connected = false;
 
             controllerHandler.stop();
+            if (onScreenKeyboard != null) {
+                onScreenKeyboard.hide(false);
+            }
 
             // Update GameManager state to indicate we're no longer in game
             UiHelper.notifyStreamEnded(this);
@@ -3037,15 +3054,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
         }
     }
 
-    private void updateFloatingButtonVisibility(boolean show) {
-        floatingMenuButton.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
 
-    public void toggleFloatingButtonVisibility() {
-        if (floatingMenuButton != null) {
-            updateFloatingButtonVisibility(floatingMenuButton.getVisibility() == View.GONE);
-        }
-    }
 
 
     @Override

@@ -2,60 +2,45 @@
 <resources>
 
     <!--
-        Base application theme. minSdk is 34, so the former res/values-v24 and res/values-v29
-        overrides live here now. The parent is AppCompat; the colors are the Material 3 dark palette
-        the Material3 theme gave the app before the Material library was dropped.
+        Base theme of every screen outside the stream, on the framework's Material theme: near-black
+        background, white text and accents, the dark panel for every dialog. No AppCompat anywhere.
     -->
-    <style name="AppBaseTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">#D0BCFF</item>
-        <item name="colorPrimaryDark">#381E72</item>
-        <item name="colorAccent">#D0BCFF</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#0E0E10</item>
+        <item name="android:colorBackground">#0E0E10</item>
+        <item name="android:colorPrimary">#0E0E10</item>
+        <item name="android:colorPrimaryDark">#0E0E10</item>
+        <item name="android:colorAccent">#FFFFFFFF</item>
+        <item name="android:colorControlActivated">#FFFFFFFF</item>
+        <item name="android:colorControlHighlight">#33FFFFFF</item>
+        <item name="android:textColorPrimary">#FFFFFFFF</item>
+        <item name="android:textColorSecondary">#FFB8B8BC</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <!-- Avoid some systems like MIUI which break the visibility of games title -->
         <item name="android:forceDarkAllowed">false</item>
         <!-- Every dialog and context menu of the app: the compact dark panel of the in-game menu -->
         <item name="android:alertDialogTheme">@style/MoonlightDialogTheme</item>
         <item name="android:dialogTheme">@style/MoonlightDialogTheme</item>
+        <item name="android:windowAnimationStyle">@style/ScreenFade</item>
     </style>
 
-    <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:statusBarColor">#1A1A1A</item>
-        <item name="android:navigationBarColor">#1A1A1A</item>
-        <item name="android:colorBackground">#1A1A1A</item>
-        <item name="android:windowBackground">#1A1A1A</item>
+    <!-- Screens fade into each other the way the TV's own menus do -->
+    <style name="ScreenFade" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
     </style>
 
-    <style name="StreamBaseTheme" parent="AppBaseTheme">
-        <!-- Black, not transparent: avoids a see-through window while switching apps -->
+    <style name="MainTheme" parent="AppTheme" />
+
+    <!-- Stream activity theme: black, not transparent, which avoids a see-through window while switching apps -->
+    <style name="StreamTheme" parent="AppTheme">
         <item name="android:windowBackground">@android:color/black</item>
-    </style>
-
-    <!-- Stream activity theme -->
-    <style name="StreamTheme" parent="StreamBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <!-- Added for API 34+ where ImageButton requires these color attrs to inflate -->
+        <item name="android:colorBackground">@android:color/black</item>
         <item name="android:colorControlNormal">@android:color/white</item>
-        <item name="android:colorControlHighlight">@android:color/white</item>
-        <item name="android:colorAccent">@android:color/white</item>
-        <item name="android:colorControlActivated">@android:color/white</item>
         <item name="android:colorButtonNormal">@android:color/white</item>
-        <!-- Duplicate non-prefixed color attributes for AppCompat widgets -->
-        <item name="colorControlNormal">@android:color/white</item>
-        <item name="colorControlHighlight">@android:color/white</item>
-        <item name="colorAccent">@android:color/white</item>
-        <item name="colorControlActivated">@android:color/white</item>
-        <item name="colorButtonNormal">@android:color/white</item>
-    </style>
-
-    <!-- Settings share the app theme (this is what the API 29+ override did) -->
-    <style name="SettingsTheme" parent="AppTheme">
     </style>
 
     <!--
@@ -95,6 +80,5 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:letterSpacing">0.08</item>
     </style>
-
 
 </resources>

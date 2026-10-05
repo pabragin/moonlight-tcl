@@ -55,7 +55,7 @@ public class StartupCrashTest {
         // Test startup when native libraries fail to load
         // The shadow should handle this, but let's verify
         try {
-            PcView activity = Robolectric.buildActivity(PcView.class).create().get();
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
             assertNotNull("Activity should handle native library issues", activity);
         } catch (UnsatisfiedLinkError e) {
             fail("Native library loading should be handled by shadow: " + e.getMessage());
@@ -66,9 +66,9 @@ public class StartupCrashTest {
 
     @Test
     public void testGLSurfaceViewInitialization() {
-        // Test GL surface view initialization that happens in PcView.onCreate
+        // Test GL surface view initialization that happens in MainActivity.onCreate
         try {
-            PcView activity = Robolectric.buildActivity(PcView.class).create().get();
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
 
             // Verify activity doesn't crash during GL initialization
             assertNotNull("Activity should survive GL initialization", activity);
@@ -93,9 +93,9 @@ public class StartupCrashTest {
     public void testUiHelperCrash() {
         // Test UiHelper methods that might cause crashes
         try {
-            // UiHelper.setLocale requires Activity, so we'll test with a mock activity
-            PcView activity = Robolectric.buildActivity(PcView.class).create().get();
-            UiHelper.setLocale(activity);
+            // The TV's language applies by itself now; creating the activity is the whole test
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
+            UiHelper.notifyNewRootView(activity);
             // Should not crash
         } catch (Exception e) {
             fail("UiHelper.setLocale should not crash: " + e.getMessage());
@@ -106,7 +106,7 @@ public class StartupCrashTest {
     public void testComputerManagerServiceBinding() {
         // Test service binding that happens during startup
         try {
-            PcView activity = Robolectric.buildActivity(PcView.class).create().get();
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
 
             // Service binding happens asynchronously, but creation should not crash
             assertNotNull("Activity should handle service binding", activity);
@@ -137,12 +137,12 @@ public class StartupCrashTest {
 
     @Test
     public void testMissingRequiredIntentExtras() {
-        // Test AppView with missing required intent extras
+        // Test MainActivity with missing required intent extras
         Intent intent = new Intent();
         // Missing NAME_EXTRA and UUID_EXTRA
 
         try {
-            AppView activity = Robolectric.buildActivity(AppView.class, intent).create().get();
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class, intent).create().get();
             // Should either handle gracefully or finish cleanly
             assertTrue("Activity should either work or finish cleanly",
                       activity != null && (!activity.isFinishing() || activity.isFinishing()));
@@ -153,13 +153,13 @@ public class StartupCrashTest {
 
     @Test
     public void testInvalidUuidInIntent() {
-        // Test AppView with invalid UUID
+        // Test MainActivity with invalid UUID
         Intent intent = new Intent();
-        intent.putExtra(AppView.NAME_EXTRA, "Test Computer");
-        intent.putExtra(AppView.UUID_EXTRA, "invalid-uuid");
+        intent.putExtra(MainActivity.NAME_EXTRA, "Test Computer");
+        intent.putExtra(MainActivity.UUID_EXTRA, "invalid-uuid");
 
         try {
-            AppView activity = Robolectric.buildActivity(AppView.class, intent).create().get();
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class, intent).create().get();
             assertNotNull("Should handle invalid UUID", activity);
         } catch (Exception e) {
             fail("Invalid UUID should be handled gracefully: " + e.getMessage());
@@ -194,8 +194,8 @@ public class StartupCrashTest {
         // Test concurrent initialization that might cause race conditions
         try {
             // Create multiple activities simultaneously
-            PcView activity1 = Robolectric.buildActivity(PcView.class).create().get();
-            PcView activity2 = Robolectric.buildActivity(PcView.class).create().get();
+            MainActivity activity1 = Robolectric.buildActivity(MainActivity.class).create().get();
+            MainActivity activity2 = Robolectric.buildActivity(MainActivity.class).create().get();
 
             assertNotNull("First activity should be created", activity1);
             assertNotNull("Second activity should be created", activity2);
@@ -209,7 +209,7 @@ public class StartupCrashTest {
         // Test for potential memory leaks during startup
         try {
             for (int i = 0; i < 10; i++) {
-                PcView activity = Robolectric.buildActivity(PcView.class).create().get();
+                MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
                 activity.onDestroy();
 
                 // Force garbage collection
@@ -227,7 +227,7 @@ public class StartupCrashTest {
     public void testActivityLifecycleTransitions() {
         // Test rapid activity lifecycle transitions that might cause crashes
         try {
-            PcView activity = Robolectric.buildActivity(PcView.class)
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class)
                 .create()
                 .start()
                 .resume()
@@ -248,7 +248,7 @@ public class StartupCrashTest {
     public void testStartupWithSystemUiVisibility() {
         // Test startup with various system UI visibility states
         try {
-            PcView activity = Robolectric.buildActivity(PcView.class).create().get();
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
 
             // Test various UI visibility changes that might happen during startup
             if (activity.getWindow() != null && activity.getWindow().getDecorView() != null) {
@@ -266,7 +266,7 @@ public class StartupCrashTest {
         // Test startup when network is unavailable
         // This is more of an integration test, but important for crash prevention
         try {
-            PcView activity = Robolectric.buildActivity(PcView.class).create().get();
+            MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
             assertNotNull("Activity should handle network unavailability", activity);
         } catch (Exception e) {
             fail("Network unavailability should not crash startup: " + e.getMessage());

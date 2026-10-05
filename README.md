@@ -49,15 +49,45 @@ their updates. Android 14 only, `armeabi-v7a` only (that is what these TVs run).
   table grows at every cable plug-in, and that is where the charger card comes from. The pad never reports the cable coming
   out, so the state returns to discharging once the level falls. `Settings → Gamepad → Gamepad cards on screen` turns it off.
 
+**On-screen keyboard**
+- `Game menu → On-screen keyboard` draws a keyboard over the stream and hands the gamepad to it: d-pad or left stick moves,
+  A presses, B closes, X is Backspace, Y is Space, LB/RB switch between the US, Russian and function-key pages, LT is Shift,
+  RT is Enter; the TV remote works the same way with OK and Back. Latin letters, digits and the special keys reach the PC as
+  real key presses, like a US keyboard plugged into it, so games and shortcuts see them and the PC's own layout decides the
+  character; Russian letters go as text and come out right whatever layout the PC is in. Shift, Ctrl and Alt are sticky (tap
+  for the next key, tap again to lock), Win opens the Start menu, and the Fn page has F1–F12, Ins/Del/Home/End/PgUp/PgDn,
+  PrtSc and ready shortcuts: Alt+Tab, Alt+F4, Win+D, Win+R, Win+Tab, Win+E, Ctrl+C/V/Z/A. The microphone key (or the View
+  button) dictates through the TV's speech recognizer: Russian on the Russian page, the TV's language otherwise; the text lands
+  on the PC as typed text, and the first use asks for the microphone permission. The TV's own keyboard is not used: it needs a
+  text field and never sees gamepad buttons.
+- Settings trimmed to what can change anything on a TV: 45 options in seven categories instead of 85 in ten (no touchpad,
+  metered-network, clipboard, floating-button, in-app-language or community-logging options), every title and description
+  rewritten in one plain line. The interface comes in 32 languages (English, Russian, Ukrainian, Polish, Czech, Bulgarian,
+  German, Dutch, Danish, Swedish, Norwegian, Finnish, French, Spanish, Italian, Portuguese and Brazilian Portuguese, Romanian,
+  Greek, Turkish, Hungarian, Hebrew, Arabic, Persian, Hindi, Thai, Vietnamese, Indonesian, Japanese, Korean, Simplified and
+  Traditional Chinese), every one complete; the app follows the TV's language or the per-app language picked in Android settings.
+
+**Interface**
+- One screen before the stream, in the style of the TV's own menus: the PCs as chips in the header with a status dot (green
+  online, grey offline, a lock when not paired), the selected PC's apps as posters below, the attached gamepads with their
+  charge in the corner, the active settings profile and the settings behind pill buttons. A PC that is offline, unpaired or
+  still being checked shows a short message with the actions that make sense (wake, pair, delete) instead of the grid. Long
+  press, Menu or the gamepad's Y open the dark action panel of the in-game menu for a PC or an app. Settings are two-pane
+  like the TV's: categories on the left, the rows on the right, toggles flip in place, choices open the panel, sliders and
+  text values a small dialog; a settings profile is edited on the same screen with the changed rows marked.
+- No AndroidX and no OkHttp any more: every screen is built on the framework's widgets (Activity, ListView, GridView,
+  AlertDialog) and the app's own Views, the host is reached through HttpsURLConnection. The APK went from 2.8 to 1.3 MB, the
+  Java code from 1.36 to 0.42 MB; most of what is left is the native decoder/streaming library.
+
 **Stability and housekeeping**
 - The whole-TV freezes of the first builds (volume bar, app switch, stream exit) no longer reproduce; the workarounds that fought
   them are gone. The "volume change after an hour freezes the screen and the app dies" symptom was the rumble crash all along.
 - Fixed a Settings-screen crash inherited from Artemis and a crash on oversized frames at high bitrates.
 - Defaults for a 4K TV: 3840×2160, 60 FPS, 100 Mbps, HEVC, HDR on, lowest-latency pacing. Phone-only features and the 3D mode are
   gone (APK 37 → 11 MB), settings are down to the ones that matter, logcat is quiet during a stream.
-- **Built-in latency test** (`Settings → Advanced Settings → Latency test mode`): open [`tools/latency-test.html`](tools/latency-test.html)
+- **Built-in latency test** (`Settings → Advanced → Latency test mode`): open [`tools/latency-test.html`](tools/latency-test.html)
   full screen on the PC, press A/B/X/Y in the stream, read button-to-frame latency split into input, host+network and
-  decode+present. **Post-stream toast** (`Settings → UI`) shows the decode time of the session.
+  decode+present. **Post-stream toast** (`Settings → Interface`) shows the decode time of the session.
   [`tools/framerate-test.html`](tools/framerate-test.html) is a local 60 fps test pattern for the PC (ladder, moving bar, frame
   counter, heavy mode): every dropped or duplicated frame in the stream is visible on the TV without any overlay.
 
@@ -218,7 +248,27 @@ Shield 2017 и GameSir 8K сделаны по исходникам драйве�
 подключении кабеля показываются номер игрока, имя из Bluetooth-настроек телевизора и заряд (игрок 1 слева внизу, игрок 2
 справа); пока открыто меню игры, заряд всех геймпадов стоит по углам, а в списках ПК и приложений подключённые геймпады показаны
 маленькими значками с батарейкой. Сам телевизор заряд не отдаёт, поэтому уровень читается у геймпада по Bluetooth LE, а кабель у
-Xbox определяется по счётчику подключений в его таблице статистики.
+Xbox определяется по счётчику подключений в его таблице статистики. Экранная клавиатура из меню игры: крестовина или левый
+стик двигают курсор, A нажимает, B закрывает, X — Backspace, Y — пробел, LB/RB переключают латиницу, кириллицу и страницу
+функциональных клавиш, LT — Shift, RT — Enter; с пульта так же. Латиница, цифры и служебные клавиши уходят на ПК как нажатия
+настоящей US-клавиатуры (символ определяет раскладка ПК, игры и сочетания работают), русские буквы — как текст, независимо от
+раскладки ПК. Shift, Ctrl и Alt залипающие, Win открывает меню «Пуск», на странице Fn есть F1–F12, Ins/Del/Home/End/PgUp/PgDn,
+PrtSc и готовые сочетания Alt+Tab, Alt+F4, Win+D, Win+R, Win+Tab, Win+E, Ctrl+C/V/Z/A. Клавиша с микрофоном (или кнопка
+View) включает голосовой набор через распознавание речи самого телевизора: по-русски на русской раскладке, на языке
+телевизора на остальных; текст приходит на ПК как набранный, при первом использовании спрашивается доступ к микрофону.
+
+**Интерфейс.** Один экран перед стримом в стиле меню самого телевизора: ПК чипами в шапке с точкой статуса (зелёная в
+сети, серая не в сети, замок без сопряжения), под ними постеры приложений выбранного ПК, в углу подключённые геймпады с
+зарядом, профиль и настройки за круглыми кнопками. ПК не в сети, без сопряжения или ещё проверяемый показывает вместо сетки
+короткое сообщение и уместные действия (разбудить, сопрячь, удалить). Долгое нажатие, Menu или Y на геймпаде открывают
+тёмную панель действий для ПК или приложения. Настройки двухпанельные, как у телевизора: категории слева, пункты справа,
+переключатели щёлкают на месте, выбор значений открывает панель, ползунки и текст — небольшой диалог; профиль настроек
+редактируется на том же экране с пометкой изменённых пунктов. В приложении больше нет AndroidX и OkHttp: все экраны на
+виджетах самой системы и собственных View, хост опрашивается через HttpsURLConnection. Настройки урезаны до того, что
+вообще может что-то изменить на телевизоре: 45 пунктов в семи категориях вместо 85 в десяти, все названия и описания
+переписаны в одну понятную строку. Интерфейс переведён на 32 языка полностью (от русского и украинского до японского, арабского
+и хинди), приложение берёт язык телевизора или тот, что выбран для него в настройках Android. APK уменьшился с 2,8 до 1,34 МБ
+без переводов и остаётся около 2,2 МБ с ними.
 
 **Сравнение с официальным Artemis 20.2.6** на том же телевизоре при одинаковых настройках 4K60 HDR, 100 Мбит/с. Исходники
 Artemis собраны как тот же пакет, поэтому у обоих клиентов одна пара с ПК и один файл настроек; они ставились друг поверх друга

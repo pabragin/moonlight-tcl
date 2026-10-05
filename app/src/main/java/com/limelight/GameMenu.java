@@ -196,6 +196,8 @@ public class GameMenu implements Game.GameMenuCallbacks {
 
     private void showSpecialKeysMenu() {
         List<MenuOption> options = new ArrayList<>();
+        options.add(new MenuOption(getString(R.string.game_menu_task_manager), true,
+                () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_ESCAPE})));
 
         if(!PreferenceConfiguration.readPreferences(game).disableDefaultExtraKeys){
             options.add(new MenuOption(getString(R.string.game_menu_send_keys_esc),
@@ -284,26 +286,6 @@ public class GameMenu implements Game.GameMenuCallbacks {
         showMenuDialog(getString(R.string.game_menu_send_keys), options.toArray(new MenuOption[options.size()]));
     }
 
-    private void showAdvancedMenu(GameInputDevice device) {
-        List<MenuOption> options = new ArrayList<>();
-        options.add(new MenuOption(getString(R.string.toggle_local_mouse_cursor), true, game::toggleMouseLocalCursor));
-
-        options.add(new MenuOption(getString(R.string.game_menu_toggle_hud), true, game::toggleHUD));
-        options.add(new MenuOption(getString(R.string.game_menu_toggle_floating_button), true, game::toggleFloatingButtonVisibility));
-        options.add(new MenuOption(getString(R.string.game_menu_task_manager), true, () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_ESCAPE})));
-
-        // **FIXED:** This is a UI navigation action, so it should not use withGameFocus.
-        options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> {
-            hideMenu();
-            showSpecialKeysMenu();
-        }));
-
-        if (device != null) {
-            options.addAll(device.getGameMenuOptions());
-        }
-        options.add(new MenuOption(getString(R.string.game_menu_cancel), null));
-        showMenuDialog(getString(R.string.game_menu_advanced), options.toArray(new MenuOption[options.size()]));
-    }
 
     private void showServerCmd(ArrayList<String> serverCmds) {
         List<MenuOption> options = new ArrayList<>();
@@ -322,15 +304,23 @@ public class GameMenu implements Game.GameMenuCallbacks {
     public void showMenu(GameInputDevice device) {
         List<MenuOption> options = new ArrayList<>();
 
-        options.add(new MenuOption(getString(R.string.game_menu_disconnect), game::disconnect));
-
+        // The four things reached for most often come first: end or leave the stream, the keyboard, the stats
         options.add(new MenuOption(getString(R.string.game_menu_quit_session), game::quit));
+        options.add(new MenuOption(getString(R.string.game_menu_disconnect), game::disconnect));
+        options.add(new MenuOption(getString(R.string.game_menu_toggle_keyboard), true, game::toggleKeyboard));
+        options.add(new MenuOption(getString(R.string.game_menu_toggle_hud), true, game::toggleHUD));
 
-        options.add(new MenuOption(getString(R.string.game_menu_upload_clipboard), true,
-                () -> game.sendClipboard(true)));
+        // A UI navigation action, so it does not wait for the game window's focus
+        options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> {
+            hideMenu();
+            showSpecialKeysMenu();
+        }));
 
-        options.add(new MenuOption(getString(R.string.game_menu_fetch_clipboard), true,
-                () -> game.getClipboard(0)));
+        options.add(new MenuOption(getString(R.string.toggle_local_mouse_cursor), true, game::toggleMouseLocalCursor));
+
+        if (device != null) {
+            options.addAll(device.getGameMenuOptions());
+        }
 
         options.add(new MenuOption(getString(R.string.game_menu_server_cmd), true,
                 () -> {
@@ -347,12 +337,6 @@ public class GameMenu implements Game.GameMenuCallbacks {
                         this.showServerCmd(serverCmds);
                     }
                 }));
-
-        options.add(new MenuOption(getString(R.string.game_menu_toggle_keyboard), true,
-                game::toggleKeyboard));
-
-        options.add(new MenuOption(getString(R.string.game_menu_advanced), true,
-                () -> showAdvancedMenu(device)));
 
         options.add(new MenuOption(getString(R.string.game_menu_cancel), null));
 

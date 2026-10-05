@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
-import androidx.annotation.NonNull;
 
 import com.limelight.LimeLog;
 
@@ -174,7 +173,6 @@ public class ProfilesManager {
         return activeProfileId == null ? null : profiles.get(activeProfileId);
     }
 
-    @NonNull
     public String getActiveName() {
         SettingsProfile active = getActive();
         return active == null ? "" : active.getName();
@@ -316,7 +314,7 @@ public class ProfilesManager {
      * Returns a SharedPreferences that overlays the active profile's options on top of the real prefs.
      */
     public SharedPreferences getOverlayingSharedPreferences(Context context) {
-        SharedPreferences base = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences base = android.preference.PreferenceManager.getDefaultSharedPreferences(context);
         SettingsProfile active = getActive();
         if (active == null || active.getOptions() == null) {
             return base;

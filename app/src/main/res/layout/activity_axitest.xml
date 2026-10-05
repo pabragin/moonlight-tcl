@@ -1,42 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Debug information (DebugInfoActivity): device facts and the attached gamepads -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="8dp">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/title_debug_info"
+        android:textColor="#FFFFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/bt_update_gamepad"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onClick"
-        android:text="@string/debug_info_refresh_gamepad_list" />
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/bt_vibrator_gamepad"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onClick"
-        android:text="@string/debug_info_test_gamepad_rumble" />
+        <TextView
+            android:id="@+id/bt_update_gamepad"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@drawable/main_pill_bg"
+            android:focusable="true"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/debug_info_refresh_gamepad_list"
+            android:textColor="@color/main_chip_text"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/bt_vibrator_gamepad"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/main_pill_bg"
+            android:focusable="true"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/debug_info_test_gamepad_rumble"
+            android:textColor="@color/main_chip_text"
+            android:textSize="15sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tx_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/debug_info_refresh_gamepad_info" />
+        android:layout_marginTop="16dp"
+        android:fontFamily="monospace"
+        android:text="@string/debug_info_refresh_gamepad_info"
+        android:textColor="#FFB8B8BC"
+        android:textSize="13sp" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp">
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:focusable="true"
+        android:scrollbars="none">
 
         <TextView
             android:id="@+id/tx_game_pad_info"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:paddingBottom="24dp"
+            android:textColor="#FFFFFFFF"
+            android:textSize="13sp" />
     </ScrollView>
-
-
-
 </LinearLayout>

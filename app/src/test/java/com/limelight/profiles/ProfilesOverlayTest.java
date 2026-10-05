@@ -42,7 +42,7 @@ public class ProfilesOverlayTest {
 
     @Test
     public void overlaySharedPreferences_returnsPatchedValues() {
-        SharedPreferences base = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences base = android.preference.PreferenceManager.getDefaultSharedPreferences(context);
         base.edit()
             .putBoolean("checkbox_ultra_low_latency", false)
             .putInt("seekbar_bitrate_kbps", 15000)

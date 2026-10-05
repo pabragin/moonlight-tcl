@@ -8,9 +8,8 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.limelight.AppView;
 import com.limelight.Game;
-import com.limelight.PcView;
+import com.limelight.MainActivity;
 import com.limelight.ShortcutTrampoline;
 import com.limelight.computers.ComputerManagerService;
 import com.limelight.R;
@@ -38,9 +37,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import android.app.Activity;
 
-public class AddComputerManually extends AppCompatActivity {
+public class AddComputerManually extends Activity {
     private TextView hostText;
     private ComputerManagerService.ComputerManagerBinder managerBinder;
     private final LinkedBlockingQueue<String> computersToAdd = new LinkedBlockingQueue<>();
@@ -205,7 +204,7 @@ public class AddComputerManually extends AppCompatActivity {
                     String pin = uri.getQueryParameter("pin");
                     String passphrase = uri.getQueryParameter("passphrase");
                     if (pin != null && passphrase != null) {
-                        Intent intent = new Intent(AddComputerManually.this, PcView.class);
+                        Intent intent = new Intent(AddComputerManually.this, MainActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("hostname", uri.getHost());
                         intent.putExtra("port", uri.getPort());
@@ -299,8 +298,8 @@ public class AddComputerManually extends AppCompatActivity {
 
                     Intent intent = new Intent(AddComputerManually.this, ShortcutTrampoline.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(AppView.UUID_EXTRA, hostUUID);
-                    intent.putExtra(AppView.NAME_EXTRA, hostName);
+                    intent.putExtra(MainActivity.UUID_EXTRA, hostUUID);
+                    intent.putExtra(MainActivity.NAME_EXTRA, hostName);
                     intent.putExtra(Game.EXTRA_APP_UUID, appUUID);
                     intent.putExtra(Game.EXTRA_APP_NAME, appName);
                     intent.putExtra(Game.EXTRA_APP_ID, appID);
@@ -320,7 +319,6 @@ public class AddComputerManually extends AppCompatActivity {
             server = null;
         }
 
-        UiHelper.setLocale(this);
 
         setContentView(R.layout.activity_add_computer_manually);
 

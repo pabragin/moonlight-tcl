@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Dictation on the on-screen keyboard (OnScreenKeyboardView / VoiceInput), asked for on first use -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- Gamepad rumble through the Bluetooth stack's HID host (BluetoothHidRumble) -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -33,6 +35,9 @@
     <uses-feature
         android:name="android.software.leanback"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
 
     <application
         android:name=".ArtemisApplication"
@@ -48,6 +53,7 @@
         android:installLocation="auto"
         android:gwpAsanMode="always"
         android:localeConfig="@xml/locales_config"
+        android:supportsRtl="true"
         android:enableOnBackInvokedCallback="false"
         android:theme="@style/AppTheme"
         >
@@ -69,20 +75,31 @@
             android:name="android.game_mode_config"
             android:resource="@xml/game_mode_config" />
 
+        <!-- The one screen before a stream (PCs and apps). The component names PcView and AppView of the two
+             Artemis screens it replaced stay as aliases: the launcher row and old shortcuts point at them. -->
         <activity
-            android:name=".PcView"
-            android:exported="true"
+            android:name=".MainActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
+            android:theme="@style/MainTheme"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
-
+        </activity>
+        <activity-alias
+            android:name=".PcView"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".AppView"
+            android:targetActivity=".MainActivity"
+            android:exported="false" />
         <!-- Small hack to support launcher shortcuts without relaunching over and over again when the back button is pressed -->
         <activity
             android:name=".ShortcutTrampoline"
@@ -103,34 +120,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AppView"
-            android:resizeableActivity="true"
-            android:enableOnBackInvokedCallback="true"
-            android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
-        </activity>
-        <activity
             android:name=".ProfilesActivity"
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
-            android:theme="@style/SettingsTheme">
+            android:theme="@style/MainTheme">
         </activity>
         <activity
-            android:name=".EditProfileActivity"
+            android:name=".preferences.SettingsActivity"
             android:resizeableActivity="true"
-            android:enableOnBackInvokedCallback="true"
+            android:enableOnBackInvokedCallback="false"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
-            android:label="@string/title_edit_profile"
-            android:theme="@style/SettingsTheme">
-        </activity>
-        <activity
-            android:name=".preferences.StreamSettings"
-            android:resizeableActivity="true"
-            android:enableOnBackInvokedCallback="true"
-            android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
-            android:label="Streaming Settings"
-            android:theme="@style/SettingsTheme"
-            >
+            android:label="@string/main_settings"
+            android:theme="@style/MainTheme">
         </activity>
         <activity
             android:name=".preferences.AddComputerManually"
@@ -182,27 +184,7 @@
         <activity android:name=".DebugInfoActivity"
             android:launchMode="singleTask"/>
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_file_paths" />
-        </provider>
 
-        <!-- AppCompat's emoji2 initializer runs at every cold start to fetch an emoji font; a TV
-             streaming client has no use for it -->
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
-            <meta-data
-                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-                tools:node="remove" />
-        </provider>
     </application>
 
 </manifest>

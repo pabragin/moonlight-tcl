@@ -1,6 +1,5 @@
 package com.limelight.nvstream.http;
 
-import androidx.annotation.NonNull;
 
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -167,7 +166,6 @@ public class ComputerDetails {
         this.serverCommands = details.serverCommands;
     }
 
-    @NonNull
     @Override
     public String toString() {
         /*

@@ -26,7 +26,15 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Stack;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import javax.net.ssl.SSLSocketFactory;
+import android.net.Uri;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -51,14 +59,6 @@ import com.limelight.nvstream.http.PairingManager.PairState;
 import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.utils.DeviceUtils;
 
-import okhttp3.ConnectionPool;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 
 public class NvHTTP {
@@ -75,13 +75,27 @@ public class NvHTTP {
     // Print URL and content to logcat on debug builds
     private static boolean verbose = BuildConfig.DEBUG;
 
-    private HttpUrl baseUrlHttp;
+    private Uri baseUrlHttp;
+    /** The host as it goes into a URL authority: an IPv6 literal in brackets */
+    private String urlHost;
 
     private int httpsPort;
     
-    private OkHttpClient httpClientLongConnectTimeout;
-    private OkHttpClient httpClientLongConnectNoReadTimeout;
-    private OkHttpClient httpClientShortConnectTimeout;
+    /** Timeouts of one kind of request; the three OkHttp clients this class used to keep */
+    private static final class HttpClient {
+        final int connectTimeoutMs;
+        final int readTimeoutMs;
+
+        HttpClient(int connectTimeoutMs, int readTimeoutMs) {
+            this.connectTimeoutMs = connectTimeoutMs;
+            this.readTimeoutMs = readTimeoutMs;
+        }
+    }
+
+    private HttpClient httpClientLongConnectTimeout;
+    private HttpClient httpClientLongConnectNoReadTimeout;
+    private HttpClient httpClientShortConnectTimeout;
+    private HostnameVerifier hostnameVerifier;
 
     private X509TrustManager defaultTrustManager;
     private X509TrustManager trustManager;
@@ -174,31 +188,20 @@ public class NvHTTP {
             }
         };
 
-        httpClientLongConnectTimeout = new OkHttpClient.Builder()
-                .connectionPool(new ConnectionPool(0, 1, TimeUnit.MILLISECONDS))
-                .hostnameVerifier(hv)
-                .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
-                .connectTimeout(LONG_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
-                .proxy(Proxy.NO_PROXY)
-                .build();
-
-        httpClientShortConnectTimeout = httpClientLongConnectTimeout.newBuilder()
-                .connectTimeout(SHORT_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
-                .build();
-
-        httpClientLongConnectNoReadTimeout = httpClientLongConnectTimeout.newBuilder()
-                .readTimeout(0, TimeUnit.MILLISECONDS)
-                .build();
+        hostnameVerifier = hv;
+        httpClientLongConnectTimeout = new HttpClient(LONG_CONNECTION_TIMEOUT, READ_TIMEOUT);
+        httpClientShortConnectTimeout = new HttpClient(SHORT_CONNECTION_TIMEOUT, READ_TIMEOUT);
+        httpClientLongConnectNoReadTimeout = new HttpClient(LONG_CONNECTION_TIMEOUT, 0);
     }
 
-    public HttpUrl getHttpsUrl(boolean likelyOnline) throws IOException {
+    public Uri getHttpsUrl(boolean likelyOnline) throws IOException {
         if (httpsPort == 0) {
             // Fetch the HTTPS port if we don't have it already
             httpsPort = getHttpsPort(openHttpConnectionToString(likelyOnline ? httpClientLongConnectTimeout : httpClientShortConnectTimeout,
                     baseUrlHttp, "serverinfo"));
         }
 
-        return new HttpUrl.Builder().scheme("https").host(baseUrlHttp.host()).port(httpsPort).build();
+        return new Uri.Builder().scheme("https").encodedAuthority(urlHost + ":" + httpsPort).build();
     }
     
     public NvHTTP(ComputerDetails.AddressTuple address, int httpsPort, String uniqueId, X509Certificate serverCert, LimelightCryptoProvider cryptoProvider) throws IOException {
@@ -225,10 +228,10 @@ public class NvHTTP {
                 }
             }
 
-            this.baseUrlHttp = new HttpUrl.Builder()
+            urlHost = addressString.contains(":") ? "[" + addressString + "]" : addressString;
+            this.baseUrlHttp = new Uri.Builder()
                     .scheme("http")
-                    .host(addressString)
-                    .port(address.port)
+                    .encodedAuthority(urlHost + ":" + address.port)
                     .build();
         } catch (IllegalArgumentException e) {
             // Encapsulate IllegalArgumentException into IOException for callers to handle more easily
@@ -343,7 +346,7 @@ public class NvHTTP {
         String resp;
 
         // If we believe the PC is online, give it a little extra time to respond
-        OkHttpClient client = likelyOnline ? httpClientLongConnectTimeout : httpClientShortConnectTimeout;
+        HttpClient client = likelyOnline ? httpClientLongConnectTimeout : httpClientShortConnectTimeout;
         
         //
         // TODO: Shield Hub uses HTTP for this and is able to get an accurate PairStatus with HTTP.
@@ -423,7 +426,7 @@ public class NvHTTP {
         details.macAddress = getXmlString(serverInfo, "mac", false);
 
         // FIXME: Do we want to use the current port?
-        details.localAddress = makeTuple(getXmlString(serverInfo, "LocalIP", false), baseUrlHttp.port());
+        details.localAddress = makeTuple(getXmlString(serverInfo, "LocalIP", false), baseUrlHttp.getPort());
 
         // This is missing on on recent GFE versions, but it's present on Sunshine
         details.externalPort = getExternalPort(serverInfo);
@@ -457,87 +460,138 @@ public class NvHTTP {
         return getComputerDetails(getServerInfo(likelyOnline));
     }
 
-    // This hack is Android-specific but we do it on all platforms
-    // because it doesn't really matter
-    private OkHttpClient performAndroidTlsHack(OkHttpClient client) {
-        // Doing this each time we create a socket is required
-        // to avoid the SSLv3 fallback that causes connection failures
+    // Doing this for every connection is required to avoid the SSLv3 fallback that causes connection failures
+    private SSLSocketFactory createSslSocketFactory() {
         try {
             SSLContext sc = SSLContext.getInstance("TLS");
             sc.init(new KeyManager[] { keyManager }, new TrustManager[] { trustManager }, new SecureRandom());
-            return client.newBuilder().sslSocketFactory(sc.getSocketFactory(), trustManager).build();
+            return sc.getSocketFactory();
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private HttpUrl getCompleteUrl(HttpUrl baseUrl, String path, String query) {
-        return baseUrl.newBuilder()
-                .addPathSegments(path)
-                .query(query)
-                .addQueryParameter("devicename", deviceName)
-                .addQueryParameter("uniqueid", uniqueId)
-                .addQueryParameter("uuid", UUID.randomUUID().toString())
-                .build();
+    private URL getCompleteUrl(Uri baseUrl, String path, String query) throws IOException {
+        Uri.Builder builder = baseUrl.buildUpon().appendEncodedPath(path);
+        if (query != null) {
+            builder.encodedQuery(query);
+        }
+        builder.appendQueryParameter("devicename", deviceName)
+                .appendQueryParameter("uniqueid", uniqueId)
+                .appendQueryParameter("uuid", UUID.randomUUID().toString());
+        try {
+            return new URL(builder.build().toString());
+        } catch (MalformedURLException e) {
+            throw new IOException(e);
+        }
+    }
+
+    /** The response body; closing it ends the connection, as every request runs on its own */
+    private static final class ConnectionInputStream extends FilterInputStream {
+        private final HttpURLConnection connection;
+
+        ConnectionInputStream(HttpURLConnection connection) throws IOException {
+            super(connection.getInputStream());
+            this.connection = connection;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                super.close();
+            } finally {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private static String readToString(InputStream in) throws IOException {
+        try (InputStream stream = in) {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] chunk = new byte[4096];
+            int n;
+            while ((n = stream.read(chunk)) != -1) {
+                buffer.write(chunk, 0, n);
+            }
+            return buffer.toString("UTF-8");
+        }
     }
 
     // Read timeout should be enabled for any HTTP query that requires no outside action
     // on the GFE server. Examples of queries that DO require outside action are launch, resume, and quit.
     // The initial pair query does require outside action (user entering a PIN) but subsequent pairing
     // queries do not.
-    private ResponseBody openHttpConnection(OkHttpClient client, HttpUrl baseUrl, String path, String query, RequestBody requestBody) throws IOException {
-        HttpUrl completeUrl = getCompleteUrl(baseUrl, path, query);
-        Request.Builder _builder = new Request.Builder().url(completeUrl);
-        Request request;
-        if (requestBody == null) request = _builder.get().build();
-        else request = _builder.post(requestBody).build();
-
-        Response response = performAndroidTlsHack(client).newCall(request).execute();
-
-        ResponseBody body = response.body();
-        
-        if (response.isSuccessful()) {
-            return body;
+    private InputStream openHttpConnection(HttpClient client, Uri baseUrl, String path, String query, String postBody) throws IOException {
+        URL completeUrl = getCompleteUrl(baseUrl, path, query);
+        HttpURLConnection connection = (HttpURLConnection) completeUrl.openConnection(Proxy.NO_PROXY);
+        if (connection instanceof HttpsURLConnection) {
+            HttpsURLConnection https = (HttpsURLConnection) connection;
+            https.setSSLSocketFactory(createSslSocketFactory());
+            https.setHostnameVerifier(hostnameVerifier);
         }
-        
-        // Unsuccessful, so close the response body
-        if (body != null) {
-            body.close();
+        connection.setConnectTimeout(client.connectTimeoutMs);
+        connection.setReadTimeout(client.readTimeoutMs);
+        connection.setUseCaches(false);
+        connection.setInstanceFollowRedirects(false);
+        // One request per connection, the way the OkHttp pool was set up
+        connection.setRequestProperty("Connection", "close");
+
+        int code;
+        String message;
+        try {
+            if (postBody != null) {
+                byte[] body = postBody.getBytes(StandardCharsets.UTF_8);
+                connection.setDoOutput(true);
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
+                connection.setFixedLengthStreamingMode(body.length);
+                try (OutputStream out = connection.getOutputStream()) {
+                    out.write(body);
+                }
+            }
+            code = connection.getResponseCode();
+            message = connection.getResponseMessage();
+        } catch (IOException e) {
+            connection.disconnect();
+            throw e;
         }
-        
-        if (response.code() == 404) {
+
+        if (code >= 200 && code < 300) {
+            return new ConnectionInputStream(connection);
+        }
+
+        connection.disconnect();
+        if (code == 404) {
             throw new FileNotFoundException(completeUrl.toString());
         }
         else {
-            throw new HostHttpResponseException(response.code(), response.message());
+            throw new HostHttpResponseException(code, message == null ? "" : message);
         }
     }
 
-    private String openHttpConnectionToString(OkHttpClient client, HttpUrl baseUrl, String path) throws IOException {
+    private String openHttpConnectionToString(HttpClient client, Uri baseUrl, String path) throws IOException {
         return openHttpConnectionToString(client, baseUrl, path, null, null);
     }
 
-    private String openHttpConnectionToString(OkHttpClient client, HttpUrl baseUrl, String path, String query) throws IOException {
+    private String openHttpConnectionToString(HttpClient client, Uri baseUrl, String path, String query) throws IOException {
         return openHttpConnectionToString(client, baseUrl, path, query, null);
     }
 
-    private String openHttpConnectionToString(OkHttpClient client, HttpUrl baseUrl, String path, String query, RequestBody requestBody) throws IOException {
+    private String openHttpConnectionToString(HttpClient client, Uri baseUrl, String path, String query, String postBody) throws IOException {
         try {
-            ResponseBody resp = openHttpConnection(client, baseUrl, path, query, requestBody);
-            String respString = resp.string();
-            resp.close();
+            String respString = readToString(openHttpConnection(client, baseUrl, path, query, postBody));
 
             if (verbose && !path.equals("serverinfo")) {
-                LimeLog.info(getCompleteUrl(baseUrl, path, query)+" -> "+respString);
+                LimeLog.info(baseUrl + "/" + path + (query == null ? "" : "?" + query) + " -> " + respString);
             }
 
             return respString;
         } catch (IOException e) {
             if (verbose && !path.equals("serverinfo")) {
-                LimeLog.warning(getCompleteUrl(baseUrl, path, query)+" -> "+e.getMessage());
+                LimeLog.warning(baseUrl + "/" + path + (query == null ? "" : "?" + query) + " -> " + e.getMessage());
                 e.printStackTrace();
             }
-            
+
             throw e;
         }
     }
@@ -643,10 +697,10 @@ public class NvHTTP {
             return Integer.parseInt(getXmlString(serverInfo, "ExternalPort", true));
         } catch (XmlPullParserException e) {
             // Expected on non-Sunshine servers
-            return baseUrlHttp.port();
+            return baseUrlHttp.getPort();
         } catch (IOException e) {
             e.printStackTrace();
-            return baseUrlHttp.port();
+            return baseUrlHttp.getPort();
         }
     }
 
@@ -753,8 +807,8 @@ public class NvHTTP {
             return getAppListByReader(new StringReader(getAppListRaw()));
         }
         else {
-            try (final ResponseBody resp = openHttpConnection(httpClientLongConnectTimeout, getHttpsUrl(true), "applist", null, null)) {
-                return getAppListByReader(new InputStreamReader(resp.byteStream()));
+            try (InputStream resp = openHttpConnection(httpClientLongConnectTimeout, getHttpsUrl(true), "applist", null, null)) {
+                return getAppListByReader(new InputStreamReader(resp));
             }
         }
     }
@@ -774,8 +828,7 @@ public class NvHTTP {
     }
     
     public InputStream getBoxArt(NvApp app) throws IOException {
-        ResponseBody resp = openHttpConnection(httpClientLongConnectTimeout, getHttpsUrl(true), "appasset", "appid=" + app.getAppId() + "&AssetType=2&AssetIdx=0", null);
-        return resp.byteStream();
+        return openHttpConnection(httpClientLongConnectTimeout, getHttpsUrl(true), "appasset", "appid=" + app.getAppId() + "&AssetType=2&AssetIdx=0", null);
     }
     
     public int getServerMajorVersion(String serverInfo) throws XmlPullParserException, IOException {
@@ -890,7 +943,7 @@ public class NvHTTP {
 
     // We currently only support plain text
     public Boolean sendClipboard(String content) throws IOException {
-        String resp = openHttpConnectionToString(httpClientLongConnectTimeout, getHttpsUrl(true), "actions/clipboard", "type=text", RequestBody.create(content, MediaType.parse("text/plain")));
+        String resp = openHttpConnectionToString(httpClientLongConnectTimeout, getHttpsUrl(true), "actions/clipboard", "type=text", content);
         // For handling the 200ed 404 from Sunshine
         if (resp.isEmpty()) {
             return true;

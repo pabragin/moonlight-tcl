@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The one screen before a stream: PCs as chips in the header, the selected PC's apps as posters below -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="8dp"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="52dp">
+
+        <ImageView
+            android:id="@+id/appMark"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/main_dot"
+            android:clipToOutline="true"
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/appTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/appMark"
+            android:layout_marginStart="12dp"
+            android:text="@string/app_label"
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Attached gamepads with their charge (GamepadBatteryMonitor) -->
+            <com.limelight.ui.GamepadStatusStrip
+                android:id="@+id/gamepadStatusStrip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp" />
+
+            <TextView
+                android:id="@+id/profilesButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/main_pill_bg"
+                android:contentDescription="@string/profile_manager_choose_profile"
+                android:drawableStart="@drawable/ic_profiles_24"
+                android:drawablePadding="8dp"
+                android:drawableTint="@color/main_chip_text"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingEnd="16dp"
+                android:textColor="@color/main_chip_text"
+                android:textSize="15sp" />
+
+            <ImageButton
+                android:id="@+id/addPcButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/main_icon_button_bg"
+                android:contentDescription="@string/main_add_pc"
+                android:padding="9dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_add"
+                android:tint="@color/main_icon_tint" />
+
+            <ImageButton
+                android:id="@+id/helpButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/main_icon_button_bg"
+                android:contentDescription="@string/help"
+                android:padding="9dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_help"
+                android:tint="@color/main_icon_tint" />
+
+            <ImageButton
+                android:id="@+id/settingsButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/main_icon_button_bg"
+                android:contentDescription="@string/main_settings"
+                android:padding="9dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings"
+                android:tint="@color/main_icon_tint" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/pcChipsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:clipToPadding="false"
+        android:focusable="false"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/pcChips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp" />
+    </HorizontalScrollView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <com.limelight.ui.PaneGridView
+            android:id="@+id/appGrid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:columnWidth="172dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:listSelector="@android:color/transparent"
+            android:numColumns="auto_fit"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp"
+            android:stretchMode="spacingWidthUniform"
+            android:verticalSpacing="4dp"
+            android:visibility="gone" />
+
+        <!-- What the body says when there is nothing to show: searching, offline, not paired, checking -->
+        <LinearLayout
+            android:id="@+id/stateCard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingBottom="40dp">
+
+            <ProgressBar
+                android:id="@+id/stateSpinner"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:indeterminate="true"
+                android:indeterminateTint="#FFFFFFFF" />
+
+            <ImageView
+                android:id="@+id/stateIcon"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:alpha="0.9"
+                android:contentDescription="@null"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/stateTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:textColor="#FFFFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/stateMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:lineSpacingExtra="3dp"
+                android:maxWidth="560dp"
+                android:textColor="#FFB8B8BC"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/stateActions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:gravity="center"
+                android:orientation="horizontal" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

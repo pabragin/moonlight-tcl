@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Row explanation: a little brighter under the cursor -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:color="#FFD0D0D4" />
+    <item android:color="#FFA9A9AE" />
+</selector>

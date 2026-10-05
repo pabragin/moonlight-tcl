@@ -8,7 +8,7 @@ import android.os.Build;
 import android.view.Display;
 import android.widget.Toast;
 
-import com.limelight.AppView;
+import com.limelight.MainActivity;
 import com.limelight.Game;
 import com.limelight.LimeLog;
 import com.limelight.R;
@@ -42,16 +42,16 @@ public class ServerHelper {
 
     public static Intent createPcShortcutIntent(Activity parent, ComputerDetails computer) {
         Intent i = new Intent(parent, ShortcutTrampoline.class);
-        i.putExtra(AppView.NAME_EXTRA, computer.name);
-        i.putExtra(AppView.UUID_EXTRA, computer.uuid);
+        i.putExtra(MainActivity.NAME_EXTRA, computer.name);
+        i.putExtra(MainActivity.UUID_EXTRA, computer.uuid);
         i.setAction(Intent.ACTION_DEFAULT);
         return i;
     }
 
     public static Intent createAppShortcutIntent(Activity parent, ComputerDetails computer, NvApp app) {
         Intent i = new Intent(parent, ShortcutTrampoline.class);
-        i.putExtra(AppView.NAME_EXTRA, computer.name);
-        i.putExtra(AppView.UUID_EXTRA, computer.uuid);
+        i.putExtra(MainActivity.NAME_EXTRA, computer.name);
+        i.putExtra(MainActivity.UUID_EXTRA, computer.uuid);
         i.putExtra(Game.EXTRA_APP_NAME, app.getAppName());
         i.putExtra(Game.EXTRA_APP_UUID, app.getAppUUID());
         i.putExtra(Game.EXTRA_APP_ID, ""+app.getAppId());

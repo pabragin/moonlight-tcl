@@ -9,11 +9,11 @@ import android.webkit.WebViewClient;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
-import androidx.appcompat.app.AppCompatActivity;
+import android.app.Activity;
 
 import com.limelight.utils.SpinnerDialog;
 
-public class HelpActivity extends AppCompatActivity {
+public class HelpActivity extends Activity {
 
     private SpinnerDialog loadingDialog;
     private WebView webView;

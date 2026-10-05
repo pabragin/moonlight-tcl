@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import androidx.appcompat.app.AppCompatActivity;
+import android.app.Activity;
 
 import com.limelight.computers.ComputerDatabaseManager;
 import com.limelight.computers.ComputerManagerListener;
@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ShortcutTrampoline extends AppCompatActivity {
+public class ShortcutTrampoline extends Activity {
     private PreferenceConfiguration prefConfig;
     private String uuidString;
     private NvApp app;
@@ -181,14 +181,10 @@ public class ShortcutTrampoline extends AppCompatActivity {
 
                                                 // Add the PC view at the back (and clear the task)
                                                 Intent i;
-                                                i = new Intent(ShortcutTrampoline.this, PcView.class);
+                                                i = new Intent(getIntent());
+                                                i.setClass(ShortcutTrampoline.this, MainActivity.class);
                                                 i.setAction(Intent.ACTION_MAIN);
                                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                intentStack.add(i);
-
-                                                // Take this intent's data and create an intent to start the app view
-                                                i = new Intent(getIntent());
-                                                i.setClass(ShortcutTrampoline.this, AppView.class);
                                                 intentStack.add(i);
 
                                                 // If a game is running, we'll make the stream the top level activity
@@ -274,7 +270,7 @@ public class ShortcutTrampoline extends AppCompatActivity {
 
     protected boolean validateAppInput(String appUUID, String appIDStr, String appName) {
         if (appUUID == null && appIDStr == null && appName == null) {
-            // We're just going to the AppView
+            // We're just going to the main screen
             return false;
         }
 
@@ -383,10 +379,10 @@ public class ShortcutTrampoline extends AppCompatActivity {
         {
             // PC arguments, both are optional, but at least one must be provided
             if (hostUUID == null) {
-                hostUUID = getIntent().getStringExtra(AppView.UUID_EXTRA);
+                hostUUID = getIntent().getStringExtra(MainActivity.UUID_EXTRA);
             }
             if (hostName == null) {
-                hostName = getIntent().getStringExtra(AppView.NAME_EXTRA);
+                hostName = getIntent().getStringExtra(MainActivity.NAME_EXTRA);
             }
 
             // App arguments, all optional, but one must be provided in order to start an app
@@ -425,8 +421,8 @@ public class ShortcutTrampoline extends AppCompatActivity {
 
         uuidString = hostUUID;
 
-        // Set the AppView UUID intent
-        setIntent(new Intent(getIntent()).putExtra(AppView.UUID_EXTRA, uuidString));
+        // Set the main screen UUID intent
+        setIntent(new Intent(getIntent()).putExtra(MainActivity.UUID_EXTRA, uuidString));
 
         if (validateAppInput(appUUID, appIDStr, appName)) {
             // If app data came from .art file or was determined by appNameString from extras

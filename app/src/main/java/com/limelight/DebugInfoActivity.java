@@ -20,9 +20,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import android.app.Activity;
 
 import com.limelight.binding.input.BluetoothHidRumble;
 import com.limelight.utils.DeviceUtils;
@@ -30,13 +28,13 @@ import com.limelight.utils.DeviceUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DebugInfoActivity extends AppCompatActivity implements View.OnClickListener {
+public class DebugInfoActivity extends Activity implements View.OnClickListener {
 
     private TextView tx_gamepad_info;
     private List<InputDevice> ids = new ArrayList<>();
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_axitest);
 
@@ -109,7 +107,7 @@ public class DebugInfoActivity extends AppCompatActivity implements View.OnClick
     private void startBtHidTest(final InputDevice dev, final String mac) {
         if (!BluetoothHidRumble.hasPermission(this)) {
             Toast.makeText(this, R.string.debug_info_bt_hid_permission, Toast.LENGTH_LONG).show();
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_BT_CONNECT);
+            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_BT_CONNECT);
             return;
         }
         if (btHidRumble == null) {

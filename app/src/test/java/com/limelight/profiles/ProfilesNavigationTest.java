@@ -7,10 +7,10 @@ import android.os.Build;
 import android.content.Context;
 import android.app.GameManager;
 
-import com.limelight.PcView;
+import com.limelight.MainActivity;
 import com.limelight.ProfilesActivity;
 import com.limelight.R;
-import com.limelight.AppView;
+import com.limelight.MainActivity;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -37,7 +37,7 @@ public class ProfilesNavigationTest {
     }
 
     private void prepareEnvironment() {
-        // Ensure GL renderer prefs exist so PcView skips GLSurface initialization
+        // Ensure GL renderer prefs exist so MainActivity skips GLSurface initialization
         SharedPreferences glPrefs = ApplicationProvider.getApplicationContext()
                 .getSharedPreferences("GlPreferences", 0);
         glPrefs.edit()
@@ -71,8 +71,8 @@ public class ProfilesNavigationTest {
     @Test
     public void clickingProfileButton_launchesProfilesActivity() {
         prepareEnvironment();
-        ActivityController<PcView> controller = Robolectric.buildActivity(PcView.class).setup();
-        PcView pcView = controller.get();
+        ActivityController<MainActivity> controller = Robolectric.buildActivity(MainActivity.class).setup();
+        MainActivity pcView = controller.get();
 
         View btn = pcView.findViewById(R.id.profilesButton);
         assertNotNull("profilesButton not found", btn);
@@ -85,22 +85,22 @@ public class ProfilesNavigationTest {
     }
 
     @Test
-    public void clickingProfileButton_launchesProfilesActivityFromAppView() {
+    public void clickingProfileButton_launchesProfilesActivityFromMainActivity() {
         prepareEnvironment();
-        Intent intent = new Intent(ApplicationProvider.getApplicationContext(), AppView.class);
+        Intent intent = new Intent(ApplicationProvider.getApplicationContext(), MainActivity.class);
         intent.putExtra("UUID", "test-uuid");
         intent.putExtra("Name", "Test PC");
 
-        ActivityController<AppView> controller = Robolectric.buildActivity(AppView.class, intent).setup();
-        AppView appView = controller.get();
+        ActivityController<MainActivity> controller = Robolectric.buildActivity(MainActivity.class, intent).setup();
+        MainActivity appView = controller.get();
 
         View btn = appView.findViewById(R.id.profilesButton);
-        assertNotNull("profilesButton not found in AppView", btn);
+        assertNotNull("profilesButton not found in MainActivity", btn);
 
         btn.performClick();
 
         Intent next = Shadows.shadowOf(appView).getNextStartedActivity();
-        assertNotNull("ProfilesActivity should be launched from AppView", next);
+        assertNotNull("ProfilesActivity should be launched from MainActivity", next);
         assertEquals(ProfilesActivity.class.getName(), next.getComponent().getClassName());
     }
 

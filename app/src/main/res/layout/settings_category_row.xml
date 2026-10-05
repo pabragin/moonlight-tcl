@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A category on the left: the cursor highlight comes from the list's selected state, the dark pill marks
+     the category whose rows are on the right (activated) -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/categoryName"
+    android:textAlignment="viewStart"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/settings_category_bg"
+    android:ellipsize="end"
+    android:gravity="center_vertical"
+    android:minHeight="48dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:singleLine="true"
+    android:textColor="#FFFFFFFF"
+    android:textSize="17sp" />

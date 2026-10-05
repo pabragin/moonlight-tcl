@@ -1,61 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- One settings profile: name, when it was changed, a check when it is the active one -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/settings_row_bg"
+    android:gravity="center_vertical"
+    android:minHeight="60dp"
     android:orientation="horizontal"
-    android:padding="16dp"
-    android:background="?android:attr/selectableItemBackground"
-    android:gravity="center_vertical">
+    android:paddingStart="18dp"
+    android:paddingEnd="18dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:duplicateParentState="true"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/profileName"
-            android:layout_width="wrap_content"
+            android:textAlignment="viewStart"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
+            android:duplicateParentState="true"
             android:singleLine="true"
-            android:ellipsize="end" />
+            android:ellipsize="end"
+            android:textColor="#FFFFFFFF"
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/profileTimestamp"
-            android:layout_width="wrap_content"
+            android:textAlignment="viewStart"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#CCCCCC"
-            android:textSize="12sp" />
-
+            android:layout_marginTop="2dp"
+            android:duplicateParentState="true"
+            android:textColor="@color/settings_summary"
+            android:textSize="13sp" />
     </LinearLayout>
 
-    <RadioButton
+    <TextView
         android:id="@+id/profileActive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp" />
-
-    <ImageButton
-        android:id="@+id/editProfile"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Edit profile"
-        android:src="@drawable/ic_edit" />
-
-    <ImageButton
-        android:id="@+id/deleteProfile"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Delete profile"
-        android:src="@drawable/ic_delete" />
-
+        android:layout_marginStart="18dp"
+        android:duplicateParentState="true"
+        android:drawableStart="@drawable/main_check_small"
+        android:drawablePadding="6dp"
+        android:drawableTint="@color/settings_value"
+        android:gravity="center_vertical"
+        android:text="@string/profiles_active"
+        android:textColor="@color/settings_value"
+        android:textSize="14sp" />
 </LinearLayout>

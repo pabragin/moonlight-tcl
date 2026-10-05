@@ -110,19 +110,18 @@
         android:gravity="end"
         android:orientation="vertical" />
 
-    <!-- Floating Menu Button -->
-    <ImageButton
-        android:id="@+id/floatingMenuButton"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_gravity="top|start"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/floating_menu_button"
-        android:contentDescription="@string/menu_button"
-        android:src="@drawable/ic_menu"
-        android:padding="6dp"
-        android:visibility="gone"
-        android:elevation="9999dp" />
+    <!-- On-screen keyboard (OnScreenKeyboardView): bottom centre, opened from the game menu -->
+    <com.limelight.ui.OnScreenKeyboardView
+        android:id="@+id/onScreenKeyboard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:elevation="8dp"
+        android:visibility="gone" />
+
 
 
 </merge>

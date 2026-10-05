@@ -23,7 +23,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.limelight.AppView;
+import com.limelight.MainActivity;
 import com.limelight.Game;
 import com.limelight.LimeLog;
 import com.limelight.R;
@@ -73,35 +73,6 @@ public class UiHelper {
         button.setText(activeProfileName);
         float density = button.getResources().getDisplayMetrics().density;
         button.setCompoundDrawablePadding(activeProfileName.isEmpty() ? 0 : Math.round(8 * density));
-    }
-
-    public static void setLocale(Activity activity)
-    {
-        String locale = PreferenceConfiguration.readPreferences(activity).language;
-        Configuration config = new Configuration(activity.getResources().getConfiguration());
-        if (locale.equals(PreferenceConfiguration.DEFAULT_LANGUAGE)) {
-            // On Android 13, migrate this non-default language setting into the OS native API
-            LocaleManager localeManager = activity.getSystemService(LocaleManager.class);
-            LocaleList systemLocales = localeManager.getSystemLocales();
-            if (!systemLocales.isEmpty()) {
-                config.locale = systemLocales.get(0);
-            }
-        } else {
-            // We're handling some nasty non-standard devices which cannot set locale using system config correctly
-            // Some locales include both language and country which must be separated
-            // before calling the Locale constructor.
-            if (locale.contains("-"))
-            {
-                config.locale = new Locale(locale.substring(0, locale.indexOf('-')),
-                        locale.substring(locale.indexOf('-') + 1));
-            }
-            else
-            {
-                config.locale = new Locale(locale);
-            }
-        }
-
-        activity.getResources().updateConfiguration(config, activity.getResources().getDisplayMetrics());
     }
 
     public static void applyStatusBarPadding(View view) {

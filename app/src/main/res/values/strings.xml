@@ -7,29 +7,17 @@
     <string name="scut_invalid_uuid">Provided PC is not valid</string>
     <string name="scut_invalid_app_id">Provided App is not valid</string>
 
-    <string name="menu_button">Menu</string>
-    <string name="quick_menu_title">Quick Menu</string>
-    <string name="configuration_mode_move_buttons">Move buttons mode</string>
-    <string name="configuration_mode_resize_buttons">Resize buttons mode</string>
-    <string name="configuration_mode_disable_enable_buttons">Enable/Disable buttons mode</string>
-    <string name="configuration_mode_exiting">Exiting configuration mode</string>
+    <string name="quick_menu_title">Menu</string>
     <string name="help_loading_title">Help Viewer</string>
     <string name="help_loading_msg">Loading help page…</string>
 
     <!-- Alignments -->
-    <string name="align_left">Align Left</string>
-    <string name="align_center">Align Center</string>
-    <string name="align_right">Align Right</string>
 
     <!-- PC view menu entries -->
     <string name="pcview_menu_header_online">Online</string>
     <string name="pcview_menu_header_offline">Offline</string>
     <string name="pcview_menu_header_unknown">Refreshing</string>
-    <string name="pcview_menu_app_list">View All Apps</string>
-    <string name="pcview_menu_pair_pc">Legacy Pair</string>
-    <string name="pcview_menu_pair_pc_otp">OTP Pair</string>
     <string name="pcview_menu_unpair_pc">Unpair</string>
-    <string name="pcview_menu_send_wol">Send Wake-On-LAN request</string>
     <string name="pcview_menu_delete_pc">Delete PC</string>
     <string name="pcview_menu_test_network">Test Network Connection</string>
     <string name="pcview_menu_details">View Details</string>
@@ -67,7 +55,6 @@
     <!-- WOL messages -->
     <string name="wol_pc_online">Computer is online</string>
     <string name="wol_no_mac">Unable to wake PC because there is no stored MAC address</string>
-    <string name="wol_waking_pc">Waking PC…</string>
     <string name="wol_waking_msg">It may take a few seconds for your PC to wake up.
 	    If it doesn\'t, make sure it\'s configured properly for Wake-On-LAN.
     </string>
@@ -107,8 +94,8 @@
     <string name="conn_client_latency_hw">hardware decoder latency:</string>
     <string name="conn_client_latency_compositor">Compositor (release → screen): avg %1$d ms, max %2$d ms over %3$d frames</string>
     <string name="conn_client_latency_compositor_partial">(first seconds only: this TV reports no present times once the video layer is on its fast path)</string>
-    <string name="title_checkbox_aaudio_renderer">Low-latency audio output (AAudio)</string>
-    <string name="summary_checkbox_aaudio_renderer">Plays the stream through a native AAudio low-latency stream instead of AudioTrack; decoded audio never passes through Java. Falls back to AudioTrack automatically if the TV refuses the stream. Not used while the system equalizer is enabled.</string>
+    <string name="title_checkbox_aaudio_renderer">Low-latency audio (AAudio)</string>
+    <string name="summary_checkbox_aaudio_renderer">Native audio output; the standard one takes over if the TV refuses.</string>
     <string name="perf_overlay_audio">Audio: %1$s · latency %2$d ms · underruns %3$d · dropped %4$d</string>
     <string name="conn_hardware_latency">Average hardware decoding latency:</string>
     <string name="conn_starting">Starting</string>
@@ -120,11 +107,8 @@
 
     <!-- General strings -->
     <string name="ip_hint">IP address of host PC</string>
-    <string name="searching_pc">Searching for host PCs on your local network…\n\n
-        Ensure Apollo is running on your host PC.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="lost_connection">Lost connection to PC</string>
     <string name="title_details">Details</string>
     <string name="help">Help</string>
     <string name="delete_pc_msg">Are you sure you want to delete this PC?</string>
@@ -140,20 +124,9 @@
     <string name="perf_overlay_netlatency">Average network latency: %1$d ms (variance: %2$d ms)</string>
     <string name="perf_overlay_dectime">Average decoding time: %1$.2f ms</string>
     <string name="perf_overlay_present">Present (compositor): avg %1$.1f ms · max %2$d ms</string>
-    <string name="perf_overlay_drawdelay"> Delay: %1$.2f ms</string>
 
     <!-- Performance Report Sharing -->
-    <string name="email_prefix_message">
-        Please send this email as-is to artemistics.logs@gmail.com to support the community.\n
-        Your shared performance data will help improve and expand the dataset available at:\n
-        https://tinyurl.com/artemis-performance\n\n
-    </string>
 
-    <string name="email_recipient">artemistics.logs@gmail.com</string>
-    <string name="email_subject">Artemistics - Performance Log</string>
-    <string name="email_chooser_title">Send performance log...</string>
-    <string name="toast_no_email_clients">No email clients installed.</string>
-    <string name="toast_no_logs">There is no performance data stored yet.</string>
 
     <!-- AppList activity -->
     <string name="applist_connect_msg">Connecting to PC…</string>
@@ -164,21 +137,15 @@
     <string name="applist_menu_quit_and_start">Quit Current Game and Start</string>
     <string name="applist_menu_quit_and_start_vdisplay">Quit Current Game and Start in Virtual Display</string>
     <string name="applist_menu_quit_and_start_primarydisplay">Quit Current Game and Start in Primary Display</string>
-    <string name="applist_menu_cancel">Cancel</string>
     <string name="applist_menu_details">View Details</string>
     <string name="applist_menu_scut">Create Shortcut</string>
     <string name="applist_menu_export_launcher">Export Launcher File</string>
-    <string name="applist_menu_tv_channel">Add to Channel</string>
     <string name="applist_menu_hide_app">Hide App</string>
-    <string name="applist_refresh_title">App List</string>
     <string name="applist_refresh_msg">Refreshing apps…</string>
-    <string name="applist_refresh_error_title">Error</string>
-    <string name="applist_refresh_error_msg">Failed to get app list</string>
     <string name="applist_quit_app">Quitting</string>
     <string name="applist_quit_success">Successfully quit</string>
     <string name="applist_quit_fail">Failed to quit</string>
     <string name="applist_quit_confirmation">Are you sure you want to quit the running app? All unsaved data will be lost.</string>
-    <string name="applist_details_id">App ID:</string>
 
     <!-- Add computer manually activity -->
     <string name="title_add_pc">Add PC Manually</string>
@@ -190,139 +157,88 @@
     <string name="addpc_wrong_sitelocal">That address doesn\'t look right. You must use your router\'s public IP address for streaming over the Internet.</string>
 
     <!-- Preferences -->
-    <string name="category_general_settings">General Settings</string>
-    <string name="category_video_settings">Video Settings</string>
-    <string name="title_resolution_list">Video resolution</string>
-    <string name="summary_resolution_list">Increase to improve image clarity. Decrease for better performance on lower end devices and slower networks.</string>
+    <string name="title_resolution_list">Resolution</string>
+    <string name="summary_resolution_list">Higher is sharper, lower is easier on the network and the PC.</string>
     <string name="title_native_res_dialog">Native Resolution Warning</string>
     <string name="text_native_res_dialog">Native resolution and/or FPS may not be supported by the streaming server. You will probably need to configure a matching custom display mode for the host PC manually.\n\nIf you choose to create a custom resolution in NVIDIA Control Panel to match your screen settings, please ensure you have read and understood NVIDIA\'s warning regarding possible monitor damage, PC instability, and other potential problems.\n\nWe are not responsible for any problems resulting from creating a custom resolution on your PC.\n\nIt may be that your monitor does not support a necessary display configuration. If so, you may try to set up a virtual monitor. Finally, if your device or host PC does not support streaming at a specific resolution or refresh rate, you\'re out of luck unfortunately.</string>
-    <string name="title_fps_list">Video frame rate</string>
-    <string name="summary_fps_list">Increase for a smoother video stream. Decrease for better performance on lower end devices.</string>
-    <string name="title_seekbar_bitrate">Video bitrate</string>
-    <string name="summary_seekbar_bitrate">Increase for better image quality. Decrease to improve performance on slower connections.</string>
-    <string name="title_seekbar_metered_bitrate">Video bitrate on metered networks</string>
-    <string name="summary_seekbar_metered_bitrate">High bitrates consume more data, lower bitrates improve smoothness in metered networks.\nSet 0 for ¼ of the above bitrate settings.</string>
+    <string name="title_fps_list">Frame rate</string>
+    <string name="summary_fps_list">60 on this TV: its screen has no faster mode.</string>
+    <string name="title_seekbar_bitrate">Bitrate</string>
+    <string name="summary_seekbar_bitrate">Picture quality against network load. 100 Mbps at 4K60 is the tested default.</string>
     <string name="suffix_seekbar_bitrate_mbps">Mbps</string>
-    <string name="title_resolution_scale_factor">Resolution Scale Factor</string>
-    <string name="summary_resolution_scale_factor">Server side requested virtual screen resolution will be multiplied by this factor. Streaming resolution are not affected.\ne.g. 120% will make 2000x1000 become 2400x1200.\nSetting a higher scale factor will improve image quality for some games.\nRequires Apollo to take effect.</string>
+    <string name="title_resolution_scale_factor">Virtual display scale</string>
+    <string name="summary_resolution_scale_factor">Size of the virtual display relative to the stream, in percent.</string>
     <string name="resolution_prefix_native">Native</string>
     <string name="resolution_prefix_native_fullscreen">Native Full-Screen</string>
     <string name="resolution_prefix_native_landscape">(Landscape)</string>
     <string name="resolution_prefix_native_portrait">(Portrait)</string>
     <string name="resolution_prefix_custom">Custom</string>
-    <string name="fps_suffix_fps">FPS</string>
+    <string name="fps_suffix_fps" translatable="false">FPS</string>
     <string name="title_native_fps_dialog">Native FPS Warning</string>
-    <string name="title_video_scale_mode">Video Scale Mode</string>
-    <string name="summary_video_scale_mode">Select between Fit, Fill and Stretch</string>
+    <string name="title_video_scale_mode">Picture fit</string>
+    <string name="summary_video_scale_mode">Fit the screen, fill it or stretch.</string>
     <string name="video_scale_mode_fit">Fit</string>
     <string name="video_scale_mode_fill">Fill</string>
     <string name="video_scale_mode_stretch">Stretch</string>
 
-    <string name="category_audio_settings">Audio Settings</string>
-    <string name="title_audio_config_list">Surround sound configuration</string>
-    <string name="summary_audio_config_list">Enable 5.1 or 7.1 surround sound for home-theater systems</string>
-    <string name="title_checkbox_enable_audiofx">Enable system equalizer support</string>
-    <string name="summary_checkbox_enable_audiofx">Allows audio effects to function while streaming, but may increase audio latency</string>
+    <string name="title_audio_config_list">Audio channels</string>
+    <string name="summary_audio_config_list">Stereo, 5.1 or 7.1 for a home theatre.</string>
 
-    <string name="category_gamepad_settings">Gamepad Settings</string>
-    <string name="title_checkbox_multi_controller">Automatic gamepad presence detection</string>
-    <string name="summary_checkbox_multi_controller">Unchecking this option forces a gamepad to always be present</string>
-    <string name="title_seekbar_deadzone">Adjust analog stick deadzone</string>
-    <string name="summary_seekbar_deadzone">Positive values set a normal dead zone, negative values apply dead zone compensation. Ensure your controller can adjust dead zones when using dead zone compensation, or centering may be difficult.</string>
-    <string name="suffix_seekbar_deadzone">%</string>
-    <string name="title_checkbox_xb1_driver">Xbox 360/One/NintendoPro USB gamepad driver</string>
-    <string name="summary_checkbox_xb1_driver">Enables a built-in USB driver for devices without native Xbox/Nintendo Pro controller support</string>
-    <string name="title_checkbox_usb_bind_all">Override native Xbox gamepad support</string>
-    <string name="summary_checkbox_usb_bind_all">Use Artemis\'s USB driver for all supported gamepads, even if native Xbox/Nintendo Pro controller support is present. On TCL TVs with Android 14 this is on by default: a gamepad on a USB cable is then driven by Moonlight itself and rumbles without touching the system input stack that crashes.</string>
-    <string name="title_checkbox_mouse_emulation">Mouse emulation via gamepad</string>
-    <string name="summary_checkbox_mouse_emulation">Long-press the Start button to toggle between gamepad and mouse mode</string>
-    <string name="title_checkbox_flip_face_buttons">Flip face buttons</string>
-    <string name="summary_checkbox_flip_face_buttons">Switches the face buttons A/B and X/Y for gamepads and the on-screen controls</string>
-    <string name="title_checkbox_gamepad_touchpad_as_mouse">Always control mouse with touchpad</string>
-    <string name="summary_checkbox_gamepad_touchpad_as_mouse">Forces gamepad touchpad input to control the host mouse, even when emulating a gamepad with a touchpad.</string>
-    <string name="title_checkbox_gamepad_motion_sensors">Allow use of gamepad motion sensors</string>
-    <string name="summary_checkbox_gamepad_motion_sensors">Enables supported hosts to request motion sensor data when emulating a gamepad with motion sensors. Disabling may slightly reduce power and network usage if motion sensors are not being used in game.</string>
-    <string name="title_enable_rumble">Enable Rumble</string>
-    <string name="summary_enable_rumble">Gamepad rumble. Bluetooth gamepads get it straight through the Bluetooth stack, which never touches the Android input service that crashes on vibration on this TV\'s Android 14 firmware (a firmware race, fixed in Android 15); this needs the Nearby devices (Bluetooth) permission. Supported: Xbox (verified), DualShock 4, DualSense, Switch Pro and Joy-Con, 8BitDo, Amazon Luna, Google Stadia, NVIDIA Shield 2017, GameSir 8K (written from the drivers\' sources, not yet verified on real pads). Other Bluetooth pads stay silent on this TV. A gamepad on a USB cable rumbles through Moonlight\'s own driver.</string>
+    <string name="title_checkbox_multi_controller">Several gamepads</string>
+    <string name="summary_checkbox_multi_controller">Off: all gamepads act as one player.</string>
+    <string name="title_seekbar_deadzone">Stick dead zone</string>
+    <string name="summary_seekbar_deadzone">How far a stick moves before the game notices.</string>
+    <string name="suffix_seekbar_deadzone" translatable="false">%</string>
+    <string name="title_checkbox_xb1_driver">Own driver for USB gamepads</string>
+    <string name="summary_checkbox_xb1_driver">Xbox gamepads on a cable are driven by the app, not by the TV.</string>
+    <string name="title_checkbox_usb_bind_all">Take over all Xbox gamepads on USB</string>
+    <string name="summary_checkbox_usb_bind_all">Even the ones the TV already recognises.</string>
+    <string name="title_checkbox_mouse_emulation">Mouse on the gamepad</string>
+    <string name="summary_checkbox_mouse_emulation">Hold Start to move the PC\'s mouse with the sticks.</string>
+    <string name="title_checkbox_flip_face_buttons">Swap A/B and X/Y</string>
+    <string name="summary_checkbox_flip_face_buttons">For gamepads with the Nintendo layout.</string>
+    <string name="title_checkbox_gamepad_touchpad_as_mouse">Touchpad moves the mouse</string>
+    <string name="summary_checkbox_gamepad_touchpad_as_mouse">The DualShock or DualSense touchpad always moves the PC\'s mouse.</string>
+    <string name="title_checkbox_gamepad_motion_sensors">Motion sensors</string>
+    <string name="summary_checkbox_gamepad_motion_sensors">Let games read the gyroscope of a DualShock or DualSense.</string>
+    <string name="title_enable_rumble">Rumble</string>
+    <string name="summary_enable_rumble">Vibration from the game on the gamepad.</string>
     <string name="rumble_bluetooth_permission_denied">Without the Nearby devices (Bluetooth) permission a Bluetooth gamepad cannot rumble on this TV</string>
-    <string name="category_input_settings">Input Settings</string>
-    <string name="title_checkbox_absolute_mouse_mode">Remote desktop mouse mode</string>
-    <string name="summary_checkbox_absolute_mouse_mode">This can make mouse acceleration behave more naturally for remote desktop usage, but it is incompatible with many games.</string>
-    <string name="title_checkbox_mouse_nav_buttons">Enable forward/back mouse buttons</string>
-    <string name="summary_checkbox_mouse_nav_buttons">Enabling this option may break right clicking on some buggy devices</string>
+    <string name="title_checkbox_absolute_mouse_mode">Remote desktop mouse</string>
+    <string name="summary_checkbox_absolute_mouse_mode">The cursor goes where you point. Good for the desktop, not for games.</string>
+    <string name="title_checkbox_mouse_nav_buttons">Mouse side buttons</string>
+    <string name="summary_checkbox_mouse_nav_buttons">Send the back and forward buttons of a mouse to the PC.</string>
 
-    <string name="category_on_screen_controls_settings">On-screen Controls Settings</string>
-    <string name="title_checkbox_show_onscreen_controls">Show on-screen controls</string>
-    <string name="summary_checkbox_show_onscreen_controls">Show virtual controller overlay on touchscreen</string>
-    <string name="title_hide_osc_when_has_gamepad">Hide OSC when using Controller</string>
-    <string name="summary_hide_osc_when_has_gamepad">Hide OSC when a physical controller is connected</string>
-    <string name="title_checkbox_vibrate_osc">Enable vibration</string>
-    <string name="summary_checkbox_vibrate_osc">Vibrates your device to emulate rumble for the on-screen controls</string>
-    <string name="title_only_l3r3">Only show L3 and R3</string>
-    <string name="summary_only_l3r3">Hide all virtual buttons except L3 and R3</string>
-    <string name="title_show_guide_button">Show Guide Button</string>
-    <string name="summary_show_guide_button">Show the guide button on screen</string>
-    <string name="title_reset_osc">Clear saved on-screen controls layout</string>
-    <string name="summary_reset_osc">Resets all on-screen controls to their default size and position</string>
-    <string name="dialog_title_reset_osc">Reset Layout</string>
-    <string name="dialog_text_reset_osc">Are you sure you want to delete your saved on-screen controls layout?</string>
-    <string name="toast_reset_osc_success">On-screen controls reset to default</string>
-    <string name="title_osc_opacity">Change opacity of on-screen controls</string>
-    <string name="summary_osc_opacity">Make the on-screen controls more/less transparent</string>
-    <string name="dialog_title_osc_opacity">Change opacity</string>
-    <string name="suffix_osc_opacity">%</string>
 
-    <string name="category_ui_settings">UI Settings</string>
-    <string name="title_language_list">Language</string>
-    <string name="summary_language_list">Language to use for Artemis</string>
-    <string name="title_checkbox_small_icon_mode">Use small box art</string>
-    <string name="summary_checkbox_small_icon_mode">Smaller box art in the app grid allows more apps to be visible on screen</string>
 
-    <string name="category_host_settings">Host Settings</string>
-    <string name="title_checkbox_enable_sops">Optimize game settings</string>
-    <string name="summary_checkbox_enable_sops">Allow GFE to modify game settings for optimal streaming</string>
-    <string name="title_checkbox_host_audio">Play audio on PC</string>
-    <string name="summary_checkbox_host_audio">Play audio from the computer and this device</string>
+    <string name="title_checkbox_enable_sops">Let the PC adjust game settings</string>
+    <string name="summary_checkbox_enable_sops">Sunshine or GeForce Experience sets the game to the stream\'s resolution.</string>
+    <string name="title_checkbox_host_audio">Keep sound on the PC too</string>
+    <string name="summary_checkbox_host_audio">Play the sound on the PC as well as on the TV.</string>
 
-    <string name="category_advanced_settings">Advanced Settings</string>
-    <string name="title_unlock_fps">Unlock all possible frame rates</string>
-    <string name="summary_unlock_fps">Streaming at 90 or 120 FPS may reduce latency on high-end devices but can cause lag or instability on devices that can\'t support it</string>
-    <string name="title_checkbox_reduce_refresh_rate">Allow refresh rate reduction</string>
-    <string name="summary_checkbox_reduce_refresh_rate">Lower display refresh rates can save power at the expense of some additional video latency</string>
-    <string name="title_checkbox_disable_warnings">Disable warning messages</string>
-    <string name="summary_checkbox_disable_warnings">Disable on-screen connection warning messages while streaming</string>
-    <string name="title_disable_frame_drop">Never drop frames</string>
-    <string name="summary_disable_frame_drop">May reduce micro-stuttering on some devices, but can increase latency</string>
-    <string name="title_video_format">Change codec settings</string>
-    <string name="summary_video_format">Newer codecs can lower video bandwidth requirements if your device supports them. Codec selections may be ignored if not supported by the host software or GPU.</string>
-    <string name="title_enable_hdr">Enable HDR</string>
-    <string name="summary_enable_hdr">Stream HDR when the game and PC GPU support it. HDR requires a GPU with HEVC Main 10 encoding support.</string>
-    <string name="title_full_range">Force full range video (Experimental)</string>
-    <string name="summary_full_range">This will cause loss of detail in light and dark areas if your device doesn\'t properly display full range video content.</string>
-    <string name="title_prevent_packet_loss">Prevent Packet Loss</string>
-    <string name="summary_prevent_packet_loss">For devices that have packet loss for unknown reasons, you can try to enable this option.</string>
-    <string name="title_enable_perf_overlay">Show performance stats while streaming</string>
-    <string name="summary_enable_perf_overlay">Display real-time stream performance information while streaming</string>
+    <string name="title_unlock_fps">Show 90 and 120 FPS in the list</string>
+    <string name="summary_unlock_fps">The screen stays at 60 Hz; the PC only sends more frames. For experiments.</string>
+    <string name="title_checkbox_disable_warnings">Hide connection warnings</string>
+    <string name="summary_checkbox_disable_warnings">No messages about a weak connection during the stream.</string>
+    <string name="title_video_format">Codec</string>
+    <string name="summary_video_format">Automatic, or HEVC, AV1 or H.264 only.</string>
+    <string name="title_enable_hdr" translatable="false">HDR</string>
+    <string name="summary_enable_hdr">Stream in HDR when the game and the PC support it.</string>
+    <string name="title_full_range">Full-range video</string>
+    <string name="summary_full_range">Try it if blacks look grey or whites clip.</string>
+    <string name="title_prevent_packet_loss">Guard against packet loss</string>
+    <string name="summary_prevent_packet_loss">Extra protection for a network that drops packets.</string>
+    <string name="title_enable_perf_overlay">Statistics on screen</string>
+    <string name="summary_enable_perf_overlay">Frame rate, latency and packet loss during the stream.</string>
     <string name="title_latency_test">Latency test mode</string>
-    <string name="summary_latency_test">Measures button-to-frame latency for comparing builds. On the PC open tools/latency-test.html from the Moonlight TCL repository full screen (black page that turns white while a button is held), start the stream and press A/B/X/Y. The result excludes the TV panel\'s own delay, so different app versions can be compared on the same TV.</string>
+    <string name="summary_latency_test">Measures button-to-frame latency; open tools/latency-test.html on the PC.</string>
     <string name="latency_test_waiting">Latency test: press A/B/X/Y on the black test page</string>
     <string name="latency_test_timeout">no reaction frame within 2 s (is the test page full screen? works with frame pacing "Prefer lowest latency")</string>
     <string name="latency_test_render_unmatched">reaction frame received but its render was not seen: value above is host+net only (set frame pacing to "Prefer lowest latency")</string>
     <string name="latency_test_overlay">Latency: last %1$d ms · avg %2$d · min %3$d · max %4$d · n=%5$d\navg input→app %6$d ms · host+net %7$d ms · decode+release %8$d ms · compositor %9$d ms</string>
-    <string name="title_enable_post_stream_toast">Show latency message after streaming</string>
-    <string name="summary_enable_post_stream_toast">Display a latency information message after the stream ends</string>
+    <string name="title_enable_post_stream_toast">Latency report after the stream</string>
+    <string name="summary_enable_post_stream_toast">A short message with the decode time when a stream ends.</string>
 
-    <string name="category_help">Help</string>
-    <string name="title_setup_guide">Setup guide</string>
-    <string name="summary_setup_guide">View instructions on how to set up your gaming PC for streaming</string>
-    <string name="title_troubleshooting">Troubleshooting guide</string>
-    <string name="summary_troubleshooting">View tips for diagnosing and fixing common streaming issues</string>
-    <string name="title_privacy_policy">Privacy policy</string>
-    <string name="summary_privacy_policy">View Artemis\'s privacy policy</string>
-    <string name="title_special_key_help">Custom Keys help</string>
-    <string name="summary_special_key_help">Instructions about how to setup custom special keys</string>
-    <string name="summary_performance_link">See performance of other devices.\nPlease note, these data are managed by the community, it is not managed by Artemis and does not represent Artemis officially.</string>
-    <string name="title_performance_link">Performance Dashboard</string>
 
     <!-- Toasts -->
     <string name="toast_controller_type_changed">Gamepad type may be changed due to motion sensor emulation</string>
@@ -333,44 +249,79 @@
     <string name="resolution_720p">720p</string>
     <string name="resolution_1080p">1080p</string>
     <string name="resolution_1440p">1440p</string>
-    <string name="resolution_4k">4K</string>
+    <string name="resolution_4k" translatable="false">4K</string>
 
-    <string name="fps_30">30 FPS</string>
-    <string name="fps_60">60 FPS</string>
-    <string name="fps_90">90 FPS</string>
-    <string name="fps_120">120 FPS</string>
+    <string name="fps_30" translatable="false">30 FPS</string>
+    <string name="fps_60" translatable="false">60 FPS</string>
+    <string name="fps_90" translatable="false">90 FPS</string>
+    <string name="fps_120" translatable="false">120 FPS</string>
 
     <string name="audioconf_stereo">Stereo</string>
-    <string name="audioconf_51surround">5.1 Surround Sound</string>
-    <string name="audioconf_71surround">7.1 Surround Sound</string>
+    <string name="audioconf_51surround" translatable="false">5.1</string>
+    <string name="audioconf_71surround" translatable="false">7.1</string>
 
-    <string name="videoformat_auto">Automatic (Recommended)</string>
-    <string name="videoformat_av1always">Prefer AV1 (Experimental)</string>
-    <string name="videoformat_hevcalways">Prefer HEVC</string>
-    <string name="videoformat_h264always">Prefer H.264</string>
+    <string name="videoformat_auto">Auto</string>
+    <string name="videoformat_av1always" translatable="false">AV1</string>
+    <string name="videoformat_hevcalways" translatable="false">HEVC</string>
+    <string name="videoformat_h264always" translatable="false">H.264</string>
 
-    <string name="title_frame_pacing">Video frame pacing</string>
-    <string name="summary_frame_pacing">Specify how to balance video latency and smoothness</string>
-    <string name="pacing_warp">Warp Drive (Experimental)</string>
-    <string name="pacing_warp2">Warp 2 (Experimental)</string>
-    <string name="pacing_latency">Prefer lowest latency</string>
-    <string name="pacing_balanced">Balanced</string>
-    <string name="pacing_balanced_alt">Balanced with FPS limit</string>
-    <string name="pacing_smoothness">Prefer smoothest video (may significantly increase latency)</string>
+    <string name="title_frame_pacing">Frame delivery</string>
+    <string name="summary_frame_pacing">What to do with a late frame: show it at once, wait for the screen, or never drop it.</string>
+    <string name="pacing_latency">Lowest latency</string>
+    <string name="pacing_balanced">Smooth</string>
+    <string name="pacing_balanced_alt">Smooth, capped</string>
+    <string name="pacing_smoothness">Never drop</string>
 
 
-    <string name="keyboard_service_label">Artemis Physical keyboard</string>
-    <string name="accessibility_description_text">Only used when physical keyboard shortcut were intercepted by system. In some systems, several keyboard shortcut are defind and used by the Android system, causing them not being able to be passed through to the host PC. Artemis will not look through your input, nor collecting your password, credit card number or any other private information.</string>
 
 
     <!-- In Game menu -->
-    <string name="game_menu_toggle_keyboard">Show soft keyboard</string>
-    <string name="game_menu_toggle_hud">Toggle Performance Overlay</string>
-    <string name="game_menu_toggle_floating_button">Toggle Floating Button</string>
-    <string name="game_menu_select_steam_mode">Select Stream mode</string>
-    <string name="game_menu_toggle_keyboard_model">Toggle Special keys</string>s
-    <string name="game_menu_toggle_virtual_model">Toggle On-screen controller</string>
-    <string name="game_menu_toggle_virtual_keyboard_model">Toggle On-screen full keyboard</string>
+    <string name="game_menu_toggle_keyboard">On-screen keyboard</string>
+    <!-- Gamepad button hints under the on-screen keyboard -->
+    <string name="osk_hint_press">Press</string>
+    <string name="osk_hint_close">Close</string>
+    <string name="osk_hint_space">Space</string>
+    <string name="osk_hint_layout">Layout</string>
+    <string name="osk_hint_voice">Voice</string>
+    <!-- Main screen (MainActivity): PC chips, state messages, actions -->
+    <string name="main_profile">Profile</string>
+    <string name="main_settings">Settings</string>
+    <string name="settings_cat_video">Video</string>
+    <string name="settings_cat_audio">Sound</string>
+    <string name="settings_cat_gamepad">Gamepad</string>
+    <string name="settings_cat_input">Mouse and keyboard</string>
+    <string name="settings_cat_ui">Interface</string>
+    <string name="settings_cat_advanced">Advanced</string>
+    <string name="settings_cat_about">About</string>
+    <string name="main_add_pc">Add PC</string>
+    <string name="main_add_pc_message">The IP address or name of the PC in your network; add a port only if Sunshine does not use 47989. The PC is found by itself when it is in the same network.</string>
+    <string name="main_no_pc_title">Looking for PCs</string>
+    <string name="main_no_pc_message">Sunshine or Apollo must be running on a PC in this network. If the PC does not show up, add it by its address.</string>
+    <string name="main_pc_checking">Checking the PC…</string>
+    <string name="main_pc_offline_message">The PC does not answer. Wake it over the network or make sure Sunshine is running on it.</string>
+    <string name="main_pc_not_paired_message">Pair this PC to see its apps: a PIN will appear here, and Sunshine or Apollo on the PC will ask for it.</string>
+    <string name="main_pair">Pair</string>
+    <string name="main_pair_passphrase">Pair with passphrase</string>
+    <string name="main_wake">Wake up</string>
+    <string name="main_running">Running</string>
+    <string name="main_start">Start</string>
+    <string name="main_unhide_app">Show app</string>
+    <string name="main_show_hidden_apps">Show hidden apps</string>
+    <string name="main_hide_hidden_apps">Hide the hidden apps again</string>
+    <!-- Settings profiles (ProfilesActivity) -->
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_active">Active</string>
+    <string name="profiles_activate">Activate</string>
+    <string name="profiles_deactivate">Deactivate</string>
+    <!-- Dictation states shown under the on-screen keyboard -->
+    <string name="osk_voice_listening">Speak…</string>
+    <string name="osk_voice_processing">Recognizing…</string>
+    <string name="osk_voice_no_match">Didn\'t catch that</string>
+    <string name="osk_voice_no_permission">No microphone access</string>
+    <string name="osk_voice_audio">Microphone is unavailable</string>
+    <string name="osk_voice_network">No connection to the speech service</string>
+    <string name="osk_voice_unavailable">Voice input is not available on this TV</string>
+    <string name="game_menu_toggle_hud">Statistics on screen</string>
 
 
     <string name="game_menu_toggle_mouse_on">Enable Controller Mouse Emulation</string>
@@ -378,183 +329,81 @@
     <string name="game_menu_disconnect">Disconnect</string>
     <string name="game_menu_cancel">Cancel</string>
     <string name="game_menu_task_manager">Open Task Manager</string>
-    <string name="game_menu_send_keys">Send special keys</string>
-    <string name="game_menu_send_keys_esc">ESC</string>
-    <string name="game_menu_send_keys_f11">F11</string>
-    <string name="game_menu_send_keys_alt_f4">Alt + F4</string>
-    <string name="game_menu_send_keys_ctrl_v">Ctrl + V</string>
-    <string name="game_menu_send_keys_win">Win (Meta)</string>
-    <string name="game_menu_send_keys_win_d">Win + D</string>
-    <string name="game_menu_send_keys_alt_b">ALT + B</string>
-    <string name="game_menu_send_keys_win_g">Win + G (Xbox Game Bar)</string>
-    <string name="game_menu_send_keys_ctrl_alt_tab">Ctrl + Alt + Tab</string>
+    <string name="game_menu_send_keys">Special keys</string>
+    <string name="game_menu_send_keys_esc" translatable="false">ESC</string>
+    <string name="game_menu_send_keys_f11" translatable="false">F11</string>
+    <string name="game_menu_send_keys_alt_f4" translatable="false">Alt + F4</string>
+    <string name="game_menu_send_keys_ctrl_v" translatable="false">Ctrl + V</string>
+    <string name="game_menu_send_keys_win" translatable="false">Win (Meta)</string>
+    <string name="game_menu_send_keys_win_d" translatable="false">Win + D</string>
+    <string name="game_menu_send_keys_alt_b" translatable="false">ALT + B</string>
+    <string name="game_menu_send_keys_win_g" translatable="false">Win + G (Xbox Game Bar)</string>
+    <string name="game_menu_send_keys_ctrl_alt_tab" translatable="false">Ctrl + Alt + Tab</string>
     <string name="game_menu_send_keys_shift_tab">Shift + Tab (Steam Overlay)</string>
-    <string name="game_menu_send_keys_alt_enter">Alt + Enter</string>
+    <string name="game_menu_send_keys_alt_enter" translatable="false">Alt + Enter</string>
     <string name="game_menu_send_keys_win_shift_left">Win + shift + left (Move app between Desktops)</string>
-    <string name="game_menu_send_keys_ctrl_alt_shift_q">Ctrl+Alt+Shift+Q (PC Exit Streaming)</string>
     <string name="game_menu_send_keys_ctrl_alt_shift_f1">Ctrl+Alt+Shift+F1 (Switch Monitor)</string>
     <string name="game_menu_send_keys_ctrl_alt_shift_f12">Ctrl+Alt+Shift+F12 (Switch Monitor)</string>
 
 
-    <string name="title_analog_scrolling">Use an analog stick to scroll</string>
-    <string name="summary_analog_scrolling">Select an analog stick to scroll when in mouse emulation mode</string>
-    <string name="analogscroll_none">None (both sticks move the mouse)</string>
-    <string name="analogscroll_right">Right analog stick</string>
-    <string name="analogscroll_left">Left analog stick</string>
+    <string name="title_analog_scrolling">Scroll with</string>
+    <string name="summary_analog_scrolling">Which stick scrolls in mouse mode.</string>
+    <string name="analogscroll_none">None</string>
+    <string name="analogscroll_right">Right stick</string>
+    <string name="analogscroll_left">Left stick</string>
 
     <string name="perf_overlay_lite_net">%1$dms</string>
     <string name="perf_overlay_lite_dectime">%1$.2fms</string>
-    <string name="perf_overlay_lite_netdrops">%1$.2f%%</string>
-    <string name="perf_overlay_lite_streamdetails">%1$s</string>
-    <string name="perf_overlay_lite_fps">%1$.2f</string>
-    <string name="perf_overlay_drawn_fps">GpuFPS:</string>
-    <string name="perf_overlay_ai_fps">3DFPS:</string>
-    <string name="perf_overlay_ai_delegate">Delegate:</string>
-    <string name="perf_overlay_lite_decoder">Decoder: %1$s</string>
-    <string name="title_import_keyboard_layout">Import keyboard layout</string>
-    <string name="title_export_keyboard_layout">Export keyboard layout</string>
-    <string name="summary_import_keyboard_layout">This will overwrite the current layout.</string>
-    <string name="summary_export_keyboard_layout">Export the current keyboard layout</string>
-    <string name="title_manual_enter_bitrate">Custom bitrate</string>
-    <string name="summary_manual_enter_bitrate">Enter bitrate manually.\nCan exceed the maximum range of the seekbar.</string>
-    <string name="dialog_manual_enter_bitrate">Enter bitrate in Mbps. Round to 0.5.</string>
-    <string name="title_custom_refresh_rate">Custom refresh rate</string>
-    <string name="summary_custom_refresh_rate">Enter refresh rate manually. Only supports Apollo.</string>
-    <string name="dialog_custom_refresh_rate">Enter refresh rate in Hz. Can be fractional.</string>
-    <string name="title_render_mode">Render Mode</string>
-    <string name="title_render_mode_convergence_title">3D Convergence</string>
-    <string name="title_render_mode_convergence_description">Reference: 50 - Balanced / 0: InFrontOfScreen /  100 - BehindOfScreen</string>
-    <string name="title_render_mode_balance_shift_title">3D Eye Balance</string>
-    <string name="title_render_mode_balance_shift_description">Reference: 50 - Both eyes share 50% depth far/pop depth effect / 0: Left (100% Pop) - Right (100% Far) /  100 - Left Far - Right Pop // 100 or 0 provide best sharpness as one pixel always exist unshifted on the other eye </string>
-    <string name="title_render_mode_strength_title">3D Effect Strength</string>
-    <string name="title_render_mode_strength_description">Reference: 50 - Higher more effect, but maybe strain on eyes and unnatural. Lower, easier on eyes and smoother expierence.</string>
-    <string name="summary_render_mode">Default 2D or SBS 3D. 3D will simply double your width and add the effect automatically, no setup required. AI 2D to 3D conversion </string>
-    <string name="title_checkbox_mouse_local_cursor">Use local mouse cursor</string>
-    <string name="summary_checkbox_mouse_local_cursor">Default external physical mouse cursor will be captured, this option can display Android system cursor</string>
-    <string name="title_checkbox_onscreen_style_official">Official Virtual Gamepad Skin</string>
-    <string name="summary_checkbox_onscreen_style_official">If you still like the old style of official virtual gamepad buttons, you can select this option.\nButton shapes can be square if you selected the bottom virtual button [Normal buttons are square buttons]</string>
-    <string name="title_checkbox_enable_perf_overlay_lite">Enable Lite mode</string>
-    <string name="summary_checkbox_enable_perf_overlay_lite">Display simplified performance information: Network Speed / Latency / Decode / Packet Loss Rate / FPS</string>
-    <string name="title_checkbox_enable_perf_logging">Enable Performance Logging</string>
-    <string name="summary_checkbox_enable_perf_logging">"Stores performance data per configuration. (Offline only) "</string>
-    <string name="title_checkbox_enable_perf_overlay_lite_dialog">Lite mode click to pop up quick options</string>
-    <string name="summary_checkbox_enable_perf_overlay_lite_dialog">Replace the back button logic, pop up the game quick menu.</string>
-    <string name="title_quit_dialog">Back Menu</string>
-    <string name="summary_quit_dialog">When enabled, clicking the physical back button on the streaming interface will show related options!\nSoft keyboard, performance information, touch mode switching, send special keys</string>
-    <string name="title_floating_button">Floating Button</string>
-    <string name="summary_floating_button">Enable floating button</string>
-    <string name="dialog_custom_resolution">Set the resolution and exit the settings page to take effect!</string>
-    <string name="summary_custom_resolution">Add a custom resolution, separated by x, strange resolutions may not work.\nFor example: 1920x1080\nIf it is a non-native resolution, it may not fill the notch area by default. If the aspect ratio is the same, you can manually set to stretch the screen to fill the full screen</string>
-    <string name="title_custom_resolution">Custom Resolution</string>
-    <string name="title_import_special_button">Import Custom Keys</string>
-    <string name="summary_import_special_button">Available in Back Menu and special keys.\nNote: Importing will overwrite current configuration, please backup accordingly.</string>
-    <string name="summary_share_performance_logs">Share your performance with friends or the community</string>
-    <string name="title_share_performance_logs_button">Share Performance Logs</string>
-    <string name="title_software_update">Software Update</string>
-    <string name="summary_software_update">Moonlight TCL by pabragin - Visit GitHub Releases to get the latest version</string>
-    <string name="title_follow_update">Follow Update</string>
-    <string name="summary_follow_update">Follow updates of Moonlight TCL with Obtainium</string>
+    <string name="perf_overlay_lite_netdrops" translatable="false">%1$.2f%%</string>
+    <string name="perf_overlay_lite_fps" translatable="false">%1$.2f</string>
+    <string name="title_checkbox_mouse_local_cursor">Show the TV\'s cursor</string>
+    <string name="summary_checkbox_mouse_local_cursor">For a USB mouse: draw the cursor on the TV instead of the PC\'s one.</string>
+    <string name="title_checkbox_enable_perf_overlay_lite">Statistics in one line</string>
+    <string name="summary_checkbox_enable_perf_overlay_lite">A compact line instead of the full block.</string>
+    <string name="title_quit_dialog">Back opens the menu</string>
+    <string name="summary_quit_dialog">Otherwise Back ends the stream at once.</string>
+    <string name="title_software_update">Releases</string>
+    <string name="summary_software_update">Moonlight TCL on GitHub.</string>
+    <string name="title_follow_update">Updates via Obtainium</string>
+    <string name="summary_follow_update">Get new versions automatically.</string>
     <string name="no_app_for_link">No installed app can open this link</string>
-    <string name="title_special_key_layout">Special Key Layout</string>
-    <string name="title_show_virtual_key">Display virtual keys on screen</string>
-    <string name="summary_show_virtual_key">Display a layer of virtual special keys on the touchscreen.\nKey opacity is shared with the virtual gamepad above.</string>
-    <string name="title_default_layout_scheme">Default layout profile</string>
-    <string name="summary_default_layout_scheme">Each layout profile is initially the same (generated based on the keyboards.json file), you can delete and adjust it yourself</string>
-    <string name="summary_vibrate_keyboard">When you click the screen button, it will trigger the phone motor vibration. This option can also be used for virtual gamepad buttons.</string>
-    <string name="title_square_buttons">Normal buttons are square buttons</string>
-    <string name="summary_square_buttons">Virtual button shapes are square buttons, by default they are round.</string>
-    <string name="title_reset_keyboard_layout">Reset virtual keyboard layout</string>
-    <string name="summary_reset_keyboard_layout">Initialize the special key layout (reset the default selected layout scheme)</string>
-    <string name="title_joyconfix">Compatible with Switch JoyCon</string>
-    <string name="summary_joyconfix">If your JoyCon cannot be used or has key recognition issues, you can try to enable this feature. Adapted for Android 10 and above</string>
-    <string name="title_keyboard_opacity">Virtual Full Keyboard Opacity</string>
-    <string name="title_onscreen_keyboard_autofit">Virtual Full Keyboard Disable Autofit</string>
-    <string name="title_onscreen_keyboard_height">Virtual Full Keyboard Height</string>
-    <string name="title_onscreen_keyboard_width">Virtual Full Keyboard Width</string>
-    <string name="title_onscreen_keyboard_align_mode">Virtual Full Keyboard Align Mode</string>
-    <string name="summary_onscreen_keyboard_height">Adjust the height of the virtual full keyboard</string>
-    <string name="summary_onscreen_keyboard_autofit">Dont adjust the size and position of the keyboard automatically and allows custom size </string>
-    <string name="summary_onscreen_keyboard_width">Adjust the width of the virtual full keyboard</string>
-    <string name="summary_onscreen_keyboard_align_mode">How the virtual full keyboard aligns to the view port</string>
-    <string name="title_free_analog_stick">Free Analog Stick</string>
-    <string name="summary_free_analog_stick">Virtual gamepad left and right stick center point positions are not fixed, can be freely adjusted within a certain range of movement.</string>
-    <string name="summary_free_analog_stick_opacity">By default, only when the stick moves, the background is displayed. If you don\'t like it, you can adjust the opacity effect.</string>
-    <string name="title_free_analog_stick_opacity">Free Analog Stick Background Opacity</string>
-    <string name="title_exdisplay_mode">External Display Mode (Beta)</string>
-    <string name="summary_exdisplay_mode">Stream display on the monitor, virtual buttons and performance information and other controls on the phone screen.</string>
-    <string name="title_debug_info">Debug Info</string>
-    <string name="summary_debug_info">Test gamepad vibration and other stuff.</string>
-    <string name="title_clear_default_special_button">Disable default Special Keys</string>
-    <string name="summary_clear_default_special_button">If you feel the built-in commands in the Back Menu are useless, you can disable them and use your imported ones.</string>
-    <string name="title_trackpad_sensitivity_x">Trackpad Sensitivity X</string>
-    <string name="summary_trackpad_sensitivity_x">X axis Sensitivity of the trackpad, negative to invert direction</string>
-    <string name="title_trackpad_sensitivity_y">Trackpad Sensitivity Y</string>
-    <string name="summary_trackpad_sensitivity_y">Y axis Sensitivity of the trackpad, negative to invert direction</string>
-    <string name="title_trackpad_drag_drop_vibration">Enable Vibration for Drag-and-Drop on Trackpad</string>
-    <string name="summary_trackpad_drag_drop_vibration">Enables vibration feedback for drag-and-drop actions on Samsung trackpad devices.</string>
-    <string name="title_trackpad_drag_drop_threshold">Hold Duration for Drag-and-Drop Activation on Trackpad</string>
-    <string name="summary_trackpad_drag_drop_threshold">Set the duration to hold on the trackpad before activating drag-and-drop on Samsung devices.</string>
-    <string name="title_trackpad_swap_axis">Swap X and Y axis of the trackpad input</string>
-    <string name="summary_trackpad_swap_axis">On some devices, trackpad input may be rotated in axis. Enabling this option may help.</string>
-    <string name="title_checkbox_force_qwerty">Force QWERTY layout</string>
-    <string name="summary_checkbox_force_qwerty">Force use QWERTY keyboard layout.\nRequired by GFE.\nTurn off if you want to use a different keyboard layout.</string>
-    <string name="title_checkbox_back_as_meta">Back button as Meta</string>
-    <string name="summary_back_as_meta">Send Meta(Win) key on physical back button press.</string>
-    <string name="title_back_as_guide">Back button as Guide</string>
-    <string name="summary_back_as_guide">Send Guide(PS/HOME) button press when Back button is pressed on controllers.</string>
-    <string name="title_checkbox_ignore_synth_events">Ignore synthetic events</string>
-    <string name="summary_ignore_synth_events">Ignore synthetic events sent by the Android system. This may resolve issues where mouse clicks trigger other unexpected keys on certain devices.\nEnabling this option will cause the system\'s soft keyboard to stop working.</string>
-    <string name="title_smart_clipboard_sync">Smart Clipboard Sync (Experimental)</string>
-    <string name="summary_smart_clipboard_sync">Automatically upload clipboard content to server when the stream starts/resumes, download clipboard from server when losing focus(requires Apollo)</string>
-    <string name="title_smart_clipboard_sync_toast">Clipboard Sync Toast</string>
-    <string name="summary_smart_clipboard_sync_toast">Show toast for clipboard sync result</string>
-    <string name="title_hide_clipboard_content">Hide clipboard content</string>
-    <string name="summary_hide_clipboard_content">Mark remote clipboard as sensitive information</string>
-    <string name="title_settings_misc">MISC</string>
+    <string name="title_joyconfix">Joy-Con fix</string>
+    <string name="summary_joyconfix">Turn on if Nintendo Joy-Cons are not recognised.</string>
+    <string name="title_debug_info">Debug information</string>
+    <string name="summary_debug_info">Attached gamepads and a rumble test.</string>
+    <string name="title_checkbox_force_qwerty">QWERTY layout for a keyboard</string>
+    <string name="summary_checkbox_force_qwerty">Keys of a plugged-in keyboard are sent as on a US layout.</string>
+    <string name="title_checkbox_back_as_meta">Back sends Win</string>
+    <string name="summary_back_as_meta">The Back key of a remote presses Win on the PC.</string>
+    <string name="title_back_as_guide">Back sends Guide</string>
+    <string name="summary_back_as_guide">The Back key of a gamepad acts as the Xbox or PS button.</string>
     <string name="perf_overlay_lite_bandwidth">Bandwidth</string>
     <string name="perf_overlay_lite_network_decoding_delay">Network/Decoding delay</string>
     <string name="perf_overlay_lite_packet_loss">Packet loss</string>
     <string name="wrong_import_format">Wrong import format, please check!</string>
-    <string name="title_checkbox_gamepad_enable_battery_report">Enable battery status report for gamepad</string>
-    <string name="summary_checkbox_gamepad_enable_battery_report">Tell the host how charged the gamepad is. This TV reports no gamepad batteries itself, so a Bluetooth pad is asked directly (Battery Service over Bluetooth LE, or the Xbox battery report over classic Bluetooth).</string>
+    <string name="title_checkbox_gamepad_enable_battery_report">Report charge to the PC</string>
+    <string name="summary_checkbox_gamepad_enable_battery_report">The PC shows the gamepad\'s battery.</string>
     <string name="title_checkbox_gamepad_notices">Gamepad cards on screen</string>
-    <string name="summary_checkbox_gamepad_notices">When a gamepad joins the stream, goes on the charger or its battery runs low, show its name (as set in the TV\'s Bluetooth settings) and charge for a few seconds; while the game menu is open every gamepad\'s charge stays in the corners. Player 1 bottom-left, player 2 bottom-right.</string>
+    <string name="summary_checkbox_gamepad_notices">A card when a gamepad joins, runs low or goes on the charger.</string>
     <string name="gamepad_notice_connected">Connected</string>
     <string name="gamepad_notice_low_battery">Low battery</string>
     <string name="gamepad_notice_charging">Charging</string>
     <string name="gamepad_notice_full">Charged</string>
     <string name="gamepad_notice_no_battery">Charge unknown</string>
-    <string name="gamepad_notice_percent">%1$d%%</string>
-    <string name="gamepad_notice_player">P%1$d</string>
+    <string name="gamepad_notice_percent" translatable="false">%1$d%%</string>
+    <string name="gamepad_notice_player" translatable="false">P%1$d</string>
     <string name="gamepad_notice_level">%1$s · %2$d%%</string>
-    <string name="title_checkbox_enforce_display_mode">Enforce Display Mode</string>
-    <string name="summary_checkbox_enforce_display_mode">Force surface to use the optimal display mode.\nRequired by some systems (such as ColorOS) to set refresh rate/resolution properly.\nDo not enable on ChromeCast 4K as it might lead to bugs.</string>
-   	<string name="title_checkbox_forceTightThresholds">Tight Vsync (Experimental)</string>
-    <string name="summary_checkbox_forceTightThresholds">Tighter VSYNC thresholds for lower latency; may increase drops.</string>
-    <string name="title_checkbox_use_virtual_display">Use Virtual Display</string>
-    <string name="summary_checkbox_use_virtual_display">Use Virtual Display by default.\nVirtual Display can automatically match your client side resolution and frame rate settings, giving you a seamless streaming experience.\nRequires Apollo as host streaming software.</string>
-    <string name="title_checkbox_resume_without_confirm">Quick Resume</string>
-    <string name="summary_checkbox_resume_without_confirm">Do not show resume menu when clicking resume button, resume the app immediately.</string>
-    <string name="title_checkbox_enable_sticky_modifier_key_virtual_keyboard">Sticky modifier keys</string>
-    <string name="summary_checkbox_enable_sticky_modifier_key_virtual_keyboard">Use sticky modifier keys on virtual full keyboard and custom onscreen keyboard.</string>
-    <string name="virtual_keyboard_hide">Hide\nKBD</string>
-    <string name="render_mode_2d">Default 2D</string>
-    <string name="render_mode_3d_sbs">AI SBS 3D</string>
-    <string name="render_mode_3d_sbs_movie">AI SBS 3D Movie (Synced)</string>
-    <string name="keyboard_layout_set_1">Profile 1</string>
-    <string name="keyboard_layout_set_2">Profile 2</string>
-    <string name="keyboard_layout_set_3">Profile 3</string>
-    <string name="keyboard_layout_set_4">Profile 4</string>
-    <string name="keyboard_layout_set_5">Profile 5</string>
-    <string name="toggle_local_mouse_cursor">Toggle local mouse cursor(physical mouse needed)</string>
+    <string name="title_checkbox_use_virtual_display">Virtual display</string>
+    <string name="summary_checkbox_use_virtual_display">The PC creates a display just for the stream, matching this TV. Needs Apollo.</string>
+    <string name="title_checkbox_resume_without_confirm">Resume at once</string>
+    <string name="summary_checkbox_resume_without_confirm">Open a running app without asking.</string>
+    <string name="toggle_local_mouse_cursor">TV mouse cursor</string>
     <string name="debug_info_android_version">Android Version:</string>
     <string name="debug_info_api_version">API Version:</string>
     <string name="debug_info_kernel_version">Kernel Version:</string>
     <string name="debug_info_brand_model">Brand and Model:</string>
     <string name="debug_info_please_choose">Please Choose</string>
     <string name="debug_info_no_gamepad_detected">No gamepad detected, please connect a gamepad, tap refresh, and try again!</string>
-    <string name="debug_info_no_vibrator">No vibrator detected on the gamepad!</string>
-    <string name="debug_info_bt_hid_test">Bluetooth HID output report (rumble test through the Bluetooth stack)</string>
     <string name="debug_info_bt_hid_running">Bluetooth HID test: about 12 seconds, hold the gamepad</string>
     <string name="debug_info_bt_hid_result">Bluetooth HID rumble test</string>
     <string name="debug_info_bt_hid_permission">The Nearby devices (Bluetooth) permission is required. Grant it and try again.</string>
@@ -562,8 +411,7 @@
     <string name="debug_info_name">Name: </string>
     <string name="debug_info_sensors">Sensors: </string>
     <string name="debug_info_no_relevant_driver">None (no relevant driver or gamepad not supported)</string>
-    <string name="debug_info_no_api_below_android12">No corresponding API below Android 12</string>
-    <string name="debug_info_vid_pid">VID_PID: </string>
+    <string name="debug_info_vid_pid" translatable="false">VID_PID: </string>
     <string name="debug_info_vibration">Vibration: </string>
     <string name="debug_info_supported">Supported</string>
     <string name="debug_info_not_supported">Not Supported</string>
@@ -574,26 +422,16 @@
     <string name="debug_info_refresh_gamepad_info">Tap to refresh gamepad info</string>
     <string name="debug_info_refresh_gamepad_list">Refresh gamepad list</string>
     <string name="debug_info_test_gamepad_rumble">Test gamepad rumble</string>
-    <string name="pref_enter_value_0_9999">Please enter a value between 0 and 9999.</string>
-    <string name="pref_set_success">Settings saved successfully!</string>
-    <string name="pref_empty_file">Empty file!</string>
-    <string name="pref_import_success">Import success!</string>
-    <string name="pref_error_occurred">An error occurred: </string>
-    <string name="pref_save_keyboard_profile">Save OSK profile</string>
-    <string name="game_menu_advanced">Advanced Menu</string>
     <string name="game_dialog_title_quit_confirm">Really want to quit?</string>
     <string name="game_dialog_message_quit_confirm">Please make sure you have no unsaved progress. Quitting the session will terminate your current running application.</string>
     <string name="game_menu_quit_session">Quit Session</string>
     <string name="game_menu_server_cmd">Server Commands</string>
-    <string name="game_menu_fetch_clipboard">Fetch Clipboard</string>
-    <string name="game_menu_upload_clipboard">Upload Clipboard</string>
     <string name="game_dialog_title_server_cmd_empty">No Server Commands</string>
     <string name="game_dialog_message_server_cmd_empty">Please make sure you\'re using Apollo as server software and has been granted this client with "Server Command" permission.</string>
     <string name="vdisplay_not_ready">Virtual display driver isn\'t ready on the server. Please make sure the SudoVDA driver is installed and enabled.</string>
     <string name="vdisplay_not_supported"><![CDATA[Virtual display isn\'t supported on this server. Please use <a href=\"https://github.com/ClassicOldSong/Apollo\">Apollo</a> as the host streaming software.]]></string>
     <string name="clipboard_sync_unsupported">This server does not support clipboard sync. Please install or upgrade your server to the latest version of Apollo.</string>
     <string name="send_clipboard_failed">Failed to send clipboard: </string>
-    <string name="permission_denied">Notification permission denied</string>
     <string name="get_clipboard_failed">Failed to get clipboard: </string>
     <string name="send_clipboard_success">Clipboard sent successfully</string>
     <string name="get_clipboard_success">Clipboard get successfully</string>
@@ -603,29 +441,11 @@
     <string name="error_msg_permission_denied">Permission Denied</string>
     <string name="error_msg_timeout">Connection Timeout</string>
     <string name="permission_launch_app">Launch Apps</string>
-    <string name="permission_sync_clipboard">Sync Clipboard</string>
 
 
     <!-- Keyboard -->
-    <string name="keyboard_clear_all">Clear All</string>
-    <string name="keyboard_add_keys">Add Keys</string>
-    <string name="keyboard_select_keys">Select Keys to Add</string>
-    <string name="keyboard_clear_all_confirm_title">Clear All Keys</string>
-    <string name="keyboard_clear_all_confirm_message">Are you sure you want to hide all on-screen controls? You can add them back later in configuration mode.</string>
-    <string name="keyboard_keys_added">%d keys added successfully</string>
-    <string name="keyboard_duplicates_skipped">%d duplicates were skipped</string>
-    <string name="keyboard_configure_movable">You can now move the settings button.</string>
-    <string name="keyboard_load_error">Error loading keyboard configuration: %s</string>
-    <string name="keyboard_add">Add</string>
-    <string name="keyboard_key_custom">%s (Custom)</string>
 
     <!-- Compliance -->
-    <string name="category_basic_settings" />
-    <string name="title_checkbox_stretch_video" />
-
-    <!-- ShortcutHelper Toast Messages -->
-    <string name="export_launcher_computer_details_incomplete">Cannot export: Computer details are incomplete.</string>
-    <string name="export_launcher_app_details_incomplete">Cannot export: App details are incomplete.</string>
     <string name="failed_to_initiate_file_export">Failed to initiate file export: %s</string>
     <string name="file_export_failed_no_location_selected">File export failed: No location selected.</string>
     <string name="file_export_failed_no_content_to_write">File export failed: No content to write.</string>
@@ -640,11 +460,6 @@
     <string name="title_export_sunshine_launcher_file">Export Launcher File for Sunshine</string>
     <string name="message_export_sunshine_launcher_file">Exporting launcher file for Sunshine is unstable, and may break at any moment. You\'ll need to export again every time if you changed the app name or image.\nUse Apollo for a more stable experience.</string>
 
-    <string name="title_enable_commit_text">Enable commit-text input (swipe/voice)</string>
-    <string name="summary_enable_commit_text">Forward multi-character text from soft keyboards (gesture typing, predictions, voice dictation). May break games that rely on key-by-key input.</string>
-    <string name="title_checkbox_enable_perf_overlay_bottom">Move overlay to bottom</string>
-    <string name="summary_checkbox_enable_perf_overlay_bottom">Useful when Display in Top Center and Lite mode are enabled during non-native resolution streaming.</string>
-    <string name="title_edit_profile">Edit Profile</string>
     <string name="profile_manager_new_profile">New Profile</string>
     <string name="profile_manager_profile_not_found">Profile not found</string>
     <string name="profile_manager_edit_profile">"Edit Profile: "</string>
@@ -656,7 +471,7 @@
     <string name="profile_manager_new_profile_with">New Profile: %s</string>
     <string name="profile_manager_no_profiles_yet">No profiles yet</string>
     <string name="profile_manager_profiles_description">Profiles allow you to create and save different streaming configurations. Each profile stores its own settings which can be quickly switched between.</string>
-    <string name="profile_manager_tap_create_profile">Tap + to create your first profile</string>s
+    <string name="profile_manager_tap_create_profile">Tap + to create your first profile</string>
     <string name="profile_manager_choose_profile">Choose Profile</string>
     <string name="profile_manager_deactivated_profile">Deactivated profile</string>
     <string name="profile_manager_activated_profile">Activated profile \'%s\'</string>
@@ -666,13 +481,9 @@
     <string name="profile_manager_profile_deleted">Deleted profile \'%s\'</string>
     <string name="profile_manager_failed_to_save">Failed to save profile. Please check logcat for details.</string>
     <string name="profile_manager_failed_to_load">Failed to load profiles. Please check logcat for details.</string>
-    <string name="profile_manager_active_profile">Active profile: %s</string>
     <string name="rename">Rename</string>
     <string name="save">Save</string>
-    <string name="title_low_latency_frame_balance">LFR (Experimental)</string>
-    <string name="summary_low_latency_frame_balance">Minimizes delay by dropping queued frames.</string>
-    <string name="category_perf_monitor_settings">Performance Monitor</string>
 
-    <string name="title_checkbox_full_screen">Enable Full Screen</string>
-    <string name="summary_checkbox_full_screen">Hide system bars with immersive mode</string>
+    <string name="export_launcher_computer_details_incomplete">Cannot export: Computer details are incomplete.</string>
+    <string name="export_launcher_app_details_incomplete">Cannot export: App details are incomplete.</string>
 </resources>
