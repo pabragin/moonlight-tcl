@@ -229,11 +229,11 @@ public final class SettingsScreen {
 
         categories.add(new Category(R.string.settings_cat_advanced).add(
                 toggle("checkbox_prevent_packet_loss", R.string.title_prevent_packet_loss, R.string.summary_prevent_packet_loss, false),
-                toggle("checkbox_latency_test", R.string.title_latency_test, R.string.summary_latency_test, false)
+                toggle("checkbox_latency_test", R.string.title_latency_test, R.string.summary_latency_test, false),
+                notInProfiles(action("pref_debug_info", R.string.title_debug_info, R.string.summary_debug_info, null))
         ));
 
         categories.add(new Category(R.string.settings_cat_about).add(
-                notInProfiles(action("pref_debug_info", R.string.title_debug_info, R.string.summary_debug_info, null)),
                 notInProfiles(link("option_software_release", R.string.title_software_update, R.string.summary_software_update,
                         "https://github.com/pabragin/moonlight-tcl/releases", null)),
                 notInProfiles(link("option_follow_update", R.string.title_follow_update, R.string.summary_follow_update,
