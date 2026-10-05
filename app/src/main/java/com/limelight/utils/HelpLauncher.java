@@ -47,6 +47,14 @@ public class HelpLauncher {
         context.startActivity(i);
     }
 
+    /** The web UI of the user's own PC: its self-signed certificate is accepted by the in-app browser. */
+    public static void launchTrustedUrl(Context context, String url) {
+        Intent i = new Intent(context, HelpActivity.class);
+        i.setData(Uri.parse(url));
+        i.putExtra(HelpActivity.EXTRA_TRUST_HOST, true);
+        context.startActivity(i);
+    }
+
     public static void launchSetupGuide(Context context) {
         launchUrl(context, "https://github.com/moonlight-stream/moonlight-docs/wiki/Setup-Guide");
     }

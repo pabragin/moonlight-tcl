@@ -1143,7 +1143,7 @@ public class MainActivity extends Activity {
                         Toast.makeText(this, getResources().getString(R.string.pcview_error_no_management_url), Toast.LENGTH_LONG).show();
                     }
                     else {
-                        HelpLauncher.launchUrl(this, url);
+                        HelpLauncher.launchTrustedUrl(this, url);
                     }
                 }));
             }

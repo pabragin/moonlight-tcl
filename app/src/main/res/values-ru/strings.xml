@@ -412,4 +412,8 @@
     <string name="perf_overlay_lite_net">%1$dмс</string>
     <string name="perf_overlay_lite_dectime">%1$.2fмс</string>
     <string name="vdisplay_not_supported"><![CDATA[Этот сервер не поддерживает виртуальный дисплей. Используйте как хост <a href=\"https://github.com/ClassicOldSong/Apollo\">Apollo</a>.]]></string>
+    <string name="help_ssl_error">Сертификат этого сайта не вызывает доверия</string>
+    <string name="help_auth_username">Имя пользователя</string>
+    <string name="help_auth_password">Пароль</string>
+    <string name="help_auth_title">Вход на %1$s</string>
 </resources>
