@@ -1,711 +1,390 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Shortcut strings -->
-	<string name="scut_deleted_pc">已刪除電腦</string>
-	<string name="scut_not_paired">未配對電腦</string>
-	<string name="scut_pc_not_found">找不到電腦</string>
-	<string name="scut_invalid_uuid">提供的電腦無效</string>
-	<string name="scut_invalid_app_id">提供的應用程式無效</string>
-
-	<string name="menu_button">選單</string>
-	<string name="quick_menu_title">快速選單</string>
-	<string name="configuration_mode_move_buttons">移動按鈕模式</string>
-	<string name="configuration_mode_resize_buttons">調整按鈕大小模式</string>
-	<string name="configuration_mode_disable_enable_buttons">啟用/停用按鈕模式</string>
-	<string name="configuration_mode_exiting">正在退出配置模式</string>
-	<string name="help_loading_title">說明檢視器</string>
-	<string name="help_loading_msg">正在載入說明頁面…</string>
-
-	<!-- Alignments -->
-	<string name="align_left">靠左對齊</string>
-	<string name="align_center">置中對齊</string>
-	<string name="align_right">靠右對齊</string>
-
-	<!-- PC view menu entries -->
-	<string name="pcview_menu_header_online">線上</string>
-	<string name="pcview_menu_header_offline">離線</string>
-	<string name="pcview_menu_header_unknown">正在重新整理</string>
-	<string name="pcview_menu_app_list">檢視所有應用程式</string>
-	<string name="pcview_menu_pair_pc">傳統配對</string>
-	<string name="pcview_menu_pair_pc_otp">OTP 配對</string>
-	<string name="pcview_menu_unpair_pc">取消配對</string>
-	<string name="pcview_menu_send_wol">發送 Wake-On-LAN 請求</string>
-	<string name="pcview_menu_delete_pc">刪除電腦</string>
-	<string name="pcview_menu_test_network">測試網路連線</string>
-	<string name="pcview_menu_details">檢視詳細資訊</string>
-	<string name="pcview_menu_eol">NVIDIA GameStream 停止服務</string>
-	<string name="pcview_menu_open_management_page">前往伺服器設定</string>
-	<string name="pcview_error_no_management_url">無法開啟伺服器設定頁面，找不到伺服器位址。</string>
-
-	<!-- Network test strings -->
-	<string name="nettest_title_waiting">正在測試網路連線</string>
-	<string name="nettest_text_waiting">Artemis 正在測試您的網路連線，以判斷是否有必要的連接埠被阻擋。\n\n這可能需要幾秒鐘…</string>
-	<string name="nettest_title_done">網路測試完成</string>
-	<string name="nettest_text_success">您的網路似乎沒有阻擋 Artemis。如果您仍然無法連線，請檢查您電腦的防火牆設定。\n\n如果您嘗試透過網際網路進行串流，請在電腦上安裝 Artemis Internet Hosting Tool，並執行內建的 Internet Streaming Tester 以檢查網際網路連線。</string>
-	<string name="nettest_text_inconclusive">無法執行網路測試，因為無法連線至 Artemis 的測試伺服器。請檢查您的網際網路連線，或稍後再試。</string>
-	<string name="nettest_text_failure">您目前的網路連線似乎正在阻擋 Artemis。在此網路下，透過網際網路串流可能無法正常運作。\n\n以下連接埠被阻擋：\n</string>
-	<string name="nettest_text_blocked">您目前的網路連線正在阻擋 Artemis。在此網路下，透過網際網路串流可能無法正常運作。</string>
-
-	<!-- Pair messages -->
-	<string name="pairing">正在配對…</string>
-	<string name="pair_pc_confirm_title">配對電腦</string>
-	<string name="pair_pc_confirm_message">您確定要與 %s 配對嗎？請不要與不熟悉的電腦配對。</string>
-	<string name="pair_pc_offline">電腦已離線</string>
-	<string name="pair_pc_ingame">電腦目前正在執行遊戲，必須先關閉遊戲才能配對。</string>
-	<string name="pair_pairing_title">正在配對</string>
-	<string name="pair_pairing_msg">請在目標電腦上輸入以下 PIN：</string>
-	<string name="pair_pairing_help">如果您的主機電腦正在執行 Sunshine，請進入 Sunshine 的網頁介面輸入 PIN。</string>
-	<string name="pair_otp_pairing_msg">正在進行配對，請稍候…</string>
-	<string name="pair_otp_pairing_help">OTP 配對僅適用於 Apollo，如果您使用其他主機軟體，請在網頁介面手動輸入剛剛提供的 PIN。</string>
-	<string name="pair_incorrect_pin">PIN 或密碼短語錯誤</string>
-	<string name="pair_fail">配對失敗</string>
-	<string name="pair_already_in_progress">配對已在進行中</string>
-	<string name="pair_passphrase_hint">密碼短語</string>
-	<string name="pair_pin_length_msg">PIN 必須是 4 位數字</string>
-	<string name="pair_passphrase_length_msg">密碼短語至少需 4 個字元</string>
-
-	<!-- WOL messages -->
-	<string name="wol_pc_online">電腦已上線</string>
-	<string name="wol_no_mac">無法喚醒電腦，因為未儲存 MAC 位址</string>
-	<string name="wol_waking_pc">正在喚醒電腦…</string>
-	<string name="wol_waking_msg">您的電腦可能需要幾秒鐘才能喚醒。
-		如果沒有反應，請確認是否已正確設定 Wake-On-LAN。
-	</string>
-	<string name="wol_fail">無法傳送 Wake-On-LAN 封包</string>
-
-	<!-- Unpair messages -->
-	<string name="unpairing">正在取消配對…</string>
-	<string name="unpair_success">取消配對成功</string>
-	<string name="unpair_fail">取消配對失敗</string>
-	<string name="unpair_error">裝置未配對</string>
-
-	<!-- Errors -->
-	<string name="error_pc_offline">電腦已離線</string>
-	<string name="error_manager_not_running">ComputerManager 服務未執行。請稍等幾秒鐘或重新啟動應用程式。</string>
-	<string name="error_unknown_host">無法解析主機</string>
-	<string name="error_404">GFE 回傳 HTTP 404 錯誤。請確認您的電腦正在執行支援的 GPU。
-		使用遠端桌面軟體也可能導致此錯誤。請嘗試重新啟動電腦或重新安裝 GFE。
-	</string>
-	<string name="title_decoding_error">影片解碼器當機</string>
-	<string name="message_decoding_error">Artemis 因與此裝置的影片解碼器不相容而當機。如果當機持續發生，請嘗試調整串流設定。</string>
-	<string name="title_decoding_reset">影片設定已重設</string>
-	<string name="message_decoding_reset">您的裝置影片解碼器在目前的串流設定下持續當機，串流設定已重設為預設值。</string>
-	<string name="error_usb_prohibited">您的裝置管理員禁止存取 USB。請檢查 Knox 或 MDM 設定。</string>
-	<string name="unable_to_pin_shortcut">您目前的啟動器不允許建立釘選捷徑。</string>
-	<string name="video_decoder_init_failed">影片解碼器初始化失敗。您的裝置可能不支援所選的解析度或幀率。</string>
-	<string name="no_video_received_error">未接收到主機端的影像。</string>
-	<string name="no_frame_received_error">您的網路效能不佳。請降低影片位元率設定，或使用更快的連線。</string>
-	<string name="early_termination_error">在啟動串流時，您的主機電腦發生錯誤。\n\n請確認主機端未開啟任何受 DRM 保護的內容。您也可以嘗試重新啟動主機電腦。</string>
-	<string name="frame_conversion_error">主機電腦回報嚴重的影片編碼錯誤。\n\n請嘗試停用 HDR 模式、調整串流解析度，或更改主機電腦的顯示解析度。</string>
-	<string name="check_ports_msg">請檢查防火牆及連接埠轉發規則，以下連接埠： </string>
-	
-	<!-- Start application messages -->
-	<string name="conn_establishing_title">正在建立連線</string>
-	<string name="conn_establishing_msg">正在啟動連線</string>
-	<string name="conn_metered">警告：您目前的網路連線為計量網路！</string>
-	<string name="conn_client_latency">平均影格解碼延遲：</string>
-	<string name="conn_client_latency_hw">硬體解碼器延遲：</string>
-	<string name="conn_hardware_latency">平均硬體解碼延遲：</string>
-	<string name="conn_starting">正在啟動</string>
-	<string name="conn_error_title">連線錯誤</string>
-	<string name="conn_error_msg">啟動失敗</string>
-	<string name="conn_terminated_title">連線已中斷</string>
-	<string name="conn_terminated_msg">連線已被中斷。</string>
-	<string name="error_code_prefix">錯誤代碼：</string>
-
-	<!-- General strings -->
-	<string name="ip_hint">主機電腦的 IP 位址</string>
-	<string name="searching_pc">正在搜尋您區域網路中的主機電腦…\n\n
-		請確認 Apollo 已在主機電腦上執行。</string>
-	<string name="yes">是</string>
-	<string name="no">否</string>
-	<string name="lost_connection">與電腦的連線中斷</string>
-	<string name="title_details">詳細資訊</string>
-	<string name="help">說明</string>
-	<string name="delete_pc_msg">您確定要刪除此電腦嗎？</string>
-	<string name="slow_connection_msg">與電腦連線速度緩慢\n請降低位元率</string>
-	<string name="poor_connection_msg">與電腦的連線品質不佳</string>
-	<string name="perf_overlay_streamdetails">影片串流：%1$s %2$.2f FPS</string>
-	<string name="perf_overlay_decoder">解碼器：%1$s</string>
-	<string name="perf_overlay_incomingfps">從網路接收的影格率：%1$.2f FPS</string>
-	<string name="perf_overlay_renderingfps">渲染影格率：%1$.2f FPS</string>
-	<string name="perf_overlay_hostprocessinglatency">主機處理延遲 最小/最大/平均：%1$.1f/%2$.1f/%3$.1f ms</string>
-	<string name="perf_overlay_netdrops">因網路連線丟失的影格：%1$.2f%%</string>
-	<string name="perf_overlay_netlatency">平均網路延遲：%1$d ms（變異：%2$d ms）</string>
-	<string name="perf_overlay_dectime">平均解碼時間：%1$.2f ms</string>
-	<string name="perf_overlay_drawdelay">延遲：%1$.2f ms</string>
-
-	<!-- Performance Report Sharing -->
-	<string name="email_prefix_message">
-		請將此電子郵件原樣發送至 artemistics.logs@gmail.com 以支持社群。\n
-		您分享的效能數據將有助於改善並擴充資料集，該資料集可在以下位置取得：\n
-		https://tinyurl.com/artemis-performance\n\n
-	</string>
-
-	<string name="email_recipient">artemistics.logs@gmail.com</string>
-	<string name="email_subject">Artemistics - 效能日誌</string>
-	<string name="email_chooser_title">傳送效能日誌...</string>
-	<string name="toast_no_email_clients">未安裝電子郵件用戶端。</string>
-	<string name="toast_no_logs">尚未儲存任何效能數據。</string>
-
-	<!-- AppList activity -->
-	<string name="applist_connect_msg">正在連線至電腦…</string>
-	<string name="applist_menu_resume">繼續工作階段</string>
-	<string name="applist_menu_start_vdisplay">在虛擬顯示器中啟動</string>
-	<string name="applist_menu_start_primarydisplay">在主要顯示器中啟動</string>
-	<string name="applist_menu_quit">結束工作階段</string>
-	<string name="applist_menu_quit_and_start">結束目前遊戲並啟動</string>
-	<string name="applist_menu_quit_and_start_vdisplay">結束目前遊戲並在虛擬顯示器中啟動</string>
-	<string name="applist_menu_quit_and_start_primarydisplay">結束目前遊戲並在主要顯示器中啟動</string>
-	<string name="applist_menu_cancel">取消</string>
-	<string name="applist_menu_details">檢視詳細資訊</string>
-	<string name="applist_menu_scut">建立捷徑</string>
-	<string name="applist_menu_export_launcher">匯出啟動檔</string>
-	<string name="applist_menu_tv_channel">新增至頻道</string>
-	<string name="applist_menu_hide_app">隱藏應用程式</string>
-	<string name="applist_refresh_title">應用程式清單</string>
-	<string name="applist_refresh_msg">正在重新整理應用程式…</string>
-	<string name="applist_refresh_error_title">錯誤</string>
-	<string name="applist_refresh_error_msg">無法取得應用程式清單</string>
-	<string name="applist_quit_app">正在結束</string>
-	<string name="applist_quit_success">已成功結束</string>
-	<string name="applist_quit_fail">結束失敗</string>
-	<string name="applist_quit_confirmation">您確定要結束正在執行的應用程式嗎？所有未儲存的資料將會遺失。</string>
-	<string name="applist_details_id">應用程式 ID：</string>
-
-	<!-- Add computer manually activity -->
-	<string name="title_add_pc">手動新增電腦</string>
-	<string name="msg_add_pc">正在連線至電腦…</string>
-	<string name="addpc_fail">無法連線至指定的電腦。請確認防火牆允許所需的連接埠。</string>
-	<string name="addpc_success">已成功新增電腦</string>
-	<string name="addpc_unknown_host">無法解析電腦位址。請確認輸入的位址沒有拼寫錯誤。</string>
-	<string name="addpc_enter_ip">您必須輸入 IP 位址</string>
-	<string name="addpc_wrong_sitelocal">該位址看起來不正確。若要透過網際網路進行串流，您必須使用路由器的公開 IP 位址。</string>
-
-	<!-- Preferences -->
-	<string name="category_general_settings">一般設定</string>
-	<string name="category_video_settings">影片設定</string>
-	<string name="title_resolution_list">影片解析度</string>
-	<string name="summary_resolution_list">提高以改善影像清晰度。降低以便在低階裝置和較慢的網路上獲得更佳效能。</string>
-	<string name="title_native_res_dialog">原生解析度警告</string>
-	<string name="text_native_res_dialog">串流伺服器可能不支援原生解析度和/或 FPS。您可能需要手動為主機電腦設定相符的自訂顯示模式。\n\n若您選擇在 NVIDIA 控制面板中建立自訂解析度以符合螢幕設定，請務必閱讀並理解 NVIDIA 對可能造成的螢幕損壞、電腦不穩定和其他潛在問題的警告。\n\n因在您的電腦上建立自訂解析度所導致的任何問題，我們概不負責。\n\n您的螢幕可能不支援必要的顯示配置。如果是這樣，您可以嘗試設定虛擬螢幕。最後，如果您的裝置或主機電腦不支援在特定解析度或更新率下進行串流，很遺憾將無法使用。</string>
-	<string name="title_fps_list">影片幀率</string>
-	<string name="summary_fps_list">提高可讓影片串流更流暢。降低則可在低階裝置上獲得更佳效能。</string>
-	<string name="title_seekbar_bitrate">影片位元率</string>
-	<string name="summary_seekbar_bitrate">提高以獲得更佳的影像品質。降低則可在較慢的連線上改善效能。</string>
-	<string name="title_seekbar_metered_bitrate">計量網路下的影片位元率</string>
-	<string name="summary_seekbar_metered_bitrate">較高的位元率會消耗更多數據，較低的位元率可改善在計量網路下的流暢度。\n設定為 0 時，位元率為上述設定的 1/4。</string>
-	<string name="suffix_seekbar_bitrate_mbps">Mbps</string>
-	<string name="title_resolution_scale_factor">解析度縮放係數</string>
-	<string name="summary_resolution_scale_factor">伺服器端請求的虛擬螢幕解析度將乘以此係數。串流解析度不受影響。\n例如：120% 會將 2000x1000 變為 2400x1200。\n設定較高的縮放係數可改善部分遊戲的影像品質。\n需要 Apollo 才能生效。</string>
-	<string name="resolution_prefix_native">原生</string>
-	<string name="resolution_prefix_native_fullscreen">原生全螢幕</string>
-	<string name="resolution_prefix_native_landscape">（橫向）</string>
-	<string name="resolution_prefix_native_portrait">（直向）</string>
-	<string name="resolution_prefix_custom">自訂</string>
-	<string name="fps_suffix_fps">FPS</string>
-	<string name="title_native_fps_dialog">原生 FPS 警告</string>
-	<string name="title_video_scale_mode">影片縮放模式</string>
-	<string name="summary_video_scale_mode">在「符合」、「填滿」與「拉伸」之間選擇</string>
-	<string name="video_scale_mode_fit">符合</string>
-	<string name="video_scale_mode_fill">填滿</string>
-	<string name="video_scale_mode_stretch">拉伸</string>
-
-	<string name="category_audio_settings">音訊設定</string>
-	<string name="title_audio_config_list">環繞音效配置</string>
-	<string name="summary_audio_config_list">為家庭劇院系統啟用 5.1 或 7.1 環繞音效</string>
-	<string name="title_checkbox_enable_audiofx">啟用系統等化器支援</string>
-	<string name="summary_checkbox_enable_audiofx">允許在串流時使用音效，但可能會增加音訊延遲</string>
-
-	<string name="category_gamepad_settings">遊戲手把設定</string>
-	<string name="title_checkbox_multi_controller">自動偵測手把存在</string>
-	<string name="summary_checkbox_multi_controller">取消勾選此選項將強制手把始終存在</string>
-	<string name="title_seekbar_deadzone">調整類比搖桿死區</string>
-	<string name="summary_seekbar_deadzone">正值設定一般死區，負值則套用死區補償。使用死區補償時，請確保您的手把可調整死區，否則可能難以保持置中。</string>
-	<string name="suffix_seekbar_deadzone">%</string>
-	<string name="title_checkbox_xb1_driver">Xbox 360/One/Nintendo Pro USB 手把驅動程式</string>
-	<string name="summary_checkbox_xb1_driver">為不具原生 Xbox/Nintendo Pro 支援的裝置啟用內建 USB 驅動程式</string>
-	<string name="title_checkbox_usb_bind_all">覆寫原生 Xbox 手把支援</string>
-	<string name="summary_checkbox_usb_bind_all">即使裝置具備原生 Xbox/Nintendo Pro 支援，也對所有支援的手把使用 Artemis 的 USB 驅動程式</string>
-	<string name="title_checkbox_mouse_emulation">以手把模擬滑鼠</string>
-	<string name="summary_checkbox_mouse_emulation">長按 Start 鍵可在手把模式與滑鼠模式間切換</string>
-	<string name="title_checkbox_flip_face_buttons">交換面板按鍵</string>
-	<string name="summary_checkbox_flip_face_buttons">對手把與螢幕控制將 A/B 與 X/Y 面板按鍵對調</string>
-	<string name="title_checkbox_gamepad_touchpad_as_mouse">一律以觸控板控制滑鼠</string>
-	<string name="summary_checkbox_gamepad_touchpad_as_mouse">即使以觸控板模擬手把，仍強制以手把觸控板輸入控制主機滑鼠。</string>
-	<string name="title_checkbox_gamepad_motion_sensors">允許使用手把陀螺儀</string>
-	<string name="summary_checkbox_gamepad_motion_sensors">在以具陀螺儀的手把進行模擬時，允許支援的主機請求陀螺儀資料。若遊戲未使用陀螺儀，停用可略微降低耗電與網路用量。</string>
-	<string name="title_enable_rumble">啟用震動回饋</string>
-	<string name="summary_enable_rumble">在支援的手把上啟用震動回饋。</string>
-	<string name="category_input_settings">輸入設定</string>
-	<string name="title_checkbox_absolute_mouse_mode">遠端桌面滑鼠模式</string>
-	<string name="summary_checkbox_absolute_mouse_mode">可讓滑鼠加速度在遠端桌面使用時更自然，但與許多遊戲不相容。</string>
-	<string name="title_checkbox_mouse_nav_buttons">啟用上一頁/下一頁滑鼠按鍵</string>
-	<string name="summary_checkbox_mouse_nav_buttons">啟用此選項可能導致部分裝置無法正常右鍵點擊</string>
-
-	<string name="category_on_screen_controls_settings">螢幕控制設定</string>
-	<string name="title_checkbox_show_onscreen_controls">顯示螢幕控制按鍵</string>
-	<string name="summary_checkbox_show_onscreen_controls">在觸控螢幕上顯示虛擬手把</string>
-	<string name="title_hide_osc_when_has_gamepad">使用手把時隱藏虛擬手把</string>
-	<string name="summary_hide_osc_when_has_gamepad">當連接實體手把時隱藏虛擬手把</string>
-	<string name="title_checkbox_vibrate_osc">啟用震動</string>
-	<string name="summary_checkbox_vibrate_osc">讓裝置震動以模擬螢幕控制的震撼回饋</string>
-	<string name="title_only_l3r3">僅顯示 L3 與 R3</string>
-	<string name="summary_only_l3r3">隱藏除 L3 與 R3 以外的所有虛擬按鍵</string>
-	<string name="title_show_guide_button">顯示 Guide 鍵</string>
-	<string name="summary_show_guide_button">在螢幕上顯示 Guide 鍵</string>
-	<string name="title_reset_osc">清除已儲存的螢幕控制版面</string>
-	<string name="summary_reset_osc">將所有螢幕控制重設為預設大小與位置</string>
-	<string name="dialog_title_reset_osc">重設版面</string>
-	<string name="dialog_text_reset_osc">確定要刪除已儲存的螢幕控制版面嗎？</string>
-	<string name="toast_reset_osc_success">螢幕控制已重設為預設值</string>
-	<string name="title_osc_opacity">調整螢幕控制不透明度</string>
-	<string name="summary_osc_opacity">使螢幕控制更透明或更不透明</string>
-	<string name="dialog_title_osc_opacity">調整不透明度</string>
-	<string name="suffix_osc_opacity">%</string>
-
-	<string name="category_ui_settings">介面設定</string>
-	<string name="title_language_list">語言</string>
-	<string name="summary_language_list">Artemis 使用的語言</string>
-	<string name="title_checkbox_small_icon_mode">使用小型封面圖</string>
-	<string name="summary_checkbox_small_icon_mode">在應用程式格狀檢視中使用較小封面圖，可在同一畫面顯示更多應用程式</string>
-
-	<string name="category_host_settings">主機設定</string>
-	<string name="title_checkbox_enable_sops">最佳化遊戲設定</string>
-	<string name="summary_checkbox_enable_sops">允許 GFE 調整遊戲設定以達到最佳串流效果</string>
-	<string name="title_checkbox_host_audio">在電腦播放音訊</string>
-	<string name="summary_checkbox_host_audio">在電腦與此裝置同時播放音訊</string>
-
-	<string name="category_advanced_settings">進階設定</string>
-	<string name="title_unlock_fps">解鎖所有可用幀率</string>
-	<string name="summary_unlock_fps">在高階裝置上以 90 或 120 FPS 串流可降低延遲，但在不支援的裝置上可能造成延遲或不穩定</string>
-	<string name="title_checkbox_reduce_refresh_rate">允許降低更新率</string>
-	<string name="summary_checkbox_reduce_refresh_rate">較低的螢幕更新率可節省電力，但會增加部分影片延遲</string>
-	<string name="title_checkbox_disable_warnings">停用警告訊息</string>
-	<string name="summary_checkbox_disable_warnings">串流時停用螢幕上的連線警告訊息</string>
-	<string name="title_disable_frame_drop">永不丟幀</string>
-	<string name="summary_disable_frame_drop">可減少部分裝置的微卡頓，但可能增加延遲</string>
-	<string name="title_video_format">變更編碼器設定</string>
-	<string name="summary_video_format">若裝置支援，較新的編碼器可降低影片頻寬需求。若主機軟體或 GPU 不支援，編碼器選擇可能被忽略。</string>
-	<string name="title_enable_hdr">啟用 HDR（實驗性）</string>
-	<string name="summary_enable_hdr">當遊戲與電腦 GPU 支援時，串流 HDR。HDR 需要支援 HEVC Main 10 編碼的 GPU。</string>
-	<string name="title_full_range">強制全範圍影像（實驗性）</string>
-	<string name="summary_full_range">若您的裝置無法正確顯示全範圍影像內容，將導致明暗區域細節流失。</string>
-	<string name="title_prevent_packet_loss">防止封包遺失</string>
-	<string name="summary_prevent_packet_loss">若裝置因不明原因出現封包遺失，可嘗試啟用此選項。</string>
-	<string name="title_enable_perf_overlay">串流時顯示效能資訊</string>
-	<string name="summary_enable_perf_overlay">串流時顯示即時效能資訊</string>
-	<string name="title_enable_post_stream_toast">串流後顯示延遲訊息</string>
-	<string name="summary_enable_post_stream_toast">串流結束後顯示延遲資訊訊息</string>
-
-	<string name="category_help">說明</string>
-	<string name="title_setup_guide">安裝指南</string>
-	<string name="summary_setup_guide">檢視如何設定您的遊戲電腦以進行串流的指引</string>
-	<string name="title_troubleshooting">疑難排解指南</string>
-	<string name="summary_troubleshooting">檢視診斷與修復常見串流問題的提示</string>
-	<string name="title_privacy_policy">隱私權政策</string>
-	<string name="summary_privacy_policy">檢視 Artemis 的隱私權政策</string>
-	<string name="title_special_key_help">自訂按鍵說明</string>
-	<string name="summary_special_key_help">有關如何設定自訂特殊按鍵的指引</string>
-	<string name="summary_performance_link">查看其他裝置的效能。\n請注意，這些資料由社群管理，非由 Artemis 官方管理，也不代表 Artemis 的官方立場。</string>
-	<string name="title_performance_link">效能儀表板</string>
-
-	<!-- Toasts -->
-	<string name="toast_controller_type_changed">因陀螺儀模擬，手把類型可能已變更</string>
-
-	<!-- Array strings -->
-	<string name="resolution_360p">360p</string>
-	<string name="resolution_480p">480p</string>
-	<string name="resolution_720p">720p</string>
-	<string name="resolution_1080p">1080p</string>
-	<string name="resolution_1440p">1440p</string>
-	<string name="resolution_4k">4K</string>
-
-	<string name="fps_30">30 FPS</string>
-	<string name="fps_60">60 FPS</string>
-	<string name="fps_90">90 FPS</string>
-	<string name="fps_120">120 FPS</string>
-
-	<string name="audioconf_stereo">立體聲</string>
-	<string name="audioconf_51surround">5.1 環繞音效</string>
-	<string name="audioconf_71surround">7.1 環繞音效</string>
-
-	<string name="videoformat_auto">自動（建議）</string>
-	<string name="videoformat_av1always">優先使用 AV1（實驗性）</string>
-	<string name="videoformat_hevcalways">優先使用 HEVC</string>
-	<string name="videoformat_h264always">優先使用 H.264</string>
-
-	<string name="title_frame_pacing">影片幀律控制</string>
-	<string name="summary_frame_pacing">指定如何在影片延遲與流暢度之間取得平衡</string>
-	<string name="pacing_warp">Warp Drive（實驗性）</string>
-	<string name="pacing_warp2">Warp 2（實驗性）</string>
-	<string name="pacing_latency">優先最低延遲</string>
-	<string name="pacing_balanced">平衡</string>
-	<string name="pacing_balanced_alt">有限制 FPS 的平衡模式</string>
-	<string name="pacing_smoothness">優先最流暢影片（可能大幅增加延遲）</string>
-
-
-	<string name="keyboard_service_label">Artemis 實體鍵盤</string>
-	<string name="accessibility_description_text">僅在系統攔截實體鍵盤快捷鍵時使用。在某些系統中，部分快捷鍵已被 Android 系統定義並使用，導致無法傳遞至主機電腦。Artemis 不會檢視您的輸入，也不會收集您的密碼、信用卡號或任何其他私人資訊。</string>
-
-
-	<!-- In Game menu -->
-	<string name="game_menu_toggle_keyboard">顯示軟體鍵盤</string>
-	<string name="game_menu_toggle_hud">切換即時效能資訊</string>
-	<string name="game_menu_toggle_floating_button">切換浮動按鈕</string>
-	<string name="game_menu_select_steam_mode">選擇串流模式</string>
-	<string name="game_menu_toggle_keyboard_model">切換特殊按鍵</string>
-	<string name="game_menu_toggle_virtual_model">切換虛擬手把</string>
-	<string name="game_menu_toggle_virtual_keyboard_model">切換螢幕完整鍵盤</string>
-
-
-	<string name="game_menu_toggle_mouse_on">啟用手把滑鼠控制</string>
-	<string name="game_menu_toggle_mouse_off">停用手把滑鼠控制</string>
-	<string name="game_menu_disconnect">中斷連線</string>
-	<string name="game_menu_cancel">取消</string>
-	<string name="game_menu_task_manager">開啟工作管理員</string>
-	<string name="game_menu_send_keys">傳送特殊按鍵</string>
-	<string name="game_menu_send_keys_esc">ESC</string>
-	<string name="game_menu_send_keys_f11">F11</string>
-	<string name="game_menu_send_keys_alt_f4">Alt + F4</string>
-	<string name="game_menu_send_keys_ctrl_v">Ctrl + V</string>
-	<string name="game_menu_send_keys_win">Win (Meta)</string>
-	<string name="game_menu_send_keys_win_d">Win + D</string>
-	<string name="game_menu_send_keys_alt_b">Alt + B</string>
-	<string name="game_menu_send_keys_win_g">Win + G (Xbox Game Bar)</string>
-	<string name="game_menu_send_keys_ctrl_alt_tab">Ctrl + Alt + Tab</string>
-	<string name="game_menu_send_keys_shift_tab">Shift + Tab (Steam Overlay)</string>
-	<string name="game_menu_send_keys_alt_enter">Alt + Enter</string>
-	<string name="game_menu_send_keys_win_shift_left">Win + Shift + 左鍵（在顯示器間移動應用程式）</string>
-	<string name="game_menu_send_keys_ctrl_alt_shift_q">Ctrl + Alt + Shift + Q（電腦結束串流）</string>
-	<string name="game_menu_send_keys_ctrl_alt_shift_f1">Ctrl + Alt + Shift + F1（切換顯示器）</string>
-	<string name="game_menu_send_keys_ctrl_alt_shift_f12">Ctrl + Alt + Shift + F12（切換顯示器）</string>
-
-
-	<string name="title_analog_scrolling">使用類比搖桿捲動</string>
-	<string name="summary_analog_scrolling">在滑鼠模擬模式下選擇類比搖桿來進行捲動</string>
-	<string name="analogscroll_none">無（雙搖桿皆控制滑鼠）</string>
-	<string name="analogscroll_right">右搖桿</string>
-	<string name="analogscroll_left">左搖桿</string>
-
-	<string name="perf_overlay_lite_net">%1$dms</string>
-	<string name="perf_overlay_lite_dectime">%1$.2fms</string>
-	<string name="perf_overlay_lite_netdrops">%1$.2f%%</string>
-	<string name="perf_overlay_lite_streamdetails">%1$s</string>
-	<string name="perf_overlay_lite_fps">%1$.2f</string>
-	<string name="perf_overlay_drawn_fps">GPU FPS：</string>
-	<string name="perf_overlay_ai_fps">3D FPS：</string>
-	<string name="perf_overlay_ai_delegate">代理：</string>
-	<string name="perf_overlay_lite_decoder">解碼器：%1$s</string>
-
-	<string name="title_import_keyboard_layout">匯入鍵盤佈局</string>
-	<string name="title_export_keyboard_layout">匯出鍵盤佈局</string>
-	<string name="summary_import_keyboard_layout">這將覆寫目前的佈局。</string>
-	<string name="summary_export_keyboard_layout">匯出目前的鍵盤佈局</string>
-
-	<string name="title_manual_enter_bitrate">自訂位元率</string>
-	<string name="summary_manual_enter_bitrate">手動輸入位元率。\n可超過拉桿的最大範圍。</string>
-	<string name="dialog_manual_enter_bitrate">請以 Mbps 輸入位元率。四捨五入到 0.5。</string>
-
-	<string name="title_custom_refresh_rate">自訂更新率</string>
-	<string name="summary_custom_refresh_rate">手動輸入更新率。僅支援 Apollo。</string>
-	<string name="dialog_custom_refresh_rate">請以 Hz 輸入更新率。可為小數。</string>
-
-	<string name="title_render_mode">渲染模式</string>
-	<string name="title_render_mode_convergence_title">3D 會聚</string>
-	<string name="title_render_mode_convergence_description">參考值：50 - 平衡 / 0 - 螢幕前 / 100 - 螢幕後</string>
-	<string name="title_render_mode_balance_shift_title">3D 視覺平衡</string>
-	<string name="title_render_mode_balance_shift_description">參考值：50 - 雙眼各分擔 50% 的深度效果；0：左眼（100% 凸出）- 右眼（100% 不變）；100：左眼不變、右眼凸出。將數值設為 0 或 100 可獲得更清晰的成像，因為總有一側像素保持未偏移</string>
-	<string name="title_render_mode_strength_title">3D 效果強度</string>
-	<string name="title_render_mode_strength_description">參考值：50。數值越高效果越強，但可能造成眼睛疲勞且不自然；數值越低更護眼，體驗更柔和。</string>
-
-	<string name="summary_render_mode">預設為 2D 或 SBS 3D。3D 會自動加倍寬度並套用效果，無需設定。支援 AI 2D 轉 3D。</string>
-
-	<string name="title_checkbox_mouse_local_cursor">使用本機滑鼠游標</string>
-	<string name="summary_checkbox_mouse_local_cursor">預設會擷取外接實體滑鼠游標，本選項可顯示 Android 系統游標</string>
-
-
-	<string name="title_checkbox_onscreen_style_official">官方虛擬手把外觀</string>
-	<string name="summary_checkbox_onscreen_style_official">若偏好舊版官方虛擬手把按鈕樣式，可選擇此項。\n若選擇底部虛擬按鈕，按鍵外形可為方形【一般按鍵預設為方形】</string>
-
-	<string name="title_checkbox_enable_perf_overlay_lite">啟用精簡模式</string>
-	<string name="summary_checkbox_enable_perf_overlay_lite">顯示簡化的效能資訊：網路速度 / 延遲 / 解碼 / 封包遺失率 / FPS</string>
-
-	<string name="title_checkbox_enable_perf_logging">啟用效能記錄</string>
-	<string name="summary_checkbox_enable_perf_logging">「離線時」依組態儲存效能資料。</string>
-
-	<string name="title_checkbox_enable_perf_overlay_lite_dialog">精簡模式點擊彈出快速選項</string>
-	<string name="summary_checkbox_enable_perf_overlay_lite_dialog">取代返回鍵邏輯，改為彈出遊戲快速選單。</string>
-
-
-
-	<string name="title_quit_dialog">返回選單</string>
-	<string name="summary_quit_dialog">啟用後，在串流介面按下實體返回鍵會顯示相關選項！\n軟體鍵盤、效能資訊、觸控模式切換、傳送特殊按鍵</string>
-
-	<string name="title_floating_button">浮動按鈕</string>
-	<string name="summary_floating_button">啟用浮動按鈕</string>
-
-	<string name="dialog_custom_resolution">設定解析度並離開設定頁面後生效！</string>
-	<string name="summary_custom_resolution">新增自訂解析度，以 x 分隔；不常見的解析度可能無法運作。\n例如：1920x1080\n若非原生解析度，預設可能不會填滿瀏海區域。若長寬比相同，可手動設定拉伸畫面以全螢幕顯示。</string>
-	<string name="title_custom_resolution">自訂解析度</string>
-
-
-	<string name="title_import_special_button">匯入自訂按鍵</string>
-	<string name="summary_import_special_button">可於返回選單與特殊按鍵中使用。\n注意：匯入會覆寫目前設定，請先備份。</string>
-
-	<string name="summary_share_performance_logs">與朋友或社群分享您的效能資料</string>
-	<string name="title_share_performance_logs_button">分享效能日誌</string>
-
-	<string name="title_software_update">軟體更新</string>
-	<string name="summary_software_update">Moonlight TCL 版本（pabragin）－前往 GitHub Releases 取得最新版本</string>
-
-	<string name="title_follow_update">追蹤更新</string>
-	<string name="summary_follow_update">使用 Obtainium 追蹤 Moonlight TCL 更新</string>
-
-	<string name="title_special_key_layout">特殊按鍵佈局</string>
-	<string name="title_show_virtual_key">在螢幕上顯示虛擬按鍵</string>
-	<string name="summary_show_virtual_key">在觸控螢幕上顯示一層虛擬特殊按鍵。\n其透明度與上方虛擬手把共享。</string>
-
-	<string name="title_default_layout_scheme">預設佈局設定檔</string>
-	<string name="summary_default_layout_scheme">每個佈局設定檔初始皆相同（依 keyboards.json 產生），可自行刪除與調整</string>
-
-	<string name="summary_vibrate_keyboard">點擊螢幕按鍵時觸發手機震動馬達。本選項也可套用於虛擬手把按鍵。</string>
-	<string name="title_square_buttons">一般按鍵為方形</string>
-	<string name="summary_square_buttons">虛擬按鍵形狀為方形，預設為圓形。</string>
-
-	<string name="title_reset_keyboard_layout">重設虛擬鍵盤佈局</string>
-	<string name="summary_reset_keyboard_layout">初始化特殊按鍵佈局（重設預設選取的佈局方案）</string>
-
-	<string name="title_joyconfix">相容 Switch JoyCon</string>
-	<string name="summary_joyconfix">若您的 JoyCon 無法使用或按鍵辨識有問題，可嘗試啟用此功能。適配 Android 10 以上。</string>
-
-	<string name="title_keyboard_opacity">虛擬全鍵盤不透明度</string>
-	<string name="title_onscreen_keyboard_autofit">虛擬全鍵盤停用自動適配</string>
-	<string name="title_onscreen_keyboard_height">虛擬全鍵盤高度</string>
-	<string name="title_onscreen_keyboard_width">虛擬全鍵盤寬度</string>
-	<string name="title_onscreen_keyboard_align_mode">虛擬全鍵盤對齊模式</string>
-	<string name="summary_onscreen_keyboard_height">調整虛擬全鍵盤高度</string>
-	<string name="summary_onscreen_keyboard_autofit">不自動調整鍵盤大小與位置，允許自訂大小</string>
-	<string name="summary_onscreen_keyboard_width">調整虛擬全鍵盤寬度</string>
-	<string name="summary_onscreen_keyboard_align_mode">虛擬全鍵盤相對檢視區的對齊方式</string>
-
-	<string name="title_free_analog_stick">自由類比搖桿</string>
-	<string name="summary_free_analog_stick">虛擬手把的左右搖桿中心點不固定，可在一定範圍內自由移動。</string>
-	<string name="summary_free_analog_stick_opacity">預設僅在搖桿移動時顯示背景。若不喜歡，可調整其不透明度效果。</string>
-	<string name="title_free_analog_stick_opacity">自由類比搖桿背景不透明度</string>
-
-	<string name="title_exdisplay_mode">外接顯示模式（Beta）</string>
-	<string name="summary_exdisplay_mode">在外接顯示器上顯示串流畫面；虛擬按鍵、效能資訊與其他控制顯示於手機螢幕。</string>
-
-
-
-	<string name="title_debug_info">偵錯資訊</string>
-	<string name="summary_debug_info">測試手把震動與其他項目。</string>
-
-
-
-	<string name="title_clear_default_special_button">停用預設特殊按鍵</string>
-	<string name="summary_clear_default_special_button">若覺得返回選單中的內建指令無用，可停用並改用您匯入的指令。</string>
-
-	<string name="title_trackpad_sensitivity_x">觸控板靈敏度 X</string>
-	<string name="summary_trackpad_sensitivity_x">觸控板 X 軸靈敏度，負值為方向反轉</string>
-	<string name="title_trackpad_sensitivity_y">觸控板靈敏度 Y</string>
-	<string name="summary_trackpad_sensitivity_y">觸控板 Y 軸靈敏度，負值為方向反轉</string>
-
-	<string name="title_trackpad_drag_drop_vibration">啟用觸控板拖放震動</string>
-	<string name="summary_trackpad_drag_drop_vibration">在 Samsung 觸控板裝置上，拖放操作提供震動回饋。</string>
-	<string name="title_trackpad_drag_drop_threshold">觸控板拖放啟動的按住時間</string>
-	<string name="summary_trackpad_drag_drop_threshold">設定在 Samsung 裝置上啟動拖放前需按住的時間。</string>
-
-	<string name="title_trackpad_swap_axis">交換觸控板輸入的 X/Y 軸</string>
-	<string name="summary_trackpad_swap_axis">在部分裝置上，觸控板輸入可能發生軸向旋轉。啟用此選項或有幫助。</string>
-
-	<string name="title_checkbox_force_qwerty">強制使用 QWERTY 佈局</string>
-	<string name="summary_checkbox_force_qwerty">強制使用 QWERTY 鍵盤佈局。\nGFE 需要。\n若要使用其他佈局，請關閉此選項。</string>
-
-	<string name="title_checkbox_back_as_meta">返回鍵作為 Meta</string>
-	<string name="summary_back_as_meta">在按下實體返回鍵時送出 Meta（Win）鍵。</string>
-	<string name="title_back_as_guide">返回鍵作為 Guide</string>
-	<string name="summary_back_as_guide">在手把上按下返回鍵時送出 Guide（PS/HOME）按鍵。</string>
-
-	<string name="title_checkbox_ignore_synth_events">忽略合成事件</string>
-	<string name="summary_ignore_synth_events">忽略 Android 系統發送的合成事件。可解決部分裝置上滑鼠點擊觸發其他意外按鍵的問題。\n啟用後，系統軟體鍵盤將無法使用。</string>
-
-	<string name="title_smart_clipboard_sync">智慧剪貼簿同步（實驗性）</string>
-	<string name="summary_smart_clipboard_sync">串流開始/恢復時自動上傳剪貼簿內容至伺服器；失去焦點時自伺服器下載（需搭配 Apollo）。</string>
-	<string name="title_smart_clipboard_sync_toast">剪貼簿同步提示</string>
-	<string name="summary_smart_clipboard_sync_toast">顯示剪貼簿同步結果的提示訊息</string>
-	<string name="title_hide_clipboard_content">隱藏剪貼簿內容</string>
-	<string name="summary_hide_clipboard_content">將遠端剪貼簿標記為敏感資訊</string>
-
-	<string name="title_settings_misc">雜項</string>
-	<string name="perf_overlay_lite_bandwidth">頻寬</string>
-	<string name="perf_overlay_lite_network_decoding_delay">網路/解碼延遲</string>
-	<string name="perf_overlay_lite_packet_loss">封包遺失</string>
-	<string name="wrong_import_format">匯入格式錯誤，請檢查！</string>
-
-	<string name="title_checkbox_gamepad_enable_battery_report">啟用手把電量回報</string>
-	<string name="summary_checkbox_gamepad_enable_battery_report">在可能時回報手把電量狀態。\n若偶發觸控螢幕/觸控板/手寫筆/滑鼠輸入卡頓，停用此選項可能有幫助。</string>
-
-	<string name="title_checkbox_enforce_display_mode">強制顯示模式</string>
-	<string name="summary_checkbox_enforce_display_mode">強制 Surface 使用最佳顯示模式。\n部分系統（如 ColorOS）需要此選項才能正確設定更新率/解析度。\n請勿在 ChromeCast 4K 上啟用，可能導致問題。</string>
-
-
-	<string name="title_checkbox_forceTightThresholds">緊密 VSync（實驗性）</string>
-	<string name="summary_checkbox_forceTightThresholds">更緊的 VSync 門檻以降低延遲；可能增加掉幀。</string>
-
-	<string name="title_checkbox_use_virtual_display">使用虛擬顯示器</string>
-	<string name="summary_checkbox_use_virtual_display">預設使用虛擬顯示器。\n虛擬顯示器可自動匹配用戶端解析度與幀率設定，帶來無縫的串流體驗。\n需要 Apollo 作為主機串流軟體。</string>
-
-	<string name="title_checkbox_resume_without_confirm">快速繼續</string>
-	<string name="summary_checkbox_resume_without_confirm">按下繼續按鈕時不顯示選單，直接繼續應用程式。</string>
-
-	<string name="title_checkbox_enable_sticky_modifier_key_virtual_keyboard">黏滯式組合鍵</string>
-	<string name="summary_checkbox_enable_sticky_modifier_key_virtual_keyboard">在虛擬全鍵盤與自訂螢幕鍵盤上啟用黏滯式組合鍵。</string>
-
-	<string name="virtual_keyboard_hide">隱藏\nKBD</string>
-
-	<string name="render_mode_2d">預設 2D</string>
-	<string name="render_mode_3d_sbs">AI SBS 3D</string>
-	<string name="render_mode_3d_sbs_movie">AI SBS 3D 電影（同步）</string>
-
-	<string name="keyboard_layout_set_1">設定檔 1</string>
-	<string name="keyboard_layout_set_2">設定檔 2</string>
-	<string name="keyboard_layout_set_3">設定檔 3</string>
-	<string name="keyboard_layout_set_4">設定檔 4</string>
-	<string name="keyboard_layout_set_5">設定檔 5</string>
-
-	<string name="toggle_local_mouse_cursor">切換本機滑鼠游標（需實體滑鼠）</string>
-
-	<string name="debug_info_android_version">Android 版本：</string>
-	<string name="debug_info_api_version">API 版本：</string>
-	<string name="debug_info_kernel_version">核心版本：</string>
-	<string name="debug_info_brand_model">品牌與型號：</string>
-	<string name="debug_info_please_choose">請選擇</string>
-	<string name="debug_info_no_gamepad_detected">未偵測到手把，請連接手把、點選重新整理後再試！</string>
-	<string name="debug_info_no_vibrator">未在手把上偵測到震動裝置！</string>
-	<string name="debug_info_name">名稱： </string>
-	<string name="debug_info_sensors">陀螺儀： </string>
-	<string name="debug_info_no_relevant_driver">無（無相關驅動或不支援該手把）</string>
-	<string name="debug_info_no_api_below_android12">Android 12 以下無對應 API</string>
-	<string name="debug_info_vid_pid">VID_PID： </string>
-	<string name="debug_info_vibration">震動： </string>
-	<string name="debug_info_supported">支援</string>
-	<string name="debug_info_not_supported">不支援</string>
-	<string name="debug_info_details">詳細資訊： </string>
-	<string name="debug_info_number_of_gamepads">手把數量： </string>
-	<string name="debug_info_accelerometer">+加速度計</string>
-	<string name="debug_info_gyroscope">+陀螺儀</string>
-	<string name="debug_info_refresh_gamepad_info">點擊以重新整理手把資訊</string>
-	<string name="debug_info_refresh_gamepad_list">重新整理手把清單</string>
-	<string name="debug_info_test_gamepad_rumble">測試手把震動</string>
-
-	<string name="pref_enter_value_0_9999">請輸入 0 到 9999 之間的數值。</string>
-	<string name="pref_set_success">設定已成功儲存！</string>
-	<string name="pref_empty_file">空白檔案！</string>
-	<string name="pref_import_success">匯入成功！</string>
-	<string name="pref_error_occurred">發生錯誤： </string>
-	<string name="pref_save_keyboard_profile">儲存 OSK 設定檔</string>
-
-	<string name="game_menu_advanced">進階選單</string>
-	<string name="game_dialog_title_quit_confirm">確定要離開？</string>
-	<string name="game_dialog_message_quit_confirm">請確認沒有未儲存的進度。離開工作階段將終止您目前執行的應用程式。</string>
-	<string name="game_menu_quit_session">結束工作階段</string>
-	<string name="game_menu_server_cmd">伺服器指令</string>
-	<string name="game_menu_fetch_clipboard">取得剪貼簿</string>
-	<string name="game_menu_upload_clipboard">上傳剪貼簿</string>
-	<string name="game_dialog_title_server_cmd_empty">無伺服器指令</string>
-	<string name="game_dialog_message_server_cmd_empty">請確認您使用的是 Apollo 作為伺服器軟體，且已授予此客戶端「伺服器指令」權限。</string>
-
-	<string name="vdisplay_not_ready">伺服器上的虛擬顯示器驅動尚未就緒。請確認已安裝並啟用 SudoVDA 驅動程式。</string>
-	<string name="vdisplay_not_supported"><![CDATA[此伺服器不支援虛擬顯示器。請使用 <a href="https://github.com/ClassicOldSong/Apollo">Apollo</a> 作為主機串流軟體。]]></string>
-	<string name="clipboard_sync_unsupported">此伺服器不支援剪貼簿同步。請安裝或將伺服器升級至最新版本的 Apollo。</string>
-	<string name="send_clipboard_failed">傳送剪貼簿失敗： </string>
-
-	<string name="permission_denied">通知權限被拒</string>
-	<string name="get_clipboard_failed">取得剪貼簿失敗： </string>
-	<string name="send_clipboard_success">剪貼簿傳送成功</string>
-	<string name="get_clipboard_success">剪貼簿取得成功</string>
-
-	<string name="proceed">繼續</string>
-	<string name="cancel">取消</string>
-	<string name="unlocking_or_starting">伺服器正在啟動或電腦正在解鎖中，請稍候…</string>
-	<string name="error_msg_permission_denied">權限被拒</string>
-	<string name="error_msg_timeout">連線逾時</string>
-
-	<string name="permission_launch_app">啟動應用程式</string>
-	<string name="permission_sync_clipboard">同步剪貼簿</string>
-	
-
-	<!-- Keyboard -->
-	<string name="keyboard_clear_all">全部清除</string>
-	<string name="keyboard_add_keys">新增按鍵</string>
-	<string name="keyboard_select_keys">選擇要新增的按鍵</string>
-	<string name="keyboard_clear_all_confirm_title">清除所有按鍵</string>
-	<string name="keyboard_clear_all_confirm_message">確定要隱藏所有螢幕控制嗎？之後可在配置模式中再行新增。</string>
-	<string name="keyboard_keys_added">成功新增 %d 個按鍵</string>
-	<string name="keyboard_duplicates_skipped">已略過 %d 個重複項目</string>
-	<string name="keyboard_configure_movable">您現在可以移動設定按鈕。</string>
-	<string name="keyboard_load_error">載入鍵盤設定時發生錯誤：%s</string>
-	<string name="keyboard_add">新增</string>
-	<string name="keyboard_key_custom">%s（自訂）</string>
-
-	<!-- Compliance -->
-	<string name="category_basic_settings" />
-	<string name="title_checkbox_stretch_video" />
-
-	<!-- ShortcutHelper Toast Messages -->
-	<string name="export_launcher_computer_details_incomplete">無法匯出：電腦資訊不完整。</string>
-	<string name="export_launcher_app_details_incomplete">無法匯出：應用程式資訊不完整。</string>
-	<string name="failed_to_initiate_file_export">無法啟動匯出：%s</string>
-	<string name="file_export_failed_no_location_selected">匯出失敗：未選取位置。</string>
-	<string name="file_export_failed_no_content_to_write">匯出失敗：沒有可寫入的內容。</string>
-	<string name="file_exported_successfully">檔案匯出成功。</string>
-	<string name="failed_to_open_file_for_writing">開啟檔案寫入失敗。</string>
-	<string name="error_writing_file">寫入檔案錯誤：%s</string>
-	<string name="unexpected_error_during_file_export">匯出期間發生未預期的錯誤。</string>
-
-	<!-- AppView Toast Messages -->
-	<string name="file_export_cancelled">已取消匯出。</string>
-	<string name="app_removed_from_pc">已自電腦移除應用程式</string>
-	<string name="title_export_sunshine_launcher_file">為 Sunshine 匯出啟動檔</string>
-	<string name="message_export_sunshine_launcher_file">為 Sunshine 匯出啟動檔不夠穩定，可能隨時失效。每次變更應用程式名稱或圖片後都需要重新匯出。\n欲獲得更穩定體驗，請使用 Apollo。</string>
-
-	<string name="title_enable_commit_text">啟用 commit-text 輸入（滑動/語音）</string>
-	<string name="summary_enable_commit_text">將軟體鍵盤的多字元輸入（手勢輸入、建議字詞、語音聽寫）轉送到主機。可能會影響依賴逐鍵輸入的遊戲。</string>
-	<string name="title_checkbox_enable_perf_overlay_bottom">將效能資訊移至底部</string>
-	<string name="summary_checkbox_enable_perf_overlay_bottom">在非原生解析度串流、同時啟用「置頂置中顯示」與精簡模式時特別有用。</string>
-
-	<string name="title_edit_profile">編輯設定檔</string>
-	<string name="profile_manager_new_profile">新增設定檔</string>
-	<string name="profile_manager_profile_not_found">找不到設定檔</string>
-	<string name="profile_manager_edit_profile">"編輯設定檔："</string>
-	<string name="profile_manager_profile">"設定檔 "</string>
-	<string name="profile_manager_profile_saved">已儲存設定檔『%s』。</string>
-	<string name="profile_manager_edit_profile_name">編輯設定檔名稱</string>
-	<string name="profile_manager_name_cannot_be_blank">名稱不可為空白</string>
-	<string name="profile_manager_edit_profile_with">編輯設定檔：%s</string>
-	<string name="profile_manager_new_profile_with">新增設定檔：%s</string>
-	<string name="profile_manager_no_profiles_yet">尚無設定檔</string>
-	<string name="profile_manager_profiles_description">設定檔可讓你建立並儲存不同的串流組態。每個設定檔都有自己的設定，並可快速切換。</string>
-	<string name="profile_manager_tap_create_profile">點選 + 以建立第一個設定檔</string>
-	<string name="profile_manager_choose_profile">選擇設定檔</string>
-	<string name="profile_manager_deactivated_profile">已停用的設定檔</string>
-	<string name="profile_manager_activated_profile">已啟用設定檔『%s』</string>
-	<string name="profile_manager_delete_profile">刪除設定檔</string>
-	<string name="profile_manager_confirm_profile_deleteion">確定要刪除『%s』嗎？</string>
-	<string name="profile_manager_delete">刪除</string>
-	<string name="profile_manager_profile_deleted">已刪除設定檔『%s』</string>
-	<string name="profile_manager_failed_to_save">無法儲存設定檔。請查看 logcat 以取得詳細資訊。</string>
-	<string name="profile_manager_failed_to_load">無法載入設定檔。請查看 logcat 以取得詳細資訊。</string>
-	<string name="profile_manager_active_profile">使用中的設定檔：%s</string>
-	<string name="rename">重新命名</string>
-	<string name="save">儲存</string>
-
-	<string name="title_low_latency_frame_balance">低延遲隊列（實驗性）</string>
-	<string name="summary_low_latency_frame_balance">透過丟棄緩衝幀以最小化延遲。</string>
-	<string name="category_perf_monitor_settings">效能監視器</string>
-
-	<string name="title_checkbox_full_screen">啟用全螢幕</string>
-	<string name="summary_checkbox_full_screen">以沉浸模式隱藏系統列</string>
+    <string name="scut_deleted_pc">電腦已刪除</string>
+    <string name="scut_not_paired">電腦未配對</string>
+    <string name="scut_pc_not_found">找不到電腦</string>
+    <string name="scut_invalid_uuid">指定的電腦無效</string>
+    <string name="scut_invalid_app_id">指定的應用程式無效</string>
+    <string name="quick_menu_title">選單</string>
+    <string name="help_loading_title">說明</string>
+    <string name="help_loading_msg">正在載入說明頁面…</string>
+    <string name="pcview_menu_header_online">線上</string>
+    <string name="pcview_menu_header_offline">離線</string>
+    <string name="pcview_menu_header_unknown">重新整理中</string>
+    <string name="pcview_menu_unpair_pc">取消配對</string>
+    <string name="pcview_menu_delete_pc">刪除電腦</string>
+    <string name="pcview_menu_test_network">測試網路連線</string>
+    <string name="pcview_menu_details">檢視詳細資訊</string>
+    <string name="pcview_menu_eol">NVIDIA GameStream 已停止服務</string>
+    <string name="pcview_menu_open_management_page">開啟伺服器設定</string>
+    <string name="pcview_error_no_management_url">無法開啟伺服器設定頁面：找不到伺服器位址。</string>
+    <string name="nettest_title_waiting">正在測試網路連線</string>
+    <string name="nettest_text_waiting">Artemis 正在測試您的網路連線，檢查所需的連接埠是否被阻擋。\n\n這可能需要幾秒鐘…</string>
+    <string name="nettest_title_done">網路測試完成</string>
+    <string name="nettest_text_success">您的網路似乎沒有阻擋 Artemis。如果仍然無法連線，請檢查電腦的防火牆設定。\n\n如果要透過網際網路串流，請在電腦上安裝 Artemis Internet Hosting Tool，並執行內附的 Internet Streaming Tester 檢查電腦的網際網路連線。</string>
+    <string name="nettest_text_inconclusive">無法進行網路測試：Artemis 的連線測試伺服器全都無法連上。請檢查網際網路連線，或稍後再試。</string>
+    <string name="nettest_text_failure">裝置目前的網路連線似乎阻擋了 Artemis。連上此網路時，可能無法透過網際網路串流。\n\n以下連接埠被阻擋：\n</string>
+    <string name="nettest_text_blocked">裝置目前的網路連線阻擋了 Artemis。連上此網路時，可能無法透過網際網路串流。</string>
+    <string name="pairing">正在配對…</string>
+    <string name="pair_pc_confirm_title">配對電腦</string>
+    <string name="pair_pc_confirm_message">確定要與 %s 配對嗎？請勿與不熟悉的電腦配對。</string>
+    <string name="pair_pc_offline">電腦已離線</string>
+    <string name="pair_pc_ingame">電腦目前正在遊戲中。配對前必須先關閉遊戲。</string>
+    <string name="pair_pairing_title">配對</string>
+    <string name="pair_pairing_msg">請在目標電腦上輸入以下 PIN：</string>
+    <string name="pair_pairing_help">如果主機電腦執行的是 Sunshine，請到 Sunshine 的網頁介面輸入 PIN。</string>
+    <string name="pair_otp_pairing_msg">正在配對，請稍候…</string>
+    <string name="pair_otp_pairing_help">OTP 配對僅適用於 Apollo。若使用其他主機軟體，請在網頁介面手動輸入剛才提供的 PIN。</string>
+    <string name="pair_incorrect_pin">PIN 或通關密語錯誤</string>
+    <string name="pair_fail">配對失敗</string>
+    <string name="pair_already_in_progress">配對已在進行中</string>
+    <string name="pair_passphrase_hint">通關密語</string>
+    <string name="pair_pin_length_msg">PIN 必須是 4 位數字</string>
+    <string name="pair_passphrase_length_msg">通關密語至少需要 4 個字元</string>
+    <string name="wol_pc_online">電腦已上線</string>
+    <string name="wol_no_mac">無法喚醒電腦：沒有儲存的 MAC 位址</string>
+    <string name="wol_waking_msg">電腦可能需要幾秒鐘才會喚醒。如果沒有反應，請確認已正確設定 Wake-on-LAN。</string>
+    <string name="wol_fail">傳送 Wake-on-LAN 封包失敗</string>
+    <string name="unpairing">正在取消配對…</string>
+    <string name="unpair_success">已取消配對</string>
+    <string name="unpair_fail">取消配對失敗</string>
+    <string name="unpair_error">裝置未配對</string>
+    <string name="error_pc_offline">電腦已離線</string>
+    <string name="error_manager_not_running">ComputerManager 服務未執行。請稍等幾秒鐘，或重新啟動應用程式。</string>
+    <string name="error_unknown_host">無法解析主機</string>
+    <string name="error_404">GFE 回傳 HTTP 404 錯誤。請確認電腦使用的是支援的 GPU。使用遠端桌面軟體也可能造成此錯誤。請嘗試重新啟動電腦或重新安裝 GFE。</string>
+    <string name="title_decoding_error">視訊解碼器當機</string>
+    <string name="message_decoding_error">Artemis 因與此裝置的視訊解碼器不相容而當機。若持續當機，請嘗試調整串流設定。</string>
+    <string name="title_decoding_reset">視訊設定已重設</string>
+    <string name="message_decoding_reset">裝置的視訊解碼器在所選串流設定下持續當機。串流設定已重設為預設值。</string>
+    <string name="error_usb_prohibited">裝置管理員已禁止存取 USB。請檢查 Knox 或 MDM 設定。</string>
+    <string name="unable_to_pin_shortcut">目前的啟動器不允許建立釘選捷徑。</string>
+    <string name="video_decoder_init_failed">視訊解碼器初始化失敗。裝置可能不支援所選的解析度或幀率。</string>
+    <string name="no_video_received_error">未收到主機的視訊。</string>
+    <string name="no_frame_received_error">網路連線狀況不佳。請調低視訊位元率，或改用更快的連線。</string>
+    <string name="early_termination_error">主機電腦在啟動串流時發生錯誤。\n\n請確認主機電腦上沒有開啟受 DRM 保護的內容。也可以嘗試重新啟動主機電腦。</string>
+    <string name="frame_conversion_error">主機電腦回報嚴重的視訊編碼錯誤。\n\n請嘗試停用 HDR、變更串流解析度，或變更主機電腦的顯示解析度。</string>
+    <string name="check_ports_msg">請檢查防火牆與連接埠轉送規則中的以下連接埠：</string>
+    <string name="conn_establishing_title">正在建立連線</string>
+    <string name="conn_establishing_msg">正在開始連線</string>
+    <string name="conn_metered">警告：目前的網路連線為計量連線！</string>
+    <string name="conn_client_latency">平均影格解碼延遲：</string>
+    <string name="conn_client_latency_hw">硬體解碼器延遲：</string>
+    <string name="conn_client_latency_compositor">合成器（釋出 → 螢幕）：平均 %1$d ms，最大 %2$d ms，共 %3$d 個影格</string>
+    <string name="conn_client_latency_compositor_partial">（僅前幾秒：視訊層進入快速路徑後，此電視就不再回報顯示時間）</string>
+    <string name="title_checkbox_aaudio_renderer">低延遲音訊（AAudio）</string>
+    <string name="summary_checkbox_aaudio_renderer">原生音訊輸出；若電視不接受，則改用標準輸出。</string>
+    <string name="perf_overlay_audio">音訊：%1$s · 延遲 %2$d ms · 欠載 %3$d · 捨棄 %4$d</string>
+    <string name="conn_hardware_latency">平均硬體解碼延遲：</string>
+    <string name="conn_starting">正在啟動</string>
+    <string name="conn_error_title">連線錯誤</string>
+    <string name="conn_error_msg">啟動失敗</string>
+    <string name="conn_terminated_title">連線已中斷</string>
+    <string name="conn_terminated_msg">連線已中斷。</string>
+    <string name="error_code_prefix">錯誤代碼：</string>
+    <string name="ip_hint">主機電腦的 IP 位址</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="title_details">詳細資訊</string>
+    <string name="help">說明</string>
+    <string name="delete_pc_msg">確定要刪除這台電腦嗎？</string>
+    <string name="slow_connection_msg">與電腦的連線緩慢\n請調低位元率</string>
+    <string name="poor_connection_msg">與電腦的連線品質不佳</string>
+    <string name="perf_overlay_streamdetails">視訊串流：%1$s %2$.2f FPS</string>
+    <string name="perf_overlay_decoder">解碼器：%1$s</string>
+    <string name="perf_overlay_lowlatency">低延遲模式：%1$s</string>
+    <string name="perf_overlay_incomingfps">從網路接收的幀率：%1$.2f FPS</string>
+    <string name="perf_overlay_renderingfps">轉譯幀率：%1$.2f FPS</string>
+    <string name="perf_overlay_hostprocessinglatency">主機處理延遲 最小/最大/平均：%1$.1f/%2$.1f/%3$.1f ms</string>
+    <string name="perf_overlay_netdrops">因網路連線遺失的影格：%1$.2f%%</string>
+    <string name="perf_overlay_netlatency">平均網路延遲：%1$d ms（變異：%2$d ms）</string>
+    <string name="perf_overlay_dectime">平均解碼時間：%1$.2f ms</string>
+    <string name="perf_overlay_present">顯示（合成器）：平均 %1$.1f ms · 最大 %2$d ms</string>
+    <string name="applist_connect_msg">正在連線至電腦…</string>
+    <string name="applist_menu_resume">繼續工作階段</string>
+    <string name="applist_menu_start_vdisplay">在虛擬顯示器中啟動</string>
+    <string name="applist_menu_start_primarydisplay">在主要顯示器中啟動</string>
+    <string name="applist_menu_quit">結束工作階段</string>
+    <string name="applist_menu_quit_and_start">結束目前的遊戲並啟動</string>
+    <string name="applist_menu_quit_and_start_vdisplay">結束目前的遊戲並在虛擬顯示器中啟動</string>
+    <string name="applist_menu_quit_and_start_primarydisplay">結束目前的遊戲並在主要顯示器中啟動</string>
+    <string name="applist_menu_details">檢視詳細資訊</string>
+    <string name="applist_menu_scut">建立捷徑</string>
+    <string name="applist_menu_export_launcher">匯出啟動檔</string>
+    <string name="applist_menu_hide_app">隱藏應用程式</string>
+    <string name="applist_refresh_msg">正在重新整理應用程式…</string>
+    <string name="applist_quit_app">正在結束</string>
+    <string name="applist_quit_success">已結束</string>
+    <string name="applist_quit_fail">結束失敗</string>
+    <string name="applist_quit_confirmation">確定要結束執行中的應用程式嗎？所有未儲存的資料都會遺失。</string>
+    <string name="title_add_pc">手動新增電腦</string>
+    <string name="msg_add_pc">正在連線至電腦…</string>
+    <string name="addpc_fail">無法連線至指定的電腦。請確認防火牆已允許所需的連接埠。</string>
+    <string name="addpc_success">已新增電腦</string>
+    <string name="addpc_unknown_host">無法解析電腦位址。請確認位址沒有輸入錯誤。</string>
+    <string name="addpc_enter_ip">必須輸入 IP 位址</string>
+    <string name="addpc_wrong_sitelocal">這個位址看起來不正確。透過網際網路串流必須使用路由器的公開 IP 位址。</string>
+    <string name="title_resolution_list">解析度</string>
+    <string name="summary_resolution_list">越高越清晰，越低則對網路和電腦越輕鬆。</string>
+    <string name="title_native_res_dialog">原生解析度警告</string>
+    <string name="text_native_res_dialog">串流伺服器可能不支援原生解析度和/或幀率。您可能需要手動為主機電腦設定相符的自訂顯示模式。\n\n若選擇在 NVIDIA 控制面板中建立符合螢幕設定的自訂解析度，請務必先閱讀並理解 NVIDIA 關於螢幕可能損壞、電腦不穩定及其他潛在問題的警告。\n\n因在電腦上建立自訂解析度所造成的任何問題，我們概不負責。\n\n您的螢幕可能不支援所需的顯示設定。若是如此，可以嘗試設定虛擬顯示器。最後，如果裝置或主機電腦不支援以特定解析度或更新率串流，那就只能說很遺憾了。</string>
+    <string name="title_fps_list">幀率</string>
+    <string name="summary_fps_list">此電視為 60：它的螢幕沒有更快的模式。</string>
+    <string name="title_seekbar_bitrate">位元率</string>
+    <string name="summary_seekbar_bitrate">畫質與網路負載的取捨。4K60 搭配 100 Mbps 是經過測試的預設值。</string>
+    <string name="suffix_seekbar_bitrate_mbps">Mbps</string>
+    <string name="title_resolution_scale_factor">虛擬顯示器縮放</string>
+    <string name="summary_resolution_scale_factor">虛擬顯示器相對於串流的大小，以百分比表示。</string>
+    <string name="resolution_prefix_native">原生</string>
+    <string name="resolution_prefix_native_fullscreen">原生全螢幕</string>
+    <string name="resolution_prefix_native_landscape">（橫向）</string>
+    <string name="resolution_prefix_native_portrait">（直向）</string>
+    <string name="resolution_prefix_custom">自訂</string>
+    <string name="title_native_fps_dialog">原生幀率警告</string>
+    <string name="title_video_scale_mode">畫面符合方式</string>
+    <string name="summary_video_scale_mode">符合螢幕、填滿或拉伸。</string>
+    <string name="video_scale_mode_fit">符合</string>
+    <string name="video_scale_mode_fill">填滿</string>
+    <string name="video_scale_mode_stretch">拉伸</string>
+    <string name="title_audio_config_list">音訊聲道</string>
+    <string name="summary_audio_config_list">立體聲，或家庭劇院用的 5.1 / 7.1。</string>
+    <string name="title_checkbox_multi_controller">多支手把</string>
+    <string name="summary_checkbox_multi_controller">關閉：所有手把視為同一位玩家。</string>
+    <string name="title_seekbar_deadzone">搖桿死區</string>
+    <string name="summary_seekbar_deadzone">搖桿要推多遠遊戲才會有反應。</string>
+    <string name="title_checkbox_xb1_driver">USB 手把使用內建驅動程式</string>
+    <string name="summary_checkbox_xb1_driver">有線 Xbox 手把由應用程式驅動，而不是電視。</string>
+    <string name="title_checkbox_usb_bind_all">接管所有 USB Xbox 手把</string>
+    <string name="summary_checkbox_usb_bind_all">包括電視已經辨識的手把。</string>
+    <string name="title_checkbox_mouse_emulation">手把模擬滑鼠</string>
+    <string name="summary_checkbox_mouse_emulation">長按 Start，用搖桿移動電腦的滑鼠。</string>
+    <string name="title_checkbox_flip_face_buttons">對調 A/B 與 X/Y</string>
+    <string name="summary_checkbox_flip_face_buttons">適用於 Nintendo 配置的手把。</string>
+    <string name="title_checkbox_gamepad_touchpad_as_mouse">觸控板移動滑鼠</string>
+    <string name="summary_checkbox_gamepad_touchpad_as_mouse">DualShock 或 DualSense 的觸控板一律移動電腦的滑鼠。</string>
+    <string name="title_checkbox_gamepad_motion_sensors">動態感測器</string>
+    <string name="summary_checkbox_gamepad_motion_sensors">讓遊戲讀取 DualShock 或 DualSense 的陀螺儀。</string>
+    <string name="title_enable_rumble">震動</string>
+    <string name="summary_enable_rumble">遊戲的震動回饋傳到手把。</string>
+    <string name="rumble_bluetooth_permission_denied">沒有「鄰近裝置」（Bluetooth）權限，Bluetooth 手把在此電視上無法震動</string>
+    <string name="title_checkbox_absolute_mouse_mode">遠端桌面滑鼠</string>
+    <string name="summary_checkbox_absolute_mouse_mode">游標指到哪就到哪。適合桌面，不適合遊戲。</string>
+    <string name="title_checkbox_mouse_nav_buttons">滑鼠側鍵</string>
+    <string name="summary_checkbox_mouse_nav_buttons">把滑鼠的上一頁與下一頁鍵傳送到電腦。</string>
+    <string name="title_checkbox_enable_sops">讓電腦調整遊戲設定</string>
+    <string name="summary_checkbox_enable_sops">Sunshine 或 GeForce Experience 會把遊戲設為串流的解析度。</string>
+    <string name="title_checkbox_host_audio">電腦也保留聲音</string>
+    <string name="summary_checkbox_host_audio">在電腦和電視上同時播放聲音。</string>
+    <string name="title_unlock_fps">在清單中顯示 90 與 120 FPS</string>
+    <string name="summary_unlock_fps">螢幕仍是 60 Hz，電腦只是送出更多影格。供實驗用。</string>
+    <string name="title_checkbox_disable_warnings">隱藏連線警告</string>
+    <string name="summary_checkbox_disable_warnings">串流期間不顯示連線不良的訊息。</string>
+    <string name="title_video_format">編解碼器</string>
+    <string name="summary_video_format">自動，或只用 HEVC、AV1 或 H.264。</string>
+    <string name="summary_enable_hdr">遊戲與電腦支援時以 HDR 串流。</string>
+    <string name="title_full_range">全範圍視訊</string>
+    <string name="summary_full_range">黑色偏灰或白色過曝時可以試試。</string>
+    <string name="title_prevent_packet_loss">防止封包遺失</string>
+    <string name="summary_prevent_packet_loss">為會掉封包的網路提供額外保護。</string>
+    <string name="title_enable_perf_overlay">螢幕統計資訊</string>
+    <string name="summary_enable_perf_overlay">串流期間顯示幀率、延遲和封包遺失。</string>
+    <string name="title_latency_test">延遲測試模式</string>
+    <string name="summary_latency_test">測量從按鍵到畫面的延遲；請在電腦上開啟 tools/latency-test.html。</string>
+    <string name="latency_test_waiting">延遲測試：請在黑色測試頁面上按 A/B/X/Y</string>
+    <string name="latency_test_timeout">2 秒內沒有收到反應影格（測試頁面是否全螢幕？需將影格遞送設為「最低延遲」）</string>
+    <string name="latency_test_render_unmatched">已收到反應影格，但未觀察到它的轉譯：上方數值僅含主機+網路（請將影格遞送設為「最低延遲」）</string>
+    <string name="latency_test_overlay">延遲：最近 %1$d ms · 平均 %2$d · 最小 %3$d · 最大 %4$d · n=%5$d\n平均 輸入→應用程式 %6$d ms · 主機+網路 %7$d ms · 解碼+釋出 %8$d ms · 合成器 %9$d ms</string>
+    <string name="title_enable_post_stream_toast">串流結束後顯示延遲報告</string>
+    <string name="summary_enable_post_stream_toast">串流結束時顯示一則含解碼時間的簡短訊息。</string>
+    <string name="toast_controller_type_changed">因動態感測器模擬，手把類型可能已變更</string>
+    <string name="resolution_360p">360p</string>
+    <string name="resolution_480p">480p</string>
+    <string name="resolution_720p">720p</string>
+    <string name="resolution_1080p">1080p</string>
+    <string name="resolution_1440p">1440p</string>
+    <string name="audioconf_stereo">立體聲</string>
+    <string name="videoformat_auto">自動</string>
+    <string name="title_frame_pacing">影格遞送</string>
+    <string name="summary_frame_pacing">如何處理遲到的影格：立即顯示、等待螢幕，或絕不捨棄。</string>
+    <string name="pacing_latency">最低延遲</string>
+    <string name="pacing_balanced">流暢</string>
+    <string name="pacing_balanced_alt">流暢，有上限</string>
+    <string name="pacing_smoothness">絕不掉格</string>
+    <string name="game_menu_toggle_keyboard">螢幕鍵盤</string>
+    <string name="osk_hint_press">按下</string>
+    <string name="osk_hint_close">關閉</string>
+    <string name="osk_hint_space">空格</string>
+    <string name="osk_hint_layout">配置</string>
+    <string name="osk_hint_voice">語音</string>
+    <string name="main_profile">設定檔</string>
+    <string name="main_settings">設定</string>
+    <string name="settings_cat_video">視訊</string>
+    <string name="settings_cat_audio">聲音</string>
+    <string name="settings_cat_gamepad">手把</string>
+    <string name="settings_cat_input">滑鼠與鍵盤</string>
+    <string name="settings_cat_ui">介面</string>
+    <string name="settings_cat_advanced">進階</string>
+    <string name="settings_cat_about">關於</string>
+    <string name="main_add_pc">新增電腦</string>
+    <string name="main_add_pc_message">電腦在您網路中的 IP 位址或名稱；只有在 Sunshine 不是使用 47989 時才需要加上連接埠。同一網路中的電腦會自動被找到。</string>
+    <string name="main_no_pc_title">正在尋找電腦</string>
+    <string name="main_no_pc_message">此網路中的電腦必須正在執行 Sunshine 或 Apollo。如果電腦沒有出現，請用位址新增。</string>
+    <string name="main_pc_checking">正在檢查電腦…</string>
+    <string name="main_pc_offline_message">電腦沒有回應。請透過網路喚醒它，或確認電腦上正在執行 Sunshine。</string>
+    <string name="main_pc_not_paired_message">配對這台電腦即可查看其應用程式：這裡會顯示一組 PIN，電腦上的 Sunshine 或 Apollo 會要求輸入。</string>
+    <string name="main_pair">配對</string>
+    <string name="main_pair_passphrase">以通關密語配對</string>
+    <string name="main_wake">喚醒</string>
+    <string name="main_running">執行中</string>
+    <string name="main_start">啟動</string>
+    <string name="main_unhide_app">顯示應用程式</string>
+    <string name="main_show_hidden_apps">顯示隱藏的應用程式</string>
+    <string name="main_hide_hidden_apps">重新隱藏這些應用程式</string>
+    <string name="profiles_title">設定檔</string>
+    <string name="profiles_active">使用中</string>
+    <string name="profiles_activate">啟用</string>
+    <string name="profiles_deactivate">停用</string>
+    <string name="osk_voice_listening">請說話…</string>
+    <string name="osk_voice_processing">辨識中…</string>
+    <string name="osk_voice_no_match">沒聽清楚</string>
+    <string name="osk_voice_no_permission">沒有麥克風存取權</string>
+    <string name="osk_voice_audio">麥克風無法使用</string>
+    <string name="osk_voice_network">無法連線至語音服務</string>
+    <string name="osk_voice_unavailable">此電視不支援語音輸入</string>
+    <string name="game_menu_toggle_hud">螢幕統計資訊</string>
+    <string name="game_menu_toggle_mouse_on">啟用手把滑鼠模擬</string>
+    <string name="game_menu_toggle_mouse_off">停用手把滑鼠模擬</string>
+    <string name="game_menu_disconnect">中斷連線</string>
+    <string name="game_menu_cancel">取消</string>
+    <string name="game_menu_task_manager">開啟工作管理員</string>
+    <string name="game_menu_send_keys">特殊按鍵</string>
+    <string name="game_menu_send_keys_shift_tab">Shift + Tab（Steam 介面）</string>
+    <string name="game_menu_send_keys_win_shift_left">Win + Shift + 左方向鍵（在桌面之間移動應用程式）</string>
+    <string name="game_menu_send_keys_ctrl_alt_shift_f1">Ctrl+Alt+Shift+F1（切換顯示器）</string>
+    <string name="game_menu_send_keys_ctrl_alt_shift_f12">Ctrl+Alt+Shift+F12（切換顯示器）</string>
+    <string name="title_analog_scrolling">捲動搖桿</string>
+    <string name="summary_analog_scrolling">滑鼠模式下用哪支搖桿捲動。</string>
+    <string name="analogscroll_none">無</string>
+    <string name="analogscroll_right">右搖桿</string>
+    <string name="analogscroll_left">左搖桿</string>
+    <string name="perf_overlay_lite_net">%1$dms</string>
+    <string name="perf_overlay_lite_dectime">%1$.2fms</string>
+    <string name="title_checkbox_mouse_local_cursor">顯示電視的游標</string>
+    <string name="summary_checkbox_mouse_local_cursor">針對 USB 滑鼠：在電視上繪製游標，而不是用電腦的游標。</string>
+    <string name="title_checkbox_enable_perf_overlay_lite">單行統計資訊</string>
+    <string name="summary_checkbox_enable_perf_overlay_lite">以精簡的一行取代完整區塊。</string>
+    <string name="title_quit_dialog">返回鍵開啟選單</string>
+    <string name="summary_quit_dialog">否則按返回鍵會立即結束串流。</string>
+    <string name="title_software_update">版本發布</string>
+    <string name="summary_software_update">GitHub 上的 Moonlight TCL。</string>
+    <string name="title_follow_update">透過 Obtainium 更新</string>
+    <string name="summary_follow_update">自動取得新版本。</string>
+    <string name="no_app_for_link">沒有已安裝的應用程式可以開啟此連結</string>
+    <string name="title_joyconfix">Joy-Con 修正</string>
+    <string name="summary_joyconfix">Nintendo Joy-Con 無法辨識時請開啟。</string>
+    <string name="title_debug_info">偵錯資訊</string>
+    <string name="summary_debug_info">已連接的手把與震動測試。</string>
+    <string name="title_checkbox_force_qwerty">鍵盤使用 QWERTY 配置</string>
+    <string name="summary_checkbox_force_qwerty">外接鍵盤的按鍵以美式配置傳送。</string>
+    <string name="title_checkbox_back_as_meta">返回鍵傳送 Win</string>
+    <string name="summary_back_as_meta">遙控器的返回鍵會在電腦上按下 Win。</string>
+    <string name="title_back_as_guide">返回鍵傳送 Guide</string>
+    <string name="summary_back_as_guide">手把的返回鍵相當於 Xbox 或 PS 鍵。</string>
+    <string name="perf_overlay_lite_bandwidth">頻寬</string>
+    <string name="perf_overlay_lite_network_decoding_delay">網路/解碼延遲</string>
+    <string name="perf_overlay_lite_packet_loss">封包遺失</string>
+    <string name="wrong_import_format">匯入格式錯誤，請檢查！</string>
+    <string name="title_checkbox_gamepad_enable_battery_report">向電腦回報電量</string>
+    <string name="summary_checkbox_gamepad_enable_battery_report">電腦上會顯示手把的電量。</string>
+    <string name="title_checkbox_gamepad_notices">螢幕上的手把卡片</string>
+    <string name="summary_checkbox_gamepad_notices">手把連接、電量不足或開始充電時顯示卡片。</string>
+    <string name="gamepad_notice_connected">已連接</string>
+    <string name="gamepad_notice_low_battery">電量不足</string>
+    <string name="gamepad_notice_charging">充電中</string>
+    <string name="gamepad_notice_full">已充飽</string>
+    <string name="gamepad_notice_no_battery">電量不明</string>
+    <string name="gamepad_notice_level">%1$s · %2$d%%</string>
+    <string name="title_checkbox_use_virtual_display">虛擬顯示器</string>
+    <string name="summary_checkbox_use_virtual_display">電腦為串流另外建立一個符合此電視的顯示器。需要 Apollo。</string>
+    <string name="title_checkbox_resume_without_confirm">立即繼續</string>
+    <string name="summary_checkbox_resume_without_confirm">不經詢問直接開啟執行中的應用程式。</string>
+    <string name="toggle_local_mouse_cursor">電視滑鼠游標</string>
+    <string name="debug_info_android_version">Android 版本：</string>
+    <string name="debug_info_api_version">API 版本：</string>
+    <string name="debug_info_kernel_version">核心版本：</string>
+    <string name="debug_info_brand_model">品牌與型號：</string>
+    <string name="debug_info_please_choose">請選擇</string>
+    <string name="debug_info_no_gamepad_detected">未偵測到手把，請連接手把、點選重新整理後再試一次！</string>
+    <string name="debug_info_bt_hid_running">Bluetooth HID 測試：約 12 秒，請握住手把</string>
+    <string name="debug_info_bt_hid_result">Bluetooth HID 震動測試</string>
+    <string name="debug_info_bt_hid_permission">需要「鄰近裝置」（Bluetooth）權限。請授予後再試一次。</string>
+    <string name="debug_info_bt_hid_granted">已授予 Bluetooth 權限，請再執行一次測試</string>
+    <string name="debug_info_name">名稱：</string>
+    <string name="debug_info_sensors">感測器：</string>
+    <string name="debug_info_no_relevant_driver">無（沒有相關驅動程式，或手把不受支援）</string>
+    <string name="debug_info_vibration">震動：</string>
+    <string name="debug_info_supported">支援</string>
+    <string name="debug_info_not_supported">不支援</string>
+    <string name="debug_info_details">詳細資訊：</string>
+    <string name="debug_info_number_of_gamepads">手把數量：</string>
+    <string name="debug_info_accelerometer">+加速度計</string>
+    <string name="debug_info_gyroscope">+陀螺儀</string>
+    <string name="debug_info_refresh_gamepad_info">點選以重新整理手把資訊</string>
+    <string name="debug_info_refresh_gamepad_list">重新整理手把清單</string>
+    <string name="debug_info_test_gamepad_rumble">測試手把震動</string>
+    <string name="game_dialog_title_quit_confirm">確定要結束嗎？</string>
+    <string name="game_dialog_message_quit_confirm">請確認沒有未儲存的進度。結束工作階段會終止目前執行中的應用程式。</string>
+    <string name="game_menu_quit_session">結束工作階段</string>
+    <string name="game_menu_server_cmd">伺服器指令</string>
+    <string name="game_dialog_title_server_cmd_empty">沒有伺服器指令</string>
+    <string name="game_dialog_message_server_cmd_empty">請確認伺服器軟體為 Apollo，且已授予此用戶端「伺服器指令」權限。</string>
+    <string name="vdisplay_not_ready">伺服器上的虛擬顯示器驅動程式尚未就緒。請確認已安裝並啟用 SudoVDA 驅動程式。</string>
+    <string name="vdisplay_not_supported"><![CDATA[此伺服器不支援虛擬顯示器。請使用 <a href=\"https://github.com/ClassicOldSong/Apollo\">Apollo</a> 作為主機串流軟體。]]></string>
+    <string name="clipboard_sync_unsupported">此伺服器不支援剪貼簿同步。請安裝或將伺服器升級至最新版的 Apollo。</string>
+    <string name="send_clipboard_failed">傳送剪貼簿失敗：</string>
+    <string name="get_clipboard_failed">取得剪貼簿失敗：</string>
+    <string name="send_clipboard_success">剪貼簿已傳送</string>
+    <string name="get_clipboard_success">剪貼簿已取得</string>
+    <string name="proceed">繼續</string>
+    <string name="cancel">取消</string>
+    <string name="unlocking_or_starting">伺服器正在啟動或電腦正在解鎖，請稍候…</string>
+    <string name="error_msg_permission_denied">權限遭拒</string>
+    <string name="error_msg_timeout">連線逾時</string>
+    <string name="permission_launch_app">啟動應用程式</string>
+    <string name="failed_to_initiate_file_export">無法開始匯出檔案：%s</string>
+    <string name="file_export_failed_no_location_selected">檔案匯出失敗：未選取位置。</string>
+    <string name="file_export_failed_no_content_to_write">檔案匯出失敗：沒有可寫入的內容。</string>
+    <string name="file_exported_successfully">檔案匯出成功。</string>
+    <string name="failed_to_open_file_for_writing">無法開啟檔案進行寫入。</string>
+    <string name="error_writing_file">寫入檔案時發生錯誤：%s</string>
+    <string name="unexpected_error_during_file_export">匯出檔案時發生未預期的錯誤。</string>
+    <string name="file_export_cancelled">已取消匯出檔案。</string>
+    <string name="app_removed_from_pc">應用程式已從電腦移除</string>
+    <string name="title_export_sunshine_launcher_file">為 Sunshine 匯出啟動檔</string>
+    <string name="message_export_sunshine_launcher_file">為 Sunshine 匯出啟動檔並不穩定，隨時可能失效。每次變更應用程式名稱或圖片後都需要重新匯出。\n使用 Apollo 可獲得更穩定的體驗。</string>
+    <string name="profile_manager_new_profile">新增設定檔</string>
+    <string name="profile_manager_profile_not_found">找不到設定檔</string>
+    <string name="profile_manager_edit_profile">"編輯設定檔："</string>
+    <string name="profile_manager_profile">"設定檔 "</string>
+    <string name="profile_manager_profile_saved">設定檔「%s」已儲存。</string>
+    <string name="profile_manager_edit_profile_name">編輯設定檔名稱</string>
+    <string name="profile_manager_name_cannot_be_blank">名稱不可為空白</string>
+    <string name="profile_manager_edit_profile_with">編輯設定檔：%s</string>
+    <string name="profile_manager_new_profile_with">新增設定檔：%s</string>
+    <string name="profile_manager_no_profiles_yet">尚無設定檔</string>
+    <string name="profile_manager_profiles_description">設定檔可讓您建立並儲存不同的串流設定。每個設定檔保存各自的設定，可以快速切換。</string>
+    <string name="profile_manager_tap_create_profile">按 + 建立第一個設定檔</string>
+    <string name="profile_manager_choose_profile">選擇設定檔</string>
+    <string name="profile_manager_deactivated_profile">已停用設定檔</string>
+    <string name="profile_manager_activated_profile">已啟用設定檔「%s」</string>
+    <string name="profile_manager_delete_profile">刪除設定檔</string>
+    <string name="profile_manager_confirm_profile_deleteion">確定要刪除「%s」嗎？</string>
+    <string name="profile_manager_delete">刪除</string>
+    <string name="profile_manager_profile_deleted">已刪除設定檔「%s」</string>
+    <string name="profile_manager_failed_to_save">儲存設定檔失敗。詳細資訊請查看 logcat。</string>
+    <string name="profile_manager_failed_to_load">載入設定檔失敗。詳細資訊請查看 logcat。</string>
+    <string name="rename">重新命名</string>
+    <string name="save">儲存</string>
+    <string name="export_launcher_computer_details_incomplete">無法匯出：電腦資訊不完整。</string>
+    <string name="export_launcher_app_details_incomplete">無法匯出：應用程式資訊不完整。</string>
 </resources>

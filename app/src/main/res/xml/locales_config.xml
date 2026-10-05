@@ -1,10 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Languages the app ships; Android 13+ offers them in the per-app language setting -->
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Don't forget to update arrays.xml when you modify this file! -->
-    <locale android:name="en"/>
-    <locale android:name="ru"/>
-    <locale android:name="zh-CN"/>
-    <locale android:name="zh-TW"/>
-    <locale android:name="fr"/>
-    <locale android:name="vi"/>
+    <locale android:name="en" />
+    <locale android:name="ar" />
+    <locale android:name="bg" />
+    <locale android:name="cs" />
+    <locale android:name="da" />
+    <locale android:name="de" />
+    <locale android:name="el" />
+    <locale android:name="es" />
+    <locale android:name="fa" />
+    <locale android:name="fi" />
+    <locale android:name="fr" />
+    <locale android:name="hi" />
+    <locale android:name="hu" />
+    <locale android:name="id" />
+    <locale android:name="it" />
+    <locale android:name="he" />
+    <locale android:name="ja" />
+    <locale android:name="ko" />
+    <locale android:name="nb" />
+    <locale android:name="nl" />
+    <locale android:name="pl" />
+    <locale android:name="pt" />
+    <locale android:name="pt-BR" />
+    <locale android:name="ro" />
+    <locale android:name="ru" />
+    <locale android:name="sv" />
+    <locale android:name="th" />
+    <locale android:name="tr" />
+    <locale android:name="uk" />
+    <locale android:name="vi" />
+    <locale android:name="zh-CN" />
+    <locale android:name="zh-TW" />
 </locale-config>
