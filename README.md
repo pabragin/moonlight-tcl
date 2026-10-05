@@ -355,9 +355,11 @@ the remote keeps working.
 the TV settings screen pushed the kernel into reclaiming memory 250 times a second during a stream. Quit them before streaming
 (Settings → Apps → the app → Force stop).
 
-**Developer options, if you have them enabled.** Make sure *Don't keep activities* is off: it destroys every screen you leave.
-*Background process limit* → "No background processes" or "At most 2 processes" keeps idle apps out of memory, at the price of
-other apps restarting more often. Nothing else in there helps streaming.
+**Developer options, if you have them enabled.** Make sure *Don't keep activities* is off. It is a debugging aid, not a memory
+saver: it frees nothing (the process and its heap stay) and only destroys the screen you leave, so every return rebuilds it
+from scratch; in Moonlight TCL that means polling the PCs and loading the posters again after every trip to Settings or a
+stream. Memory is freed by *Background process limit* → "No background processes" or "At most 2 processes", which keeps idle
+apps out of memory at the price of other apps restarting more often. Nothing else in there helps streaming.
 
 ![Background process limit](docs/tv/developer-background-limit.png)
 
@@ -497,7 +499,9 @@ Artemis собраны как тот же пакет, поэтому у обои
 (Настройки → Аккаунты и вход → аккаунт → Google Assistant → «Микрофон без рук» выкл.; кнопка микрофона на пульте продолжит
 работать); закрывать перед стримом браузер и другие фоновые приложения
 (Настройки → Приложения → приложение → Остановить); в параметрах разработчика, если они включены, убедиться, что «Не сохранять
-действия» выключено, а «Лимит фоновых процессов» при желании поставить «Без фоновых процессов» или «Не более 2»; и дать
+действия» выключено: это отладочная опция, памяти она не освобождает (процесс и его куча остаются), а только уничтожает экран,
+с которого ушли, и каждое возвращение собирает его заново с повторным опросом ПК и постеров; память освобождает «Лимит фоновых
+процессов», при желании «Без фоновых процессов» или «Не более 2»; и дать
 телевизору воздух сзади: после часа 4K HDR SoC держится на 76–82 °C, и прошивка сама режет декодер, а яркость панели меняет это
 всего на градус. Скриншоты меню на английском лежат в `docs/tv/`.
 
