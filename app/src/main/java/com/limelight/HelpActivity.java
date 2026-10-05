@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.text.InputType;
 import android.webkit.HttpAuthHandler;
+import android.webkit.WebBackForwardList;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -32,6 +33,7 @@ public class HelpActivity extends Activity {
 
     private SpinnerDialog loadingDialog;
     private WebView webView;
+    private String trustedHost;
 
     private boolean backCallbackRegistered;
     private OnBackInvokedCallback onBackInvokedCallback;
@@ -43,11 +45,7 @@ public class HelpActivity extends Activity {
         onBackInvokedCallback = new OnBackInvokedCallback() {
             @Override
             public void onBackInvoked() {
-                // We should always be able to go back because we unregister our callback
-                // when we can't go back. Nonetheless, we will still check anyway.
-                if (webView.canGoBack()) {
-                    webView.goBack();
-                }
+                goBackOrClose();
             }
         };
 
@@ -65,7 +63,7 @@ public class HelpActivity extends Activity {
         // This allows the links to places on the same page to work
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
-        final String trustedHost = getIntent().getBooleanExtra(EXTRA_TRUST_HOST, false) ? getIntent().getData().getHost() : null;
+        trustedHost = getIntent().getBooleanExtra(EXTRA_TRUST_HOST, false) ? getIntent().getData().getHost() : null;
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -150,15 +148,39 @@ public class HelpActivity extends Activity {
         }
     }
 
+    /**
+     * Back on a TV remote must always do something visible. The PC's web UI is a single-page app whose
+     * history is full of entries for the same address, so there Back simply closes the page; a documentation
+     * page steps back through its history while the previous entry is really another page, then closes.
+     */
+    private void goBackOrClose() {
+        if (trustedHost == null && webView.canGoBack()) {
+            WebBackForwardList history = webView.copyBackForwardList();
+            int index = history.getCurrentIndex();
+            String previous = index > 0 ? history.getItemAtIndex(index - 1).getUrl() : null;
+            if (previous != null && !samePage(previous, webView.getUrl())) {
+                webView.goBack();
+                return;
+            }
+        }
+        finish();
+    }
+
+    private static boolean samePage(String a, String b) {
+        if (a == null || b == null) {
+            return false;
+        }
+        int ha = a.indexOf('#');
+        int hb = b.indexOf('#');
+        return (ha < 0 ? a : a.substring(0, ha)).equals(hb < 0 ? b : b.substring(0, hb));
+    }
+
     private void refreshBackDispatchState() {
-        if (webView.canGoBack() && !backCallbackRegistered) {
+        // Always ours: the decision whether to step back or close is made in goBackOrClose()
+        if (!backCallbackRegistered) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, onBackInvokedCallback);
             backCallbackRegistered = true;
-        }
-        else if (!webView.canGoBack() && backCallbackRegistered) {
-            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(onBackInvokedCallback);
-            backCallbackRegistered = false;
         }
     }
 
@@ -174,13 +196,6 @@ public class HelpActivity extends Activity {
     @Override
     // NOTE: This will NOT be called on Android 13+ with android:enableOnBackInvokedCallback="true"
     public void onBackPressed() {
-        // Back goes back through the WebView history
-        // until no more history remains
-        if (webView.canGoBack()) {
-            webView.goBack();
-        }
-        else {
-            super.onBackPressed();
-        }
+        goBackOrClose();
     }
 }
