@@ -110,7 +110,7 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 |---|---|
 | **TV** | TCL Google TV on Android 14 firmware: C8K, C6K, QM6K, QM8K and similar. Android 14 and `armeabi-v7a` only. |
 | **PC** | [Sunshine](https://github.com/LizardByte/Sunshine) or [Apollo](https://github.com/ClassicOldSong/Apollo). HDR needs a GPU that encodes HEVC Main 10 and an HDR game. |
-| **Network** | Wired gigabit between the PC and the TV for 4K at 100 Mbps. |
+| **Network** | Ethernet through a **USB gigabit adapter**. Wi-Fi adds milliseconds of latency and jitter; on Ethernet the hop to the PC is under a millisecond. The TV's own port is 100 Mbps, too small for a 100 Mbps stream. |
 | **Gamepad** | Any pad the TV sees. Rumble over Bluetooth is verified on Xbox pads; a pad on a USB cable goes through Moonlight's own USB driver. |
 
 If the TV ever freezes or reboots, open an issue with `adb logcat -v threadtime -b all` captured around the moment, or after a
@@ -345,6 +345,11 @@ so none are used.
 The TV's own background work costs frames and heat (see [Measured, not promised](#measured-not-promised)). On a TCL C8K these
 settings are worth a look; the screenshots are from firmware V655 with the menu switched to English.
 
+**Plug in Ethernet through a USB adapter.** Wi-Fi latency is far too high for this: every hop costs milliseconds and jitters,
+and the jitter is what drops frames. On Ethernet the TV reaches the PC in under a millisecond. The TV's built-in port is only
+100 Mbps, which does not carry a 100 Mbps stream with its audio and overhead; a USB gigabit Ethernet adapter does. The TV
+picks it up without drivers and the link negotiates 1000 Mbps. All the numbers in this README were measured on such a link.
+
 **Turn off hands-free "Hey Google".** Settings → Accounts & Profiles → your account → Google Assistant → *Hands-free mic* off.
 With it on, the Assistant's hotword detector used a quarter of a CPU core the whole time the TV was on. The microphone button on
 the remote keeps working.
@@ -495,7 +500,11 @@ Artemis собраны как тот же пакет, поэтому у обои
 | Максимум деталей | 120 Мбит/с | Тёмные HDR-сцены во всей красе, просадки до 40 кадров в самых тяжёлых моментах: запаса у декодера нет. |
 | Задержка важнее чёткости | 2560×1440 | Декодирование 7 мс вместо 13, до панели телевизор масштабирует сам. Оставайтесь на HEVC. |
 
-**Настройки телевизора.** Фон телевизора стоит кадров и градусов, поэтому: отключить голосовое управление без пульта
+**Настройки телевизора.** Сначала сеть: подключить телевизор по кабелю через USB-адаптер Ethernet. По Wi-Fi задержка слишком
+велика, каждый переход стоит миллисекунд и плавает, а именно джиттер роняет кадры; по кабелю до ПК меньше миллисекунды.
+Встроенный порт телевизора только 100 Мбит/с, стрим на 100 Мбит/с со звуком и служебным трафиком в него не влезает, а
+USB-адаптер на гигабит телевизор подхватывает без драйверов и поднимает линк на 1000 Мбит/с; все цифры в этом README сняты на
+таком подключении. Дальше фон телевизора, он стоит кадров и градусов, поэтому: отключить голосовое управление без пульта
 (Настройки → Аккаунты и вход → аккаунт → Google Assistant → «Микрофон без рук» выкл.; кнопка микрофона на пульте продолжит
 работать); закрывать перед стримом браузер и другие фоновые приложения
 (Настройки → Приложения → приложение → Остановить); в параметрах разработчика, если они включены, убедиться, что «Не сохранять
