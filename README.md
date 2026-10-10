@@ -113,7 +113,15 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 | **Network** | Ethernet through a **USB gigabit adapter**. Wi-Fi adds milliseconds of latency and jitter; on Ethernet the hop to the PC is under a millisecond. The TV's own port is 100 Mbps, too small for a 100 Mbps stream. |
 | **Gamepad** | Any pad the TV sees. Rumble over Bluetooth is verified on Xbox pads; a pad on a USB cable goes through Moonlight's own USB driver. |
 
-If the TV ever freezes or reboots, open an issue with `adb logcat -v threadtime -b all` captured around the moment, or after a
+> [!IMPORTANT]
+> **Does the TV still freeze or go black when you leave the stream? Turn on `Settings → Advanced → Keep a second layer above the
+> video (only if the TV freezes)`.** It keeps a tiny transparent surface above the video and removes the video before the stream
+> screen closes, so the firmware never has to rebuild the picture under a playing video. It costs 10–15 ms of display latency.
+>
+> **Video above 1080p corrupted** (wrong crop, shifted image, green and blue bands at 4K)? **Turn off `Settings → Advanced → TV
+> game mode (recommended)`.** This happens on TCL TVs with a Realtek SoC, such as the Brazilian C6K.
+
+If the TV still freezes or reboots, open an issue with `adb logcat -v threadtime -b all` captured around the moment, or after a
 reboot the output of `adb shell dumpsys dropbox --print system_server_native_crash`.
 
 ## Measured, not promised
@@ -220,8 +228,10 @@ so none are used.
 <details>
 <summary><b>Stability</b>: what was fixed and what is left out</summary>
 
-- The whole-TV freezes of the first builds (volume bar, app switch, stream exit) no longer reproduce; the workarounds that fought
-  them are gone. The "volume change after an hour freezes the screen and the app dies" symptom was the rumble crash all along.
+- The whole-TV freezes of the first builds (volume bar, app switch, stream exit) do not reproduce on firmware V655 and later. For
+  TVs where the exit freeze still happens, `Settings → Advanced → Keep a second layer above the video` keeps a 2×2 px surface above
+  the video and removes the video layer before leaving the stream, at 10–15 ms of display latency. The "volume change after an
+  hour freezes the screen and the app dies" symptom was the rumble crash all along.
 - Fixed a Settings-screen crash inherited from Artemis and a crash on oversized frames at high bitrates.
 - Frame-loss recovery as in upstream Moonlight since September 2026: no speculative loss reports while reference-frame
   invalidation is off (one lost packet could drop up to 120 consecutive frames), a partially dropped IDR frame is handled
@@ -514,5 +524,13 @@ USB-адаптер на гигабит телевизор подхватывае
 телевизору воздух сзади: после часа 4K HDR SoC держится на 76–82 °C, и прошивка сама режет декодер, а яркость панели меняет это
 всего на градус. Скриншоты меню на английском лежат в `docs/tv/`.
 
-**Если телевизор завис или перезагрузился**, откройте issue с `adb logcat -v threadtime -b all`, снятым вокруг этого момента,
+> [!IMPORTANT]
+> **Телевизор всё ещё зависает или гаснет при выходе из стрима? Включите `Настройки → Дополнительно → Второй слой поверх видео
+> (только при зависаниях)`.** Над видео держится крошечная прозрачная поверхность, а при выходе видео убирается до закрытия экрана
+> стрима, и прошивке не приходится перестраивать картинку под идущим видео. Цена — 10–15 мс задержки картинки.
+>
+> **Видео выше 1080p искажено** (неверная обрезка, сдвинутая картинка, зелёные и синие полосы в 4K)? **Выключите `Настройки →
+> Дополнительно → Игровой режим телевизора (рекомендуется)`.** Так бывает на TCL с процессором Realtek, например бразильском C6K.
+
+**Если телевизор всё равно завис или перезагрузился**, откройте issue с `adb logcat -v threadtime -b all`, снятым вокруг этого момента,
 или после перезагрузки с выводом `adb shell dumpsys dropbox --print system_server_native_crash`.
