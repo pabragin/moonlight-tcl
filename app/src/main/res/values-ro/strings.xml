@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Transmite în HDR când jocul și PC-ul îl suportă.</string>
     <string name="title_full_range">Video cu gamă completă</string>
     <string name="summary_full_range">Încearcă dacă negrul pare gri sau albul este tăiat.</string>
+    <string name="title_minimal_post_processing">Modul de joc al televizorului (recomandat)</string>
+    <string name="summary_minimal_post_processing">Cere televizorului procesare minimă a imaginii. Dezactivează dacă video peste 1080p apare corupt.</string>
+    <string name="title_tv_compositor_layer">Al doilea strat peste video (doar dacă televizorul îngheață)</string>
+    <string name="summary_tv_compositor_layer">Încearcă dacă televizorul îngheață la ieșirea din stream. Adaugă 10–15 ms latență de afișare.</string>
     <string name="title_prevent_packet_loss">Protecție la pierderea pachetelor</string>
     <string name="summary_prevent_packet_loss">Protecție în plus pentru o rețea care pierde pachete.</string>
     <string name="title_enable_perf_overlay">Statistici pe ecran</string>

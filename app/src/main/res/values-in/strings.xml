@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Stream dalam HDR jika game dan PC mendukungnya.</string>
     <string name="title_full_range">Video full-range</string>
     <string name="summary_full_range">Coba jika hitam tampak abu-abu atau putih terpotong.</string>
+    <string name="title_minimal_post_processing">Mode game TV (disarankan)</string>
+    <string name="summary_minimal_post_processing">Meminta TV memakai pemrosesan gambar minimal. Matikan jika video di atas 1080p rusak.</string>
+    <string name="title_tv_compositor_layer">Lapisan kedua di atas video (hanya jika TV membeku)</string>
+    <string name="summary_tv_compositor_layer">Coba jika TV membeku saat keluar dari stream. Menambah latensi tampilan 10–15 ms.</string>
     <string name="title_prevent_packet_loss">Lindungi dari packet loss</string>
     <string name="summary_prevent_packet_loss">Perlindungan ekstra untuk jaringan yang sering kehilangan paket.</string>
     <string name="title_enable_perf_overlay">Statistik di layar</string>

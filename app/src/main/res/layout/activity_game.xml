@@ -122,6 +122,13 @@
         android:elevation="8dp"
         android:visibility="gone" />
 
-
+    <!-- "Keep a second layer above the video": a separate 2x2 px surface above the video, so the video
+         SurfaceView is never the only layer the compositor sees. See Game.startCompositorKeepAlive(). -->
+    <SurfaceView
+        android:id="@+id/compositorKeepAlive"
+        android:layout_width="2px"
+        android:layout_height="2px"
+        android:layout_gravity="bottom|end"
+        android:visibility="gone" />
 
 </merge>

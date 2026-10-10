@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">ゲームとPCが対応していればHDRでストリーミングします。</string>
     <string name="title_full_range">フルレンジ映像</string>
     <string name="summary_full_range">黒が灰色に見えたり白が飛んだりする場合に試してください。</string>
+    <string name="title_minimal_post_processing">テレビのゲームモード（推奨）</string>
+    <string name="summary_minimal_post_processing">テレビに最小限の画像処理を要求します。1080pを超える映像が崩れる場合はオフにしてください。</string>
+    <string name="title_tv_compositor_layer">映像の上に2つ目のレイヤーを置く（テレビがフリーズする場合のみ）</string>
+    <string name="summary_tv_compositor_layer">ストリーム終了時にテレビがフリーズする場合に試してください。表示遅延が10〜15 ms増えます。</string>
     <string name="title_prevent_packet_loss">パケットロス対策</string>
     <string name="summary_prevent_packet_loss">パケットを落とすネットワーク向けの追加保護。</string>
     <string name="title_enable_perf_overlay">画面に統計を表示</string>

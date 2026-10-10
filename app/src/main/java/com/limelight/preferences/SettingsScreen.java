@@ -229,6 +229,8 @@ public final class SettingsScreen {
 
         categories.add(new Category(R.string.settings_cat_advanced).add(
                 toggle("checkbox_prevent_packet_loss", R.string.title_prevent_packet_loss, R.string.summary_prevent_packet_loss, false),
+                toggle("checkbox_minimal_post_processing", R.string.title_minimal_post_processing, R.string.summary_minimal_post_processing, true),
+                toggle("checkbox_tv_compositor_layer", R.string.title_tv_compositor_layer, R.string.summary_tv_compositor_layer, false),
                 toggle("checkbox_latency_test", R.string.title_latency_test, R.string.summary_latency_test, false),
                 notInProfiles(action("pref_debug_info", R.string.title_debug_info, R.string.summary_debug_info, null))
         ));

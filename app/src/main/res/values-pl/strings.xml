@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Streamuj w HDR, gdy gra i PC go obsługują.</string>
     <string name="title_full_range">Pełny zakres wideo</string>
     <string name="summary_full_range">Spróbuj, jeśli czerń jest szara, a biel prześwietlona.</string>
+    <string name="title_minimal_post_processing">Tryb gry telewizora (zalecane)</string>
+    <string name="summary_minimal_post_processing">Prosi telewizor o minimalne przetwarzanie obrazu. Wyłącz, jeśli obraz powyżej 1080p jest uszkodzony.</string>
+    <string name="title_tv_compositor_layer">Druga warstwa nad obrazem (tylko gdy telewizor się zawiesza)</string>
+    <string name="summary_tv_compositor_layer">Spróbuj, jeśli telewizor zawiesza się po wyjściu ze streamu. Dodaje 10–15 ms opóźnienia obrazu.</string>
     <string name="title_prevent_packet_loss">Ochrona przed utratą pakietów</string>
     <string name="summary_prevent_packet_loss">Dodatkowa ochrona dla sieci, która gubi pakiety.</string>
     <string name="title_enable_perf_overlay">Statystyki na ekranie</string>

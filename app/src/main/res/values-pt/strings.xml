@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Transmitir em HDR quando o jogo e o PC o suportam.</string>
     <string name="title_full_range">Vídeo de gama completa</string>
     <string name="summary_full_range">Experimente se os pretos parecem cinzentos ou os brancos saturam.</string>
+    <string name="title_minimal_post_processing">Modo de jogo da TV (recomendado)</string>
+    <string name="summary_minimal_post_processing">Pede à TV o mínimo de processamento de imagem. Desative se o vídeo acima de 1080p aparecer corrompido.</string>
+    <string name="title_tv_compositor_layer">Manter uma segunda camada sobre o vídeo (só se a TV bloquear)</string>
+    <string name="summary_tv_compositor_layer">Experimente se a TV bloquear ao sair da transmissão. Acrescenta 10–15 ms de latência de imagem.</string>
     <string name="title_prevent_packet_loss">Proteção contra perda de pacotes</string>
     <string name="summary_prevent_packet_loss">Proteção extra para uma rede que perde pacotes.</string>
     <string name="title_enable_perf_overlay">Estatísticas no ecrã</string>

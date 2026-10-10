@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">סטרים ב-HDR כשהמשחק והמחשב תומכים בו.</string>
     <string name="title_full_range">וידאו בטווח מלא</string>
     <string name="summary_full_range">נסה אם השחור נראה אפור או שהלבן נשרף.</string>
+    <string name="title_minimal_post_processing">מצב משחק בטלוויזיה (מומלץ)</string>
+    <string name="summary_minimal_post_processing">מבקש מהטלוויזיה עיבוד תמונה מינימלי. כבה אם וידאו מעל 1080p משובש.</string>
+    <string name="title_tv_compositor_layer">שכבה שנייה מעל הווידאו (רק אם הטלוויזיה קופאת)</string>
+    <string name="summary_tv_compositor_layer">נסה אם הטלוויזיה קופאת ביציאה מהסטרים. מוסיף 10–15 ms השהיית תצוגה.</string>
     <string name="title_prevent_packet_loss">הגנה מאובדן מנות</string>
     <string name="summary_prevent_packet_loss">הגנה נוספת לרשת שמאבדת מנות.</string>
     <string name="title_enable_perf_overlay">סטטיסטיקה על המסך</string>

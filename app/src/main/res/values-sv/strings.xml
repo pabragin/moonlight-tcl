@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Strömma i HDR när spelet och datorn stöder det.</string>
     <string name="title_full_range">Fullt färgomfång</string>
     <string name="summary_full_range">Prova om svart ser grått ut eller vitt bränns ut.</string>
+    <string name="title_minimal_post_processing">TV:ns spelläge (rekommenderas)</string>
+    <string name="summary_minimal_post_processing">Ber tv:n om minimal bildbehandling. Stäng av om video över 1080p blir förvrängd.</string>
+    <string name="title_tv_compositor_layer">Behåll ett andra lager över videon (bara om tv:n fryser)</string>
+    <string name="summary_tv_compositor_layer">Prova om tv:n fryser när du lämnar strömmen. Ger 10–15 ms extra visningsfördröjning.</string>
     <string name="title_prevent_packet_loss">Skydd mot paketförlust</string>
     <string name="summary_prevent_packet_loss">Extra skydd för ett nätverk som tappar paket.</string>
     <string name="title_enable_perf_overlay">Statistik på skärmen</string>

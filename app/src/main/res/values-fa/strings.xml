@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">وقتی بازی و رایانه پشتیبانی می‌کنند، با HDR استریم شود.</string>
     <string name="title_full_range">ویدیوی تمام‌دامنه</string>
     <string name="summary_full_range">اگر سیاه‌ها خاکستری‌اند یا سفیدها می‌سوزند، امتحان کنید.</string>
+    <string name="title_minimal_post_processing">حالت بازی تلویزیون (توصیه‌شده)</string>
+    <string name="summary_minimal_post_processing">از تلویزیون حداقل پردازش تصویر را می‌خواهد. اگر ویدیوی بالاتر از 1080p خراب است، خاموشش کنید.</string>
+    <string name="title_tv_compositor_layer">نگه داشتن لایه دوم روی ویدیو (فقط اگر تلویزیون هنگ می‌کند)</string>
+    <string name="summary_tv_compositor_layer">اگر تلویزیون هنگام خروج از استریم هنگ می‌کند، امتحان کنید. 10–15 ms به تأخیر نمایش اضافه می‌کند.</string>
     <string name="title_prevent_packet_loss">محافظت در برابر از دست رفتن بسته‌ها</string>
     <string name="summary_prevent_packet_loss">محافظت بیشتر برای شبکه‌ای که بسته گم می‌کند.</string>
     <string name="title_enable_perf_overlay">آمار روی صفحه</string>

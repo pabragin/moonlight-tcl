@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">In HDR streamen als de game en de pc het ondersteunen.</string>
     <string name="title_full_range">Volledig kleurbereik</string>
     <string name="summary_full_range">Probeer dit als zwart grijs lijkt of wit uitbijt.</string>
+    <string name="title_minimal_post_processing">Gamemodus van de tv (aanbevolen)</string>
+    <string name="summary_minimal_post_processing">Vraagt de tv om minimale beeldbewerking. Zet uit als video boven 1080p beschadigd is.</string>
+    <string name="title_tv_compositor_layer">Tweede laag boven de video (alleen als de tv vastloopt)</string>
+    <string name="summary_tv_compositor_layer">Probeer dit als de tv vastloopt bij het verlaten van de stream. Kost 10–15 ms extra beeldvertraging.</string>
     <string name="title_prevent_packet_loss">Bescherming tegen pakketverlies</string>
     <string name="summary_prevent_packet_loss">Extra bescherming voor een netwerk dat pakketten verliest.</string>
     <string name="title_enable_perf_overlay">Statistieken op het scherm</string>

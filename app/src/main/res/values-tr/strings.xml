@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Oyun ve PC destekliyorsa HDR yayınla.</string>
     <string name="title_full_range">Tam aralıklı video</string>
     <string name="summary_full_range">Siyahlar gri görünüyor veya beyazlar patlıyorsa deneyin.</string>
+    <string name="title_minimal_post_processing">TV oyun modu (önerilir)</string>
+    <string name="summary_minimal_post_processing">TV\'den en az görüntü işleme ister. 1080p üzeri video bozuk görünüyorsa kapatın.</string>
+    <string name="title_tv_compositor_layer">Videonun üstünde ikinci katman (yalnızca TV donuyorsa)</string>
+    <string name="summary_tv_compositor_layer">Yayından çıkarken TV donuyorsa deneyin. Görüntüye 10–15 ms gecikme ekler.</string>
     <string name="title_prevent_packet_loss">Paket kaybına karşı koruma</string>
     <string name="summary_prevent_packet_loss">Paket düşüren ağlar için ek koruma.</string>
     <string name="title_enable_perf_overlay">Ekranda istatistik</string>

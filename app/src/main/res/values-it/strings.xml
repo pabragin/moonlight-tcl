@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Trasmetti in HDR quando il gioco e il PC lo supportano.</string>
     <string name="title_full_range">Video a gamma completa</string>
     <string name="summary_full_range">Provalo se i neri sembrano grigi o i bianchi sono tagliati.</string>
+    <string name="title_minimal_post_processing">Modalità gioco della TV (consigliato)</string>
+    <string name="summary_minimal_post_processing">Chiede alla TV un\'elaborazione minima dell\'immagine. Disattivala se il video sopra 1080p è corrotto.</string>
+    <string name="title_tv_compositor_layer">Secondo livello sopra il video (solo se la TV si blocca)</string>
+    <string name="summary_tv_compositor_layer">Provalo se la TV si blocca quando esci dallo stream. Aggiunge 10–15 ms di latenza di visualizzazione.</string>
     <string name="title_prevent_packet_loss">Protezione dalla perdita di pacchetti</string>
     <string name="summary_prevent_packet_loss">Protezione extra per una rete che perde pacchetti.</string>
     <string name="title_enable_perf_overlay">Statistiche sullo schermo</string>

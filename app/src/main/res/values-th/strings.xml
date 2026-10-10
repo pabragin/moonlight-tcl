@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">สตรีมแบบ HDR เมื่อเกมและ PC รองรับ</string>
     <string name="title_full_range">วิดีโอช่วงสีเต็ม</string>
     <string name="summary_full_range">ลองใช้หากสีดำดูเทาหรือสีขาวสว่างเกิน</string>
+    <string name="title_minimal_post_processing">โหมดเกมของทีวี (แนะนำ)</string>
+    <string name="summary_minimal_post_processing">ขอให้ทีวีประมวลผลภาพน้อยที่สุด ปิดหากวิดีโอที่สูงกว่า 1080p แสดงผลผิดเพี้ยน</string>
+    <string name="title_tv_compositor_layer">คงเลเยอร์ที่สองไว้เหนือวิดีโอ (เฉพาะเมื่อทีวีค้าง)</string>
+    <string name="summary_tv_compositor_layer">ลองใช้หากทีวีค้างเมื่อออกจากสตรีม เพิ่มความหน่วงการแสดงผล 10–15 ms</string>
     <string name="title_prevent_packet_loss">ป้องกันแพ็กเก็ตสูญหาย</string>
     <string name="summary_prevent_packet_loss">การป้องกันเพิ่มเติมสำหรับเครือข่ายที่ทำแพ็กเก็ตหาย</string>
     <string name="title_enable_perf_overlay">สถิติบนหน้าจอ</string>

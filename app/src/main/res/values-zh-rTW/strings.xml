@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">遊戲與電腦支援時以 HDR 串流。</string>
     <string name="title_full_range">全範圍視訊</string>
     <string name="summary_full_range">黑色偏灰或白色過曝時可以試試。</string>
+    <string name="title_minimal_post_processing">電視遊戲模式（建議開啟）</string>
+    <string name="summary_minimal_post_processing">要求電視盡量少做畫面處理。若 1080p 以上的視訊破圖，請關閉。</string>
+    <string name="title_tv_compositor_layer">在視訊上方保留第二層（僅在電視當機時）</string>
+    <string name="summary_tv_compositor_layer">退出串流時電視當機可以試試。會增加 10–15 ms 顯示延遲。</string>
     <string name="title_prevent_packet_loss">防止封包遺失</string>
     <string name="summary_prevent_packet_loss">為會掉封包的網路提供額外保護。</string>
     <string name="title_enable_perf_overlay">螢幕統計資訊</string>

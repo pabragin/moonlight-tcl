@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">गेम और PC समर्थन करें तो HDR में स्ट्रीम करें।</string>
     <string name="title_full_range">फ़ुल-रेंज वीडियो</string>
     <string name="summary_full_range">काला धूसर दिखे या सफ़ेद कट जाए, तो आज़माएँ।</string>
+    <string name="title_minimal_post_processing">टीवी गेम मोड (अनुशंसित)</string>
+    <string name="summary_minimal_post_processing">टीवी से न्यूनतम पिक्चर प्रोसेसिंग माँगता है। 1080p से ऊपर वीडियो बिगड़े तो बंद करें।</string>
+    <string name="title_tv_compositor_layer">वीडियो के ऊपर दूसरी परत रखें (सिर्फ़ तब जब टीवी अटके)</string>
+    <string name="summary_tv_compositor_layer">स्ट्रीम छोड़ते समय टीवी अटक जाए तो आज़माएँ। डिस्प्ले में 10–15 ms देरी जोड़ता है।</string>
     <string name="title_prevent_packet_loss">पैकेट लॉस से सुरक्षा</string>
     <string name="summary_prevent_packet_loss">पैकेट खोने वाले नेटवर्क के लिए अतिरिक्त सुरक्षा।</string>
     <string name="title_enable_perf_overlay">स्क्रीन पर आँकड़े</string>

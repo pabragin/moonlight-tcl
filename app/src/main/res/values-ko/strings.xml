@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">게임과 PC가 지원하면 HDR로 스트리밍합니다.</string>
     <string name="title_full_range">풀 레인지 비디오</string>
     <string name="summary_full_range">검은색이 회색으로 보이거나 흰색이 뭉개지면 시도해 보세요.</string>
+    <string name="title_minimal_post_processing">TV 게임 모드 (권장)</string>
+    <string name="summary_minimal_post_processing">TV에 최소한의 화질 처리를 요청합니다. 1080p 이상 영상이 깨지면 끄세요.</string>
+    <string name="title_tv_compositor_layer">영상 위에 두 번째 레이어 유지 (TV가 멈출 때만)</string>
+    <string name="summary_tv_compositor_layer">스트림을 나갈 때 TV가 멈추면 시도해 보세요. 화면 지연이 10–15 ms 늘어납니다.</string>
     <string name="title_prevent_packet_loss">패킷 손실 방지</string>
     <string name="summary_prevent_packet_loss">패킷이 손실되는 네트워크를 위한 추가 보호.</string>
     <string name="title_enable_perf_overlay">화면에 통계 표시</string>

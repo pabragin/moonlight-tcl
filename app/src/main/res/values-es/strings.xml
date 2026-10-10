@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Transmitir en HDR cuando el juego y el PC lo admitan.</string>
     <string name="title_full_range">Video de rango completo</string>
     <string name="summary_full_range">Pruébalo si los negros se ven grises o los blancos se recortan.</string>
+    <string name="title_minimal_post_processing">Modo juego del televisor (recomendado)</string>
+    <string name="summary_minimal_post_processing">Pide al televisor el mínimo procesado de imagen. Desactívalo si el video por encima de 1080p se ve corrupto.</string>
+    <string name="title_tv_compositor_layer">Segunda capa sobre el video (solo si el televisor se congela)</string>
+    <string name="summary_tv_compositor_layer">Pruébalo si el televisor se congela al salir del streaming. Añade 10–15 ms de latencia de imagen.</string>
     <string name="title_prevent_packet_loss">Protección contra pérdida de paquetes</string>
     <string name="summary_prevent_packet_loss">Protección extra para una red que pierde paquetes.</string>
     <string name="title_enable_perf_overlay">Estadísticas en pantalla</string>

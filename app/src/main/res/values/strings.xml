@@ -226,6 +226,10 @@
     <string name="summary_enable_hdr">Stream in HDR when the game and the PC support it.</string>
     <string name="title_full_range">Full-range video</string>
     <string name="summary_full_range">Try it if blacks look grey or whites clip.</string>
+    <string name="title_minimal_post_processing">TV game mode (recommended)</string>
+    <string name="summary_minimal_post_processing">Asks the TV for minimal picture processing. Turn it off if video above 1080p is corrupted.</string>
+    <string name="title_tv_compositor_layer">Keep a second layer above the video (only if the TV freezes)</string>
+    <string name="summary_tv_compositor_layer">Try it if the TV freezes when you leave the stream. Adds 10–15 ms of display latency.</string>
     <string name="title_prevent_packet_loss">Guard against packet loss</string>
     <string name="summary_prevent_packet_loss">Extra protection for a network that drops packets.</string>
     <string name="title_enable_perf_overlay">Statistics on screen</string>

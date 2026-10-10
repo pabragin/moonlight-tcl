@@ -211,6 +211,10 @@
     <string name="title_native_fps_dialog">Встроенное предупреждение о FPS</string>
     <string name="title_full_range">Полный диапазон видео</string>
     <string name="summary_full_range">Попробуйте, если чёрное серое или белое выбито.</string>
+    <string name="title_minimal_post_processing">Игровой режим телевизора (рекомендуется)</string>
+    <string name="summary_minimal_post_processing">Просит телевизор минимально обрабатывать картинку. Выключите, если видео выше 1080p искажено.</string>
+    <string name="title_tv_compositor_layer">Второй слой поверх видео (только при зависаниях)</string>
+    <string name="summary_tv_compositor_layer">Попробуйте, если телевизор зависает при выходе из стрима. Добавляет 10–15 мс задержки картинки.</string>
     <string name="toast_controller_type_changed">Тип геймпада может быть изменен из-за эмуляции датчика движения</string>
     <string name="title_analog_scrolling">Прокрутка стиком</string>
     <string name="analogscroll_right">Правый стик</string>

@@ -153,6 +153,31 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     private boolean connecting = false;
     public boolean connected = false;
     private boolean surfaceCreated = false;
+
+    // "Keep a second layer above the video" (prefConfig.tvCompositorLayer). Some TV firmwares (TCL on
+    // Android 14) freeze the whole TV when SurfaceFlinger reconfigures composition while the stream's video
+    // SurfaceView is the only visible layer and is still receiving frames. A 2x2 px surface stays above the
+    // video, and on exit the video layer is removed before the activity transition starts.
+    private static final int COMPOSITOR_KEEP_ALIVE_INTERVAL_MS = 1000;
+    private static final int GRACEFUL_EXIT_DELAY_MS = 200;
+    private final Handler workaroundHandler = new Handler(Looper.getMainLooper());
+    private SurfaceView compositorKeepAliveView;
+    private boolean compositorKeepAliveToggle;
+    private boolean compositorKeepAliveSurfaceReady;
+    private boolean streamTeardownStarted;
+    private final Runnable compositorKeepAliveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (compositorKeepAliveView == null || streamTeardownStarted) {
+                return;
+            }
+            // Repaint now and then so the surface always has a fresh buffer; the colour alternates
+            // between two practically transparent values
+            compositorKeepAliveToggle = !compositorKeepAliveToggle;
+            paintCompositorKeepAlive();
+            workaroundHandler.postDelayed(this, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
+        }
+    };
     // Queued audio above which packets are dropped (upstream: 40 ms)
     private static final int AUDIO_MAX_PENDING_MS = 40;
 
@@ -320,6 +345,12 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+
+        // The manifest asks for minimal post-processing (ALLM / game mode). On some TCL TVs with a Realtek SoC
+        // (c2.realtek.* decoders) that path shows anything above 1080p corrupted, so it can be turned off.
+        if (!prefConfig.minimalPostProcessing) {
+            getWindow().setPreferMinimalPostProcessing(false);
+        }
 
         // Listen for UI visibility events
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
@@ -561,6 +592,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 performanceOverlayView.setLayoutParams(params);
             }
         }
+
+        startCompositorKeepAlive();
 
         decoderRenderer = new MediaCodecDecoderRenderer(
                 this,
@@ -1002,6 +1035,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         instance = null;
         timerHandler.removeCallbacksAndMessages(null);
+        workaroundHandler.removeCallbacksAndMessages(null);
         com.limelight.utils.LatencyTester.stop();
 
         if (controllerHandler != null) {
@@ -1032,6 +1066,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     @Override
     protected void onPause() {
         if (isFinishing()) {
+            // Fallback for exit paths that didn't go through finishGracefully()
+            beginStreamTeardownForWorkaround();
+
             // Stop any further input device notifications before we lose focus (and pointer capture)
             if (controllerHandler != null) {
                 controllerHandler.stop();
@@ -1233,7 +1270,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
                     // Quit
                     case KeyEvent.KEYCODE_Q:
-                        finish();
+                        finishGracefully();
                         break;
 
                     // Toggle cursor visibility
@@ -2680,7 +2717,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                                 message, true);
                     }
                     else {
-                        finish();
+                        finishGracefully();
                     }
                 }
             }
@@ -2970,9 +3007,122 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     }
 
     @Override
+    public void onUserLeaveHint() {
+        super.onUserLeaveHint();
+
+        // Home/Recents: the stream is torn down in onStop() anyway, so drop the video layer before the
+        // launcher covers it
+        beginStreamTeardownForWorkaround();
+    }
+
+    private void startCompositorKeepAlive() {
+        compositorKeepAliveView = findViewById(R.id.compositorKeepAlive);
+        if (compositorKeepAliveView == null || !prefConfig.tvCompositorLayer) {
+            return;
+        }
+
+        LimeLog.info("Keeping a 2x2 px translucent surface above the video");
+        // Above the stream SurfaceView, below the window. Must be set before the surface exists.
+        compositorKeepAliveView.setZOrderMediaOverlay(true);
+        compositorKeepAliveView.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
+        compositorKeepAliveView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                compositorKeepAliveSurfaceReady = true;
+                paintCompositorKeepAlive();
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                paintCompositorKeepAlive();
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                compositorKeepAliveSurfaceReady = false;
+            }
+        });
+        compositorKeepAliveView.setVisibility(View.VISIBLE);
+        workaroundHandler.postDelayed(compositorKeepAliveRunnable, COMPOSITOR_KEEP_ALIVE_INTERVAL_MS);
+    }
+
+    private void paintCompositorKeepAlive() {
+        if (compositorKeepAliveView == null || !compositorKeepAliveSurfaceReady) {
+            return;
+        }
+        SurfaceHolder holder = compositorKeepAliveView.getHolder();
+        android.graphics.Canvas canvas = null;
+        try {
+            canvas = holder.lockCanvas();
+            if (canvas != null) {
+                canvas.drawColor(compositorKeepAliveToggle ? 0x02000000 : 0x01000000, android.graphics.PorterDuff.Mode.SRC);
+            }
+        } catch (Exception e) {
+            // Surface may be going away
+        } finally {
+            if (canvas != null) {
+                try {
+                    holder.unlockCanvasAndPost(canvas);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Stops feeding frames to the stream surface and removes the video layer from the screen while this
+     * window is still the top one, so the compositor never reconfigures (app switch, exit) while the video
+     * layer is receiving frames.
+     */
+    private void beginStreamTeardownForWorkaround() {
+        if (prefConfig == null || !prefConfig.tvCompositorLayer || streamTeardownStarted) {
+            return;
+        }
+        streamTeardownStarted = true;
+        workaroundHandler.removeCallbacks(compositorKeepAliveRunnable);
+
+        LimeLog.info("Removing the video layer before leaving");
+
+        if (attemptedConnection && decoderRenderer != null) {
+            decoderRenderer.prepareForStop();
+        }
+
+        // Hiding the container destroys the stream surface, which runs surfaceDestroyed() -> stopConnection().
+        // Our window stays on screen (black), so the compositor only drops the idle video layer.
+        if (streamContainer != null) {
+            streamContainer.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /** finish() for user-initiated exits: with the second layer on, the video layer goes first. */
+    private void finishGracefully() {
+        if (isFinishing()) {
+            return;
+        }
+        if (prefConfig == null || !prefConfig.tvCompositorLayer) {
+            finish();
+            return;
+        }
+
+        beginStreamTeardownForWorkaround();
+        workaroundHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isFinishing()) {
+                    finish();
+                }
+            }
+        }, GRACEFUL_EXIT_DELAY_MS);
+    }
+
+    @Override
     public void onBackPressed() {
         if(prefConfig.enableBackMenu){
             showGameMenu(null);
+            return;
+        }
+        if (prefConfig.tvCompositorLayer) {
+            finishGracefully();
             return;
         }
         super.onBackPressed();
@@ -3018,7 +3168,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         if (prefConfig.smartClipboardSync) {
             getClipboard(-1);
         }
-        finish();
+        finishGracefully();
     }
 
     public void quit() {
@@ -3030,7 +3180,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         builder.setPositiveButton(getString(R.string.yes), (dialog, which) -> {
             quitOnStop = true;
             dialog.dismiss();
-            finish();
+            finishGracefully();
         });
 
         builder.setNegativeButton(getString(R.string.no), (dialog, which) -> dialog.dismiss());

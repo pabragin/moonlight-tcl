@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Streamovat v HDR, když ho hra i PC podporují.</string>
     <string name="title_full_range">Plný rozsah videa</string>
     <string name="summary_full_range">Vyzkoušejte, pokud je černá šedá nebo bílá přepálená.</string>
+    <string name="title_minimal_post_processing">Herní režim TV (doporučeno)</string>
+    <string name="summary_minimal_post_processing">Požádá televizor o minimální zpracování obrazu. Vypněte, pokud je video nad 1080p poškozené.</string>
+    <string name="title_tv_compositor_layer">Druhá vrstva nad videem (jen pokud TV zamrzá)</string>
+    <string name="summary_tv_compositor_layer">Vyzkoušejte, pokud TV zamrzne při ukončení streamu. Přidá 10–15 ms zpoždění obrazu.</string>
     <string name="title_prevent_packet_loss">Ochrana proti ztrátě paketů</string>
     <string name="summary_prevent_packet_loss">Ochrana navíc pro síť, která ztrácí pakety.</string>
     <string name="title_enable_perf_overlay">Statistiky na obrazovce</string>

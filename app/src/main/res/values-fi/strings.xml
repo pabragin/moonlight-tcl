@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Suoratoista HDR:nä, kun peli ja PC tukevat sitä.</string>
     <string name="title_full_range">Täyden alueen video</string>
     <string name="summary_full_range">Kokeile, jos musta näyttää harmaalta tai valkoinen palaa puhki.</string>
+    <string name="title_minimal_post_processing">TV:n pelitila (suositeltu)</string>
+    <string name="summary_minimal_post_processing">Pyytää televisiolta mahdollisimman vähän kuvankäsittelyä. Poista käytöstä, jos yli 1080p:n video on rikki.</string>
+    <string name="title_tv_compositor_layer">Toinen kerros videon päällä (vain jos TV jäätyy)</string>
+    <string name="summary_tv_compositor_layer">Kokeile, jos TV jäätyy striimistä poistuttaessa. Lisää kuvan viivettä 10–15 ms.</string>
     <string name="title_prevent_packet_loss">Suojaus pakettihäviöltä</string>
     <string name="summary_prevent_packet_loss">Lisäsuoja verkolle, joka hukkaa paketteja.</string>
     <string name="title_enable_perf_overlay">Tilastot näytöllä</string>

@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">In HDR streamen, wenn Spiel und PC es unterstützen.</string>
     <string name="title_full_range">Voller Farbumfang</string>
     <string name="summary_full_range">Probieren, wenn Schwarz grau wirkt oder Weiß ausbrennt.</string>
+    <string name="title_minimal_post_processing">Spielmodus des TVs (empfohlen)</string>
+    <string name="summary_minimal_post_processing">Fordert vom TV minimale Bildverarbeitung an. Ausschalten, wenn Video über 1080p fehlerhaft ist.</string>
+    <string name="title_tv_compositor_layer">Zweite Ebene über dem Video (nur wenn der TV einfriert)</string>
+    <string name="summary_tv_compositor_layer">Probieren, wenn der TV beim Verlassen des Streams einfriert. Kostet 10–15 ms Anzeigelatenz.</string>
     <string name="title_prevent_packet_loss">Schutz vor Paketverlust</string>
     <string name="summary_prevent_packet_loss">Zusätzlicher Schutz für ein Netzwerk, das Pakete verliert.</string>
     <string name="title_enable_perf_overlay">Statistik auf dem Bildschirm</string>

@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Ροή σε HDR όταν το υποστηρίζουν το παιχνίδι και το PC.</string>
     <string name="title_full_range">Βίντεο πλήρους εύρους</string>
     <string name="summary_full_range">Δοκιμάστε το αν τα μαύρα φαίνονται γκρι ή τα λευκά «καίγονται».</string>
+    <string name="title_minimal_post_processing">Λειτουργία παιχνιδιού TV (προτείνεται)</string>
+    <string name="summary_minimal_post_processing">Ζητά από την τηλεόραση ελάχιστη επεξεργασία εικόνας. Απενεργοποιήστε αν το βίντεο πάνω από 1080p αλλοιώνεται.</string>
+    <string name="title_tv_compositor_layer">Δεύτερο επίπεδο πάνω από το βίντεο (μόνο αν παγώνει η τηλεόραση)</string>
+    <string name="summary_tv_compositor_layer">Δοκιμάστε το αν η τηλεόραση παγώνει όταν βγαίνετε από τη ροή. Προσθέτει 10–15 ms καθυστέρηση εικόνας.</string>
     <string name="title_prevent_packet_loss">Προστασία από απώλεια πακέτων</string>
     <string name="summary_prevent_packet_loss">Επιπλέον προστασία για δίκτυο που χάνει πακέτα.</string>
     <string name="title_enable_perf_overlay">Στατιστικά στην οθόνη</string>

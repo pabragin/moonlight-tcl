@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Stream i HDR, når spillet og pc\'en understøtter det.</string>
     <string name="title_full_range">Fuldt farveområde</string>
     <string name="summary_full_range">Prøv det, hvis sort ser gråt ud, eller hvidt brænder ud.</string>
+    <string name="title_minimal_post_processing">TV\'ets spiltilstand (anbefales)</string>
+    <string name="summary_minimal_post_processing">Beder TV\'et om minimal billedbehandling. Slå fra, hvis video over 1080p er forvrænget.</string>
+    <string name="title_tv_compositor_layer">Hold et ekstra lag over videoen (kun hvis TV\'et fryser)</string>
+    <string name="summary_tv_compositor_layer">Prøv det, hvis TV\'et fryser, når du forlader streamen. Giver 10–15 ms ekstra visningsforsinkelse.</string>
     <string name="title_prevent_packet_loss">Beskyt mod pakketab</string>
     <string name="summary_prevent_packet_loss">Ekstra beskyttelse til et netværk, der taber pakker.</string>
     <string name="title_enable_perf_overlay">Statistik på skærmen</string>

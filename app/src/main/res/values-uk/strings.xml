@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Стрімити в HDR, коли гра та ПК його підтримують.</string>
     <string name="title_full_range">Повний діапазон відео</string>
     <string name="summary_full_range">Спробуйте, якщо чорне сіре або біле вибите.</string>
+    <string name="title_minimal_post_processing">Ігровий режим телевізора (рекомендовано)</string>
+    <string name="summary_minimal_post_processing">Просить телевізор мінімально обробляти картинку. Вимкніть, якщо відео понад 1080p спотворене.</string>
+    <string name="title_tv_compositor_layer">Другий шар поверх відео (лише якщо телевізор зависає)</string>
+    <string name="summary_tv_compositor_layer">Спробуйте, якщо телевізор зависає під час виходу зі стриму. Додає 10–15 мс затримки картинки.</string>
     <string name="title_prevent_packet_loss">Захист від втрати пакетів</string>
     <string name="summary_prevent_packet_loss">Додатковий захист для мережі, яка губить пакети.</string>
     <string name="title_enable_perf_overlay">Статистика на екрані</string>

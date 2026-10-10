@@ -79,6 +79,8 @@ public class PreferenceConfiguration {
     private static final String AAUDIO_PREF_STRING = "checkbox_aaudio_renderer";
     private static final String REDUCE_REFRESH_RATE_PREF_STRING = "checkbox_reduce_refresh_rate";
     private static final String FULL_RANGE_PREF_STRING = "checkbox_full_range";
+    private static final String MINIMAL_POST_PROCESSING_PREF_STRING = "checkbox_minimal_post_processing";
+    private static final String TV_COMPOSITOR_LAYER_PREF_STRING = "checkbox_tv_compositor_layer";
     private static final String GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING = "checkbox_gamepad_touchpad_as_mouse";
     private static final String GAMEPAD_MOTION_SENSORS_PREF_STRING = "checkbox_gamepad_motion_sensors";
     private static final String FULL_SCREEN_PREF_STRING = "checkbox_full_screen";
@@ -155,6 +157,8 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_ENABLE_AUDIO_FX = false;
     private static final boolean DEFAULT_REDUCE_REFRESH_RATE = false;
     private static final boolean DEFAULT_FULL_RANGE = false;
+    private static final boolean DEFAULT_MINIMAL_POST_PROCESSING = true;
+    private static final boolean DEFAULT_TV_COMPOSITOR_LAYER = false;
     private static final boolean DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE = false;
     private static final boolean DEFAULT_GAMEPAD_MOTION_SENSORS = true;
     // On: Bluetooth pads rumble through the Bluetooth stack (BluetoothHidRumble), which never touches
@@ -288,6 +292,8 @@ public class PreferenceConfiguration {
     public boolean enableAudioFx;
     public boolean useAAudio;
     public boolean reduceRefreshRate;
+    public boolean minimalPostProcessing;
+    public boolean tvCompositorLayer;
     public boolean fullRange;
     public boolean gamepadMotionSensors;
     public boolean gamepadTouchpadAsMouse;
@@ -811,6 +817,8 @@ private static int getFramePacingValue(Context context) {
         config.useAAudio = prefs.getBoolean(AAUDIO_PREF_STRING, true);
         config.reduceRefreshRate = prefs.getBoolean(REDUCE_REFRESH_RATE_PREF_STRING, DEFAULT_REDUCE_REFRESH_RATE);
         config.fullRange = prefs.getBoolean(FULL_RANGE_PREF_STRING, DEFAULT_FULL_RANGE);
+        config.minimalPostProcessing = prefs.getBoolean(MINIMAL_POST_PROCESSING_PREF_STRING, DEFAULT_MINIMAL_POST_PROCESSING);
+        config.tvCompositorLayer = prefs.getBoolean(TV_COMPOSITOR_LAYER_PREF_STRING, DEFAULT_TV_COMPOSITOR_LAYER);
         config.gamepadTouchpadAsMouse = prefs.getBoolean(GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING, DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE);
         config.gamepadMotionSensors = prefs.getBoolean(GAMEPAD_MOTION_SENSORS_PREF_STRING, DEFAULT_GAMEPAD_MOTION_SENSORS);
         config.enableRumble = prefs.getBoolean(ENABLE_RUMBLE_PREF_STRING, DEFAULT_ENABLE_RUMBLE);

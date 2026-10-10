@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">HDR-ben streamel, ha a játék és a PC támogatja.</string>
     <string name="title_full_range">Teljes tartományú videó</string>
     <string name="summary_full_range">Próbálja ki, ha a fekete szürkés, vagy a fehér kiég.</string>
+    <string name="title_minimal_post_processing">TV játékmód (ajánlott)</string>
+    <string name="summary_minimal_post_processing">Minimális képfeldolgozást kér a TV-től. Kapcsolja ki, ha az 1080p feletti videó hibás.</string>
+    <string name="title_tv_compositor_layer">Második réteg a videó felett (csak ha a TV lefagy)</string>
+    <string name="summary_tv_compositor_layer">Próbálja ki, ha a TV lefagy a streamből kilépéskor. 10–15 ms megjelenítési késést ad.</string>
     <string name="title_prevent_packet_loss">Védelem csomagvesztés ellen</string>
     <string name="summary_prevent_packet_loss">Extra védelem csomagokat vesztő hálózathoz.</string>
     <string name="title_enable_perf_overlay">Statisztika a képernyőn</string>

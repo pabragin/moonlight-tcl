@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Streamer en HDR quand le jeu et le PC le permettent.</string>
     <string name="title_full_range">Vidéo pleine plage</string>
     <string name="summary_full_range">À essayer si les noirs sont gris ou les blancs écrêtés.</string>
+    <string name="title_minimal_post_processing">Mode jeu du téléviseur (recommandé)</string>
+    <string name="summary_minimal_post_processing">Demande au téléviseur un traitement d\'image minimal. Désactivez-le si la vidéo au-delà de 1080p est corrompue.</string>
+    <string name="title_tv_compositor_layer">Garder un second calque sur la vidéo (seulement si le téléviseur se fige)</string>
+    <string name="summary_tv_compositor_layer">À essayer si le téléviseur se fige en quittant le stream. Ajoute 10 à 15 ms de latence d\'affichage.</string>
     <string name="title_prevent_packet_loss">Protection contre la perte de paquets</string>
     <string name="summary_prevent_packet_loss">Protection renforcée pour un réseau qui perd des paquets.</string>
     <string name="title_enable_perf_overlay">Statistiques à l\'écran</string>

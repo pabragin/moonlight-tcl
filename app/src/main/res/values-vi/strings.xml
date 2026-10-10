@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Truyền phát HDR khi game và PC hỗ trợ.</string>
     <string name="title_full_range">Video dải đầy đủ</string>
     <string name="summary_full_range">Thử nếu màu đen bị xám hoặc màu trắng bị cháy.</string>
+    <string name="title_minimal_post_processing">Chế độ game của TV (khuyên dùng)</string>
+    <string name="summary_minimal_post_processing">Yêu cầu TV xử lý hình ảnh tối thiểu. Tắt nếu video trên 1080p bị lỗi hình.</string>
+    <string name="title_tv_compositor_layer">Giữ lớp thứ hai trên video (chỉ khi TV bị treo)</string>
+    <string name="summary_tv_compositor_layer">Thử nếu TV bị treo khi thoát stream. Thêm 10–15 ms độ trễ hiển thị.</string>
     <string name="title_prevent_packet_loss">Chống mất gói tin</string>
     <string name="summary_prevent_packet_loss">Bảo vệ thêm cho mạng hay rớt gói tin.</string>
     <string name="title_enable_perf_overlay">Thống kê trên màn hình</string>

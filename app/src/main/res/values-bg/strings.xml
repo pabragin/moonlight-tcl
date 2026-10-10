@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Стрийм в HDR, когато играта и компютърът го поддържат.</string>
     <string name="title_full_range">Пълен диапазон на видеото</string>
     <string name="summary_full_range">Опитайте, ако черното е сиво или бялото е изгоряло.</string>
+    <string name="title_minimal_post_processing">Игрови режим на телевизора (препоръчително)</string>
+    <string name="summary_minimal_post_processing">Иска от телевизора минимална обработка на образа. Изключете, ако видеото над 1080p е повредено.</string>
+    <string name="title_tv_compositor_layer">Втори слой над видеото (само ако телевизорът замръзва)</string>
+    <string name="summary_tv_compositor_layer">Опитайте, ако телевизорът замръзва при излизане от потока. Добавя 10–15 ms забавяне на образа.</string>
     <string name="title_prevent_packet_loss">Защита от загуба на пакети</string>
     <string name="summary_prevent_packet_loss">Допълнителна защита за мрежа, която губи пакети.</string>
     <string name="title_enable_perf_overlay">Статистика на екрана</string>

@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">Strøm i HDR når spillet og PC-en støtter det.</string>
     <string name="title_full_range">Fullt fargeområde</string>
     <string name="summary_full_range">Prøv dette hvis svart ser grått ut eller hvitt blir utbrent.</string>
+    <string name="title_minimal_post_processing">TV-ens spillmodus (anbefales)</string>
+    <string name="summary_minimal_post_processing">Ber TV-en om minimal bildebehandling. Slå av hvis video over 1080p blir ødelagt.</string>
+    <string name="title_tv_compositor_layer">Hold et ekstra lag over videoen (bare hvis TV-en fryser)</string>
+    <string name="summary_tv_compositor_layer">Prøv dette hvis TV-en fryser når du forlater strømmen. Gir 10–15 ms ekstra visningsforsinkelse.</string>
     <string name="title_prevent_packet_loss">Beskytt mot pakketap</string>
     <string name="summary_prevent_packet_loss">Ekstra beskyttelse for et nettverk som mister pakker.</string>
     <string name="title_enable_perf_overlay">Statistikk på skjermen</string>

@@ -184,6 +184,10 @@
     <string name="summary_enable_hdr">游戏和电脑支持时以 HDR 串流。</string>
     <string name="title_full_range">全范围视频</string>
     <string name="summary_full_range">黑色发灰或白色过曝时试试。</string>
+    <string name="title_minimal_post_processing">电视游戏模式（推荐）</string>
+    <string name="summary_minimal_post_processing">请求电视尽量少做画面处理。如果 1080p 以上的视频花屏，请关闭。</string>
+    <string name="title_tv_compositor_layer">在视频上方保留第二层（仅在电视卡死时）</string>
+    <string name="summary_tv_compositor_layer">退出串流时电视卡死可以试试。会增加 10–15 ms 显示延迟。</string>
     <string name="title_prevent_packet_loss">防止丢包</string>
     <string name="summary_prevent_packet_loss">为会丢包的网络提供额外保护。</string>
     <string name="title_enable_perf_overlay">屏幕统计信息</string>
