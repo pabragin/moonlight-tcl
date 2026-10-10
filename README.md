@@ -116,7 +116,7 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 > [!IMPORTANT]
 > **Does the TV still freeze or go black when you leave the stream? Turn on `Settings → Advanced → Keep a second layer above the
 > video (only if the TV freezes)`.** It keeps a tiny transparent surface above the video and removes the video before the stream
-> screen closes, so the firmware never has to rebuild the picture under a playing video. It costs 10–15 ms of display latency.
+> screen closes, so the firmware never has to rebuild the picture under a playing video. The picture gets slower.
 >
 > **Video above 1080p corrupted** (wrong crop, shifted image, green and blue bands at 4K)? **Turn off `Settings → Advanced → TV
 > game mode (recommended)`.** This happens on TCL TVs with a Realtek SoC, such as the Brazilian C6K.
@@ -230,7 +230,7 @@ so none are used.
 
 - The whole-TV freezes of the first builds (volume bar, app switch, stream exit) do not reproduce on firmware V655 and later. For
   TVs where the exit freeze still happens, `Settings → Advanced → Keep a second layer above the video` keeps a 2×2 px surface above
-  the video and removes the video layer before leaving the stream, at 10–15 ms of display latency. The "volume change after an
+  the video and removes the video layer before leaving the stream; the picture gets slower with it. The "volume change after an
   hour freezes the screen and the app dies" symptom was the rumble crash all along.
 - Fixed a Settings-screen crash inherited from Artemis and a crash on oversized frames at high bitrates.
 - Frame-loss recovery as in upstream Moonlight since September 2026: no speculative loss reports while reference-frame
@@ -527,7 +527,7 @@ USB-адаптер на гигабит телевизор подхватывае
 > [!IMPORTANT]
 > **Телевизор всё ещё зависает или гаснет при выходе из стрима? Включите `Настройки → Дополнительно → Второй слой поверх видео
 > (только при зависаниях)`.** Над видео держится крошечная прозрачная поверхность, а при выходе видео убирается до закрытия экрана
-> стрима, и прошивке не приходится перестраивать картинку под идущим видео. Цена — 10–15 мс задержки картинки.
+> стрима, и прошивке не приходится перестраивать картинку под идущим видео. Картинка при этом медленнее.
 >
 > **Видео выше 1080p искажено** (неверная обрезка, сдвинутая картинка, зелёные и синие полосы в 4K)? **Выключите `Настройки →
 > Дополнительно → Игровой режим телевизора (рекомендуется)`.** Так бывает на TCL с процессором Realtek, например бразильском C6K.
