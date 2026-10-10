@@ -187,7 +187,7 @@
     <string name="title_minimal_post_processing">Игрови режим на телевизора (препоръчително)</string>
     <string name="summary_minimal_post_processing">Иска от телевизора минимална обработка на образа. Изключете, ако видеото над 1080p е повредено.</string>
     <string name="title_tv_compositor_layer">Втори слой над видеото (само ако телевизорът замръзва)</string>
-    <string name="summary_tv_compositor_layer">Опитайте, ако телевизорът замръзва при излизане от потока. Добавя 10–15 ms забавяне на образа.</string>
+    <string name="summary_tv_compositor_layer">Опитайте, ако телевизорът замръзва при излизане от потока. Образът става по-бавен.</string>
     <string name="title_prevent_packet_loss">Защита от загуба на пакети</string>
     <string name="summary_prevent_packet_loss">Допълнителна защита за мрежа, която губи пакети.</string>
     <string name="title_enable_perf_overlay">Статистика на екрана</string>

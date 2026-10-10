@@ -187,7 +187,7 @@
     <string name="title_minimal_post_processing">Tryb gry telewizora (zalecane)</string>
     <string name="summary_minimal_post_processing">Prosi telewizor o minimalne przetwarzanie obrazu. Wyłącz, jeśli obraz powyżej 1080p jest uszkodzony.</string>
     <string name="title_tv_compositor_layer">Druga warstwa nad obrazem (tylko gdy telewizor się zawiesza)</string>
-    <string name="summary_tv_compositor_layer">Spróbuj, jeśli telewizor zawiesza się po wyjściu ze streamu. Dodaje 10–15 ms opóźnienia obrazu.</string>
+    <string name="summary_tv_compositor_layer">Spróbuj, jeśli telewizor zawiesza się po wyjściu ze streamu. Obraz będzie wolniejszy.</string>
     <string name="title_prevent_packet_loss">Ochrona przed utratą pakietów</string>
     <string name="summary_prevent_packet_loss">Dodatkowa ochrona dla sieci, która gubi pakiety.</string>
     <string name="title_enable_perf_overlay">Statystyki na ekranie</string>
