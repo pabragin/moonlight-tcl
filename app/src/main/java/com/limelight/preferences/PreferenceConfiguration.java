@@ -157,8 +157,10 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_ENABLE_AUDIO_FX = false;
     private static final boolean DEFAULT_REDUCE_REFRESH_RATE = false;
     private static final boolean DEFAULT_FULL_RANGE = false;
-    private static final boolean DEFAULT_MINIMAL_POST_PROCESSING = true;
-    private static final boolean DEFAULT_TV_COMPOSITOR_LAYER = false;
+    // Off by default only on TCL G15 firmware older than V048.000462 (see isTclG15WithCorruptGameMode())
+    private static final boolean DEFAULT_MINIMAL_POST_PROCESSING = !isTclG15WithCorruptGameMode();
+    // On by default only on TCL's North American firmware branch (see isTclNorthAmericaPlatform())
+    private static final boolean DEFAULT_TV_COMPOSITOR_LAYER = isTclNorthAmericaPlatform();
     private static final boolean DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE = false;
     private static final boolean DEFAULT_GAMEPAD_MOTION_SENSORS = true;
     // On: Bluetooth pads rumble through the Bluetooth stack (BluetoothHidRumble), which never touches
@@ -465,6 +467,44 @@ public class PreferenceConfiguration {
         }
 
         return (int)Math.round(resolutionFactor * frameRateFactor) * 1000;
+    }
+
+    // TCL's North American Pentonic 700 models (QM8K, QM7K, Q77K, QM6K, 2024 QM8/QM7) run their own
+    // firmware branch, T653T02 ("V8-0012T02-LF1V321"), not the T653T01 branch that fixed the freeze
+    // on leaving the stream in V655. Their owners report that freeze, so the second layer starts on.
+    public static boolean isTclNorthAmericaPlatform() {
+        String sw = tclSoftwareVersion();
+        return sw.contains("T653T02") || sw.contains("0012T02");
+    }
+
+    // TCL's G15 platform (Realtek RTD2881, board rtd6748: C6K in Brazil and Asia-Pacific, P8K, P8L,
+    // A400M) corrupted video above 1080p in game mode until firmware V8-0016T01-LF1V048.000462.
+    // A G15 set whose version can't be parsed is treated as old.
+    public static boolean isTclG15WithCorruptGameMode() {
+        String sw = tclSoftwareVersion();
+        boolean g15 = sw.contains("0016T01") || sw.contains("6748")
+                || Build.HARDWARE.contains("6748") || Build.BOARD.contains("6748");
+        if (!g15) {
+            return false;
+        }
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("LF1V(\\d+)(?:\\.(\\d+))?").matcher(sw);
+        if (!m.find()) {
+            return true;
+        }
+        int major = Integer.parseInt(m.group(1));
+        long build = m.group(2) != null ? Long.parseLong(m.group(2)) : Long.MAX_VALUE;
+        return major < 48 || (major == 48 && build < 462);
+    }
+
+    // TCL firmware version, e.g. "V8-T653T01-LF1V667"; empty when unreadable
+    private static String tclSoftwareVersion() {
+        try {
+            Class<?> sp = Class.forName("android.os.SystemProperties");
+            Object value = sp.getMethod("get", String.class).invoke(null, "persist.software.version_id");
+            return value != null ? value.toString() : "";
+        } catch (Throwable t) {
+            return "";
+        }
     }
 
     public static int getDefaultBitrate(Context context) {
