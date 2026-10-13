@@ -159,8 +159,8 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_FULL_RANGE = false;
     // Off by default only on TCL G15 firmware older than V048.000462 (see isTclG15WithCorruptGameMode())
     private static final boolean DEFAULT_MINIMAL_POST_PROCESSING = !isTclG15WithCorruptGameMode();
-    // On by default only on TCL's North American firmware branch (see isTclNorthAmericaPlatform())
-    private static final boolean DEFAULT_TV_COMPOSITOR_LAYER = isTclNorthAmericaPlatform();
+    // On by default only on TCL firmware that freezes on exit (see isTclFirmwareWithExitFreeze())
+    private static final boolean DEFAULT_TV_COMPOSITOR_LAYER = isTclFirmwareWithExitFreeze();
     private static final boolean DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE = false;
     private static final boolean DEFAULT_GAMEPAD_MOTION_SENSORS = true;
     // On: Bluetooth pads rumble through the Bluetooth stack (BluetoothHidRumble), which never touches
@@ -469,12 +469,21 @@ public class PreferenceConfiguration {
         return (int)Math.round(resolutionFactor * frameRateFactor) * 1000;
     }
 
-    // TCL's North American Pentonic 700 models (QM8K, QM7K, Q77K, QM6K, 2024 QM8/QM7) run their own
-    // firmware branch, T653T02 ("V8-0012T02-LF1V321"), not the T653T01 branch that fixed the freeze
-    // on leaving the stream in V655. Their owners report that freeze, so the second layer starts on.
-    public static boolean isTclNorthAmericaPlatform() {
+    // TCL Pentonic 700 firmware that freezes the TV when leaving the stream:
+    // - the T653T01 branch (C6K-C8K, X11K, C955...: "V8-T653T01-LF1V643") before V655, which fixed it;
+    // - the North American T653T02 branch (QM8K, QM7K, Q77K, QM6K, 2024 QM8/QM7: "V8-0012T02-LF1V321"),
+    //   numbered separately and with no known fix.
+    // The second layer starts on there.
+    public static boolean isTclFirmwareWithExitFreeze() {
         String sw = tclSoftwareVersion();
-        return sw.contains("T653T02") || sw.contains("0012T02");
+        if (sw.contains("T653T02") || sw.contains("0012T02")) {
+            return true;
+        }
+        if (sw.contains("T653T01") || sw.contains("0012T01")) {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("LF1V(\\d+)").matcher(sw);
+            return m.find() && Integer.parseInt(m.group(1)) < 655;
+        }
+        return false;
     }
 
     // TCL's G15 platform (Realtek RTD2881, board rtd6748: C6K in Brazil and Asia-Pacific, P8K, P8L,
