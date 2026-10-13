@@ -52,8 +52,9 @@ Background: [moonlight-stream/moonlight-android#1533](https://github.com/moonlig
 <h3>🛡️ The TV never freezes or reboots</h3>
 TCL's Android 14 firmware has a race in its input service that gamepad rumble sets off: the service aborts, the TV shows the boot
 animation and every app restarts. Moonlight TCL sends rumble through the Bluetooth stack instead, so the pad shakes and the TV
-stays up. The whole-TV freezes of the first builds (volume bar, app switch, stream exit) no longer reproduce; the "volume change
-after an hour kills the screen" symptom was that same crash.
+stays up. The whole-TV freezes on stream exit or a menu over the video come from older TCL firmware; there Moonlight TCL keeps
+a second layer above the video by default, so they don't happen. The "volume change after an hour kills the screen" symptom was
+the rumble crash.
 </td>
 <td width="50%" valign="top">
 <h3>🐛 The inherited crashes are fixed</h3>
@@ -114,9 +115,14 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 | **Gamepad** | Any pad the TV sees. Rumble over Bluetooth is verified on Xbox pads; a pad on a USB cable goes through Moonlight's own USB driver. |
 
 > [!IMPORTANT]
-> **Does the TV still freeze or go black when you leave the stream? Turn on `Settings → Advanced → Keep a second layer above the
-> video (only if the TV freezes)`.** It keeps a tiny transparent surface above the video and removes the video before the stream
-> screen closes, so the firmware never has to rebuild the picture under a playing video. The picture gets slower.
+> **Does the TV freeze or go black when you leave the stream or open a menu over it? Update the TV firmware.** TCL fixed this in
+> **V655** (C6K, C7K, C8K, X11K and the rest of the `T653T01` / `0012T01` platform) and **V339** (North American QM8K, QM7K,
+> Q77K, QM6K: `0012T02`). Your version is in Settings → System → About → Software version.
+>
+> On older firmware Moonlight TCL turns on `Settings → Advanced → Keep a second layer above the video (only if the TV freezes)`
+> by default. It keeps a tiny transparent surface above the video and removes the video before the stream screen closes, so the
+> firmware never has to rebuild the picture under a playing video. The picture gets slower. If your TV freezes on firmware this
+> list doesn't cover, turn it on yourself.
 >
 > **Video above 1080p corrupted** (wrong crop, shifted image, green and blue bands at 4K)? **Turn off `Settings → Advanced → TV
 > game mode (recommended)`.** This happens on TCL TVs with a Realtek SoC, such as the Brazilian C6K.
@@ -228,10 +234,20 @@ so none are used.
 <details>
 <summary><b>Stability</b>: what was fixed and what is left out</summary>
 
-- The whole-TV freezes of the first builds (volume bar, app switch, stream exit) do not reproduce on firmware V655 and later. For
-  TVs where the exit freeze still happens, `Settings → Advanced → Keep a second layer above the video` keeps a 2×2 px surface above
-  the video and removes the video layer before leaving the stream; the picture gets slower with it. The "volume change after an
-  hour freezes the screen and the app dies" symptom was the rumble crash all along.
+- The whole-TV freeze (volume bar, menu, app switch or stream exit over a playing video) is a bug in MediaTek's display composer.
+  While the video is the only layer on screen, the panel runs in a mode synchronized to the video frames. When a second layer
+  appears or the video goes away, that mode changes, the composer's vsync thread waits for a vblank that never comes, and
+  SurfaceFlinger stalls with it. Comparing the firmware images shows the fix: a timeout on that wait with a software vsync
+  fallback, handling of the frame-sync mode change, and separate video and graphics commits in the kernel display driver.
+
+  | Platform | Models | Freezes | Fixed in |
+  |---|---|---|---|
+  | `T653T01` / `0012T01` | C6K, C7K, C8K, X11K, C955 and similar | Android 14 builds up to V643 | **V655** |
+  | `T653T02` / `0012T02` | QM8K, QM7K, Q77K, QM6K, 2024 QM8/QM7 (North America) | Android 14 builds up to V333 | **V339** |
+
+  Below those versions `Settings → Advanced → Keep a second layer above the video` is on by default: a 2×2 px surface stays above
+  the video, so the sync mode never changes, and the video layer is removed before leaving the stream. The picture gets slower
+  with it. The "volume change after an hour freezes the screen and the app dies" symptom was the rumble crash.
 - Fixed a Settings-screen crash inherited from Artemis and a crash on oversized frames at high bitrates.
 - Frame-loss recovery as in upstream Moonlight since September 2026: no speculative loss reports while reference-frame
   invalidation is off (one lost packet could drop up to 120 consecutive frames), a partially dropped IDR frame is handled

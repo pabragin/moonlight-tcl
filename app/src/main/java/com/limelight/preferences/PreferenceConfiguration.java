@@ -469,21 +469,23 @@ public class PreferenceConfiguration {
         return (int)Math.round(resolutionFactor * frameRateFactor) * 1000;
     }
 
-    // TCL Pentonic 700 firmware that freezes the TV when leaving the stream:
-    // - the T653T01 branch (C6K-C8K, X11K, C955...: "V8-T653T01-LF1V643") before V655, which fixed it;
-    // - the North American T653T02 branch (QM8K, QM7K, Q77K, QM6K, 2024 QM8/QM7: "V8-0012T02-LF1V321"),
-    //   numbered separately and with no known fix.
-    // The second layer starts on there.
+    // TCL Pentonic 700 firmware that freezes the TV when leaving the stream or opening a menu over it.
+    // MediaTek fixed it in the composer (vsync-wait timeout, frame-sync mode change handling) in
+    // T653T01 V655 ("V8-T653T01-LF1V655": C6K-C8K, X11K, C955...) and in the North American branch
+    // T653T02 V339 ("V8-0012T02-LF1V339": QM8K, QM7K, Q77K, QM6K, 2024 QM8/QM7), numbered separately.
+    // The second layer starts on below those versions; an unparseable version counts as old.
     public static boolean isTclFirmwareWithExitFreeze() {
         String sw = tclSoftwareVersion();
+        int fixedIn;
         if (sw.contains("T653T02") || sw.contains("0012T02")) {
-            return true;
+            fixedIn = 339;
+        } else if (sw.contains("T653T01") || sw.contains("0012T01")) {
+            fixedIn = 655;
+        } else {
+            return false;
         }
-        if (sw.contains("T653T01") || sw.contains("0012T01")) {
-            java.util.regex.Matcher m = java.util.regex.Pattern.compile("LF1V(\\d+)").matcher(sw);
-            return m.find() && Integer.parseInt(m.group(1)) < 655;
-        }
-        return false;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("LF1V(\\d+)").matcher(sw);
+        return !m.find() || Integer.parseInt(m.group(1)) < fixedIn;
     }
 
     // TCL's G15 platform (Realtek RTD2881, board rtd6748: C6K in Brazil and Asia-Pacific, P8K, P8L,
