@@ -117,7 +117,7 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 > [!IMPORTANT]
 > **Does the TV freeze or go black when you leave the stream or open a menu over it? Update the TV firmware.** TCL fixed this in
 > **V655** (C6K, C7K, C8K, X11K and the rest of the `T653T01` / `0012T01` platform) and **V339** (North American QM8K, QM7K,
-> Q77K, QM6K: `0012T02`). Your version is in Settings → System → About → Software version.
+> Q77K, QM6K: `0012T02`). To see your version, open the **TV's own settings** (not Moonlight's): Settings → System → About → Software version.
 >
 > On older firmware Moonlight TCL turns on `Settings → Advanced → Keep a second layer above the video (only if the TV freezes)`
 > by default. It keeps a tiny transparent surface above the video and removes the video before the stream screen closes, so the
