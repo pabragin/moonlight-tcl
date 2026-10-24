@@ -6,6 +6,8 @@
 No freezes, no reboots, no inherited crashes, and the lowest latency the TV's MediaTek chip can deliver:<br>
 4K HDR at a steady 60 frames per second, counted at the screen.</p>
 
+<p align="center"><b>English</b> · <a href="README.ru.md">Русский</a></p>
+
 <p align="center">
   <a href="https://github.com/pabragin/moonlight-tcl/releases/latest"><img src="https://img.shields.io/github/v/release/pabragin/moonlight-tcl?style=flat-square&label=release&color=E2231A" alt="Latest release"></a>
   <a href="https://github.com/pabragin/moonlight-tcl/releases/latest"><img src="https://img.shields.io/github/release-date/pabragin/moonlight-tcl?style=flat-square&label=updated&color=333333" alt="Release date"></a>
@@ -25,8 +27,7 @@ No freezes, no reboots, no inherited crashes, and the lowest latency the TV's Me
   <a href="#measured-not-promised">Numbers</a> ·
   <a href="#what-is-inside">Features</a> ·
   <a href="#set-up-the-tv">TV setup</a> ·
-  <a href="#building">Build</a> ·
-  <a href="#по-русски">По-русски</a>
+  <a href="#building">Build</a>
 </p>
 
 A build of [Artemis](https://github.com/ClassicOldSong/moonlight-android), the Moonlight Android fork, tuned for the MediaTek chip
@@ -60,7 +61,7 @@ the rumble crash.
 <h3>🐛 The inherited crashes are fixed</h3>
 The Settings screen that crashed on open in Artemis, the crash on oversized frames at high bitrates, and the frame-loss handling
 that could drop 120 frames in a row after one lost packet (three fixes from upstream moonlight-common-c) are all gone. The
-settings that could not change anything on a TV are gone too: 45 options in seven categories instead of 85 in ten.
+settings that could not change anything on a TV are gone too: 45 settings in seven categories instead of 85 in ten.
 </td>
 </tr>
 <tr>
@@ -104,7 +105,7 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 2. **Install** with a file manager, the Downloader app or `adb install`. A new version installs over any earlier Moonlight TCL build.
 3. **Pair**: open the app, choose your PC, type the PIN into Sunshine or Apollo. Coming from Artemis or Moonlight, pair again:
    pairings and settings are per app.
-4. **Play.** The defaults are already set for a 4K TV: 3840×2160, 60 FPS, HEVC, HDR on, 100 Mbps, lowest-latency pacing. When the
+4. **Play.** The defaults are already set for a 4K TV: 3840×2160, 60 FPS, HEVC, HDR on, 100 Mbps, frame delivery "Lowest latency". When the
    app asks once for the Nearby devices (Bluetooth) permission, say yes: that is what lets rumble reach Bluetooth gamepads.
 
 | | |
@@ -117,15 +118,18 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 > [!IMPORTANT]
 > **Does the TV freeze or go black when you leave the stream or open a menu over it? Update the TV firmware.** TCL fixed this in
 > **V655** (C6K, C7K, C8K, X11K and the rest of the `T653T01` / `0012T01` platform) and **V339** (North American QM8K, QM7K,
-> Q77K, QM6K: `0012T02`). To see your version, open the **TV's own settings** (not Moonlight's): Settings → System → About → Software version.
+> Q77K, QM6K: `0012T02`). To see your version, open the **TV's own settings** (not Moonlight's): Settings → System → About → Product Information, a line
+> like `V8-0012T01-LF1V667`.
 >
 > On older firmware Moonlight TCL turns on `Settings → Advanced → Keep a second layer above the video (only if the TV freezes)`
 > by default. It keeps a tiny transparent surface above the video and removes the video before the stream screen closes, so the
 > firmware never has to rebuild the picture under a playing video. The picture gets slower. If your TV freezes on firmware this
 > list doesn't cover, turn it on yourself.
 >
-> **Video above 1080p corrupted** (wrong crop, shifted image, green and blue bands at 4K)? **Turn off `Settings → Advanced → TV
-> game mode (recommended)`.** This happens on TCL TVs with a Realtek SoC, such as the Brazilian C6K.
+> **Video above 1080p corrupted** (wrong crop, shifted image, green and blue bands at 4K)? **Update the TV firmware.** TCL fixed
+> this in **V048.000462** for its Realtek platform G15 (`0016T01`: C6K in Brazil and Asia-Pacific, P8K, P8L, A400M). On older
+> firmware Moonlight TCL turns `Settings → Advanced → TV game mode (recommended)` off by default. If the picture is still
+> corrupted, or you changed that setting yourself before, turn it off by hand.
 
 If the TV still freezes or reboots, open an issue with `adb logcat -v threadtime -b all` captured around the moment, or after a
 reboot the output of `adb shell dumpsys dropbox --print system_server_native_crash`.
@@ -137,8 +141,8 @@ explained under the tables). The one game figure that was not measured under con
 
 ### Against the official Artemis 20.2.6
 
-Artemis 20.2.6 is the release this fork started from. Same TV, same PC, same settings: 4K60 HEVC HDR, 100 Mbps, lowest-latency
-pacing. The source is [`tools/framerate-test.html`](tools/framerate-test.html) in heavy mode on the PC, a page guaranteed to
+Artemis 20.2.6 is the release this fork started from. Same TV, same PC, same settings: 4K60 HEVC HDR, 100 Mbps, frame
+delivery "Lowest latency". The source is [`tools/framerate-test.html`](tools/framerate-test.html) in heavy mode on the PC, a page guaranteed to
 deliver 60 frames per second; the TV's compositor was asked every two seconds how many frames it had actually put on the screen.
 
 | Test page in heavy mode, 4K60 HDR, 100 Mbps | Artemis 20.2.6 | Moonlight TCL |
@@ -248,6 +252,9 @@ so none are used.
   Below those versions `Settings → Advanced → Keep a second layer above the video` is on by default: a 2×2 px surface stays above
   the video, so the sync mode never changes, and the video layer is removed before leaving the stream. The picture gets slower
   with it. The "volume change after an hour freezes the screen and the app dies" symptom was the rumble crash.
+- On TCL's Realtek platform G15 (`0016T01`) the TV's game mode corrupts video above 1080p on firmware before V048.000462, so
+  there `Settings → Advanced → TV game mode` is off by default. Firmware that can't be read counts as old. Both firmware-based
+  defaults apply only until you change the setting yourself.
 - Fixed a Settings-screen crash inherited from Artemis and a crash on oversized frames at high bitrates.
 - Frame-loss recovery as in upstream Moonlight since September 2026: no speculative loss reports while reference-frame
   invalidation is off (one lost packet could drop up to 120 consecutive frames), a partially dropped IDR frame is handled
@@ -268,7 +275,7 @@ so none are used.
 - The decoder is always asked for every low-latency option it accepts; the video threads run at display priority and are
   registered with Android's performance hints (ADPF); the app is declared a game.
 - The video is the only layer on screen, which keeps the TV's compositor on its fast path.
-- Defaults for a 4K TV: 3840×2160, 60 FPS, 100 Mbps, HEVC, HDR on, lowest-latency pacing.
+- Defaults for a 4K TV: 3840×2160, 60 FPS, 100 Mbps, HEVC, HDR on, frame delivery "Lowest latency".
 
 </details>
 
@@ -414,139 +421,3 @@ All streaming functionality is the work of the Moonlight and Artemis authors:
 projects. Moonlight started as a project of students at [Case Western](http://case.edu) at [MHacks](http://mhacks.org).
 
 Licensed under the GNU GPL v3, see [LICENSE.txt](LICENSE.txt).
-
----
-
-## По-русски
-
-<p align="center">
-  <a href="https://github.com/pabragin/moonlight-tcl/releases/latest"><img src="https://img.shields.io/badge/Скачать%20APK-последний%20релиз-E2231A?style=for-the-badge&logo=android&logoColor=white" alt="Скачать APK"></a>&nbsp;
-  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.limelight.tcl%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fpabragin%2Fmoonlight-tcl%22%2C%22author%22%3A%22pabragin%22%2C%22name%22%3A%22Moonlight%20TCL%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22armeabi-v7a%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%241%5C%22%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22v(.%2B)%5C%22%7D%22%7D"><img src="https://img.shields.io/badge/Obtainium-автообновления-1F1F1F?style=for-the-badge" alt="Добавить в Obtainium"></a>&nbsp;
-  <a href="https://github.com/pabragin/moonlight-tcl/releases"><img src="https://img.shields.io/badge/Что%20нового-заметки%20к%20релизам-444444?style=for-the-badge" alt="Заметки к релизам"></a>
-</p>
-
-Сборка [Artemis](https://github.com/ClassicOldSong/moonlight-android) для телевизоров TCL на прошивке Android 14 (C8K, C6K, QM6K,
-QM8K и похожие): без зависаний и перезагрузок телевизора, без унаследованных крашей и с минимальной задержкой, которую может дать
-чип MediaTek. Стримит игры и рабочий стол с [Sunshine](https://github.com/LizardByte/Sunshine) или
-[Apollo](https://github.com/ClassicOldSong/Apollo) на ПК. Приложение называется Moonlight TCL, пакет `com.limelight.tcl`, ставится
-рядом с обычным Artemis или Moonlight и не затирается их обновлениями; только Android 14 и `armeabi-v7a`, потому что на этих
-телевизорах другого нет. APK на странице [Releases](https://github.com/pabragin/moonlight-tcl/releases), обновления через
-Obtainium (приложение есть в его каталоге, а в самом приложении «Настройки → О программе → Обновления через Obtainium» открывает
-Obtainium напрямую). После установки спарьтесь с ПК заново: настройки и пары у каждого приложения свои. Все цифры сняты на TCL C8K.
-
-**Почему эта сборка**
-
-- **Телевизор не зависает и не перезагружается.** В прошивке Android 14 у системной службы ввода есть гонка, которую запускает
-  вибрация геймпада через системный стек: служба падает, телевизор показывает анимацию загрузки, и все приложения
-  перезапускаются (исправлено только в Android 15). Здесь вибрация идёт в обход: Bluetooth-геймпадам она отправляется через
-  собственный HID-хост Bluetooth-стека, по USB-кабелю через собственный драйвер Moonlight. Зависания всего телевизора из первых
-  сборок (полоса громкости, переключение приложений, выход из стрима) больше не воспроизводятся, а «через час меняешь громкость и
-  экран гаснет» было тем же самым падением.
-- **Унаследованные краши исправлены.** Экран настроек, который в Artemis падал при открытии; падение на слишком больших кадрах
-  при высоком битрейте; обработка потерь, из-за которой один потерянный пакет мог отбросить 120 кадров подряд (три исправления
-  из апстримного moonlight-common-c).
-- **Кратчайший путь до панели.** Кадры уходят на экран прямо из колбэка декодера, без промежуточного потока и блокировок; кадр
-  копируется один раз; декодеру всегда выставляются все опции низкой задержки; потоки видео с приоритетом экрана и подсказками
-  производительности Android; звук через нативный AAudio; видео единственный слой на экране, так что композитор идёт быстрым
-  путём. Собственная доля клиента в декодировании кадра меньше миллисекунды, остальное аппаратный декодер MediaTek.
-- **Все 60 кадров доходят до экрана.** Тот же телевизор, тот же стрим 4K60 HDR на 100 Мбит/с: у официального Artemis 20.2.6 все
-  60 кадров дошли до экрана в 0 из 48 замеров, здесь в 44 из 48, при загрузке процессора на треть меньше.
-- **Ничего лишнего.** APK 2,1 МБ со всеми языками против 12 МБ у Artemis 20.2.6, на телевизоре 2 МБ против 14, в памяти на
-  главном экране 32 МБ против 81 (Java-куча 2,5 МБ против 42; оба замера на одном телевизоре, без стрима). Без AndroidX,
-  Material и OkHttp: все экраны на виджетах самой системы и собственных View, хост опрашивается через HttpsURLConnection,
-  большая часть размера это нативная библиотека декодера и стриминга. Настроек 45 в семи категориях вместо 85 в десяти:
-  остались только те, что вообще могут что-то изменить на телевизоре.
-- **Сделано для телевизора и геймпада.** Один экран перед стримом, двухпанельные настройки, экранная клавиатура с диктовкой,
-  карточки геймпадов, интерфейс на 32 языках.
-
-**Что внутри**
-
-- **Интерфейс.** Один экран в стиле меню самого телевизора: ПК чипами в шапке с точкой статуса (зелёная в сети, серая не в
-  сети, замок без сопряжения), под ними постеры приложений выбранного ПК, в углу подключённые геймпады с зарядом, профиль и
-  настройки за круглыми кнопками. ПК не в сети, без сопряжения или ещё проверяемый показывает вместо сетки короткое сообщение и
-  уместные действия (разбудить, сопрячь, удалить). Долгое нажатие, Menu или Y на геймпаде открывают тёмную панель действий для
-  ПК или приложения. Настройки двухпанельные, как у телевизора: категории слева, пункты справа, переключатели щёлкают на месте,
-  выбор значений открывает панель, ползунки и текст — небольшой диалог; профиль настроек редактируется на том же экране с
-  пометкой изменённых пунктов. «Открыть настройки сервера» показывает веб-интерфейс Sunshine или Apollo во встроенном браузере:
-  сертификат ПК принимается, запрашивается логин, «назад» закрывает страницу. Интерфейс переведён на 32 языка полностью, для
-  арабского, иврита и фарси раскладка справа налево; приложение берёт язык телевизора или тот, что выбран для него в настройках
-  Android.
-- **Вибрация.** Включена по умолчанию, нужно разрешение «Устройства поблизости», которое приложение спрашивает один раз. Xbox
-  проверен на телевизоре; DualShock 4, DualSense, Switch Pro, Joy-Con, 8BitDo, Amazon Luna, Google Stadia, NVIDIA Shield 2017 и
-  GameSir 8K сделаны по исходникам драйверов Linux и SDL и ждут проверки на живых геймпадах; остальные Bluetooth-геймпады на этом
-  телевизоре не вибрируют, обратного переключения на системную службу нет, потому что именно она перезагружает телевизор.
-- **Карточки геймпадов.** При подключении, при низком заряде (20 %, потом 10 %) и при подключении кабеля показываются номер
-  игрока, имя из Bluetooth-настроек телевизора и заряд (игрок 1 слева внизу, игрок 2 справа); пока открыто меню игры, заряд всех
-  геймпадов стоит по углам, а в списках ПК и приложений подключённые геймпады показаны маленькими значками с батарейкой. Сам
-  телевизор заряд не отдаёт, поэтому уровень читается у геймпада по Bluetooth LE, а кабель у Xbox определяется по счётчику
-  подключений в его таблице статистики. Выключается в «Настройки → Геймпад → Карточки геймпадов».
-- **Экранная клавиатура.** Из меню игры: крестовина или левый стик двигают курсор, A нажимает, B закрывает, X — Backspace,
-  Y — пробел, LB/RB переключают латиницу, кириллицу и страницу функциональных клавиш, LT — Shift, RT — Enter; с пульта так же.
-  Латиница, цифры и служебные клавиши уходят на ПК как нажатия настоящей US-клавиатуры (символ определяет раскладка ПК, игры и
-  сочетания работают), русские буквы — как текст, независимо от раскладки ПК. Shift, Ctrl и Alt залипающие, Win открывает меню
-  «Пуск», на странице Fn есть F1–F12, Ins/Del/Home/End/PgUp/PgDn, PrtSc и готовые сочетания Alt+Tab, Alt+F4, Win+D, Win+R,
-  Win+Tab, Win+E, Ctrl+C/V/Z/A. Клавиша с микрофоном (или кнопка View) включает голосовой набор через распознавание речи самого
-  телевизора: по-русски на русской раскладке, на языке телевизора на остальных; текст приходит на ПК как набранный, при первом
-  использовании спрашивается доступ к микрофону.
-- **Инструменты.** Встроенный тест задержки («Настройки → Дополнительно → Режим теста задержки» плюс `tools/latency-test.html`
-  на ПК), отчёт о задержке после стрима («Настройки → Интерфейс»), тестовая страница `tools/framerate-test.html` с 60 кадрами в
-  секунду, на которой каждый пропущенный или задвоенный кадр виден без оверлея.
-
-**Сравнение с официальным Artemis 20.2.6** на том же телевизоре при одинаковых настройках 4K60 HDR, 100 Мбит/с. Исходники
-Artemis собраны как тот же пакет, поэтому у обоих клиентов одна пара с ПК и один файл настроек; они ставились друг поверх друга
-и мерялись подряд, по два раза каждый, в одной сессии хоста. Источник — `tools/framerate-test.html` в тяжёлом режиме, страница,
-которая гарантированно выдаёт 60 кадров в секунду; композитор телевизора каждые две секунды опрашивался, сколько кадров он
-реально вывел; оверлей статистики у обоих выключен, его отрисовка стоит композитору около 25 мс на кадр.
-
-| Тестовая страница, тяжёлый режим, 100 Мбит/с | Artemis 20.2.6 | Moonlight TCL |
-|---|---|---|
-| Замеров, где все 60 кадров в секунду дошли до экрана | **0 из 48**, везде 50–56 | **44 из 48**, остальные 57–59 |
-| Кадров в секунду из сети | 60 | 60 |
-| Время декодера на кадр | 14–15 мс | 14–15 мс |
-| Загрузка процессора (4 ядра) | 54–62 % | 38–41 % |
-
-При 200 Мбит/с, когда оба упираются в декодер, в более раннем прогоне 5 из 22 против 10 из 22. В игре разрыв был больше, 40–51
-кадр против ровных 60, но частота хоста там не записывалась, так что это только ориентир. Вибрация у Artemis идёт через
-системный стек, который перезагружает этот телевизор, а его экран настроек во время теста упал при открытии.
-
-**Что ещё влияет на цифры.** Примерно через час непрерывного 4K HDR декодер этого телевизора начал выдавать 45–50 кадров в
-секунду с любым клиентом, а после пятнадцати минут простоя вернулся к 60; все цифры сняты на отдохнувшем телевизоре. Фоновая
-нагрузка телевизора влияет не меньше клиента: в одной сессии кадры на экране шли волнами, около 40 в секунду по 20 секунд каждые
-полторы минуты, хотя из сети приходили все 60 и сокет ничего не терял. Причина: Google Assistant с распознаванием «Окей, Google»
-без пульта постоянно занимал четверть ядра, в памяти сидели браузер и настройки телевизора, ядро 250 раз в секунду
-останавливалось на освобождение памяти, SoC 78–80 °C. После отключения голосового управления без пульта и закрытия фоновых
-приложений тот же стрим держал 60 кадров в 86 % замеров вместо 48 %, а SoC стал на два градуса холоднее.
-
-**Какой битрейт ставить для 4K60 HDR**
-
-| Нужно | Ставьте | Что получите |
-|---|---|---|
-| По умолчанию | **100 Мбит/с** | Картинка практически без потерь, 60 кадров держатся почти во всех сценах. |
-| Плавность в любой сцене | 60 Мбит/с | 60 кадров везде, картинка чуть мягче. |
-| Максимум деталей | 120 Мбит/с | Тёмные HDR-сцены во всей красе, просадки до 40 кадров в самых тяжёлых моментах: запаса у декодера нет. |
-| Задержка важнее чёткости | 2560×1440 | Декодирование 7 мс вместо 13, до панели телевизор масштабирует сам. Оставайтесь на HEVC. |
-
-**Настройки телевизора.** Сначала сеть: подключить телевизор по кабелю через USB-адаптер Ethernet. По Wi-Fi задержка слишком
-велика, каждый переход стоит миллисекунд и плавает, а именно джиттер роняет кадры; по кабелю до ПК меньше миллисекунды.
-Встроенный порт телевизора только 100 Мбит/с, стрим на 100 Мбит/с со звуком и служебным трафиком в него не влезает, а
-USB-адаптер на гигабит телевизор подхватывает без драйверов и поднимает линк на 1000 Мбит/с; все цифры в этом README сняты на
-таком подключении. Дальше фон телевизора, он стоит кадров и градусов, поэтому: отключить голосовое управление без пульта
-(Настройки → Аккаунты и вход → аккаунт → Google Assistant → «Микрофон без рук» выкл.; кнопка микрофона на пульте продолжит
-работать); закрывать перед стримом браузер и другие фоновые приложения
-(Настройки → Приложения → приложение → Остановить); в параметрах разработчика, если они включены, убедиться, что «Не сохранять
-действия» выключено: это отладочная опция, памяти она не освобождает (процесс и его куча остаются), а только уничтожает экран,
-с которого ушли, и каждое возвращение собирает его заново с повторным опросом ПК и постеров; память освобождает «Лимит фоновых
-процессов», при желании «Без фоновых процессов» или «Не более 2»; и дать
-телевизору воздух сзади: после часа 4K HDR SoC держится на 76–82 °C, и прошивка сама режет декодер, а яркость панели меняет это
-всего на градус. Скриншоты меню на английском лежат в `docs/tv/`.
-
-> [!IMPORTANT]
-> **Телевизор всё ещё зависает или гаснет при выходе из стрима? Включите `Настройки → Дополнительно → Второй слой поверх видео
-> (только при зависаниях)`.** Над видео держится крошечная прозрачная поверхность, а при выходе видео убирается до закрытия экрана
-> стрима, и прошивке не приходится перестраивать картинку под идущим видео. Картинка при этом медленнее.
->
-> **Видео выше 1080p искажено** (неверная обрезка, сдвинутая картинка, зелёные и синие полосы в 4K)? **Выключите `Настройки →
-> Дополнительно → Игровой режим телевизора (рекомендуется)`.** Так бывает на TCL с процессором Realtek, например бразильском C6K.
-
-**Если телевизор всё равно завис или перезагрузился**, откройте issue с `adb logcat -v threadtime -b all`, снятым вокруг этого момента,
-или после перезагрузки с выводом `adb shell dumpsys dropbox --print system_server_native_crash`.
