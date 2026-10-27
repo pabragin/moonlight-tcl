@@ -364,7 +364,14 @@ public class ShortcutTrampoline extends Activity {
         String appUUID = null;
         String appIDStr = null;
 
-        if (Intent.ACTION_VIEW.equals(action) && dataUri != null) {
+        if (Intent.ACTION_VIEW.equals(action) && dataUri != null && "moonlight-tcl".equals(dataUri.getScheme())) {
+            // moonlight-tcl://stream?host=<PC name>&app=<app name>, also uuid= and appid=
+            hostUUID = dataUri.getQueryParameter("uuid");
+            hostName = dataUri.getQueryParameter("host");
+            appName = dataUri.getQueryParameter("app");
+            appIDStr = dataUri.getQueryParameter("appid");
+        }
+        else if (Intent.ACTION_VIEW.equals(action) && dataUri != null) {
             Map<String, String> artData = parseArtFileData(dataUri);
 
             if (artData != null) {

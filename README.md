@@ -27,6 +27,7 @@ No freezes, no reboots, no inherited crashes, and the lowest latency the TV's Me
   <a href="#measured-not-promised">Numbers</a> ·
   <a href="#what-is-inside">Features</a> ·
   <a href="#set-up-the-tv">TV setup</a> ·
+  <a href="#start-a-stream-from-home-assistant">Home Assistant</a> ·
   <a href="#building">Build</a>
 </p>
 
@@ -403,6 +404,27 @@ apps out of memory at the price of other apps restarting more often. Nothing els
 
 **Keep it cool.** After an hour of 4K HDR the SoC sits at 76–82 °C and the firmware trims the decoder. Lower panel brightness
 changed that by about a degree; airflow behind the TV matters more.
+
+## Start a stream from Home Assistant
+
+Moonlight TCL registers two links that anything able to start apps on the TV can open (Home Assistant's Android TV Remote,
+`adb`). They are not marked browsable, so a web page on the TV can't fire them.
+
+| Link | Does |
+|---|---|
+| `moonlight-tcl://open` | Opens the PC list. |
+| `moonlight-tcl://stream?host=<PC name>&app=<app name>` | Starts streaming that app. `host` must match the PC name exactly, `app` ignores case. `uuid=<PC uuid>` and `appid=<app id>` work instead of the names. |
+
+```yaml
+action: remote.turn_on
+target:
+  entity_id: remote.living_room_tv
+data:
+  activity: moonlight-tcl://stream?host=WIN-PC&app=Desktop
+```
+
+A stream link takes the same path as a launcher shortcut, so it shows the same error if the PC or app isn't found.
+The links come from [yuliwilliam/moonlight-tcl](https://github.com/yuliwilliam/moonlight-tcl).
 
 ## Building
 

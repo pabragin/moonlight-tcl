@@ -95,6 +95,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
+            <!-- moonlight-tcl://open, for launchers such as Home Assistant's Android TV Remote. Not BROWSABLE, so web
+                 pages can't fire it. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="moonlight-tcl" android:host="open" />
+            </intent-filter>
         </activity-alias>
         <activity-alias
             android:name=".AppView"
@@ -117,6 +124,13 @@
                 <data android:host="*" />
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\.art" />
+            </intent-filter>
+            <!-- moonlight-tcl://stream?host=<PC name>&app=<app name> (or uuid= / appid=) starts a stream. Not
+                 BROWSABLE, so web pages can't fire it. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="moonlight-tcl" android:host="stream" />
             </intent-filter>
         </activity>
         <activity
