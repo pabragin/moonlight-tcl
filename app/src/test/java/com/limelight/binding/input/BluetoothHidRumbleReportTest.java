@@ -26,6 +26,32 @@ public class BluetoothHidRumbleReportTest {
     private static final short ZERO = 0;
 
     @Test
+    public void ultimate24gMatchesPhysicallyVerifiedBluetoothReports() {
+        BluetoothHidRumble.ReportFormat format = BluetoothHidRumble.reportFormatFor(0x2dc8, 0x3012);
+        assertSame(BluetoothHidRumble.EIGHT_BIT_DO_ULTIMATE_24G, format);
+        // Captured and physically tested on an Ultimate 2.4G, D/Bluetooth, firmware 2.04.
+        assertEquals("A5DB6400", format.build((short) 0x6400, ZERO, ZERO, ZERO)); // large motor
+        assertEquals("A5DB0064", format.build(ZERO, (short) 0x6400, ZERO, ZERO)); // small motor
+        assertEquals("A5DBFF00", format.build(FULL, ZERO, ZERO, ZERO));
+        assertEquals("A5DB00FF", format.build(ZERO, FULL, ZERO, ZERO));
+        assertEquals("A5DB19FF", format.build((short) 0x1900, FULL, ZERO, ZERO)); // both, unequal
+        assertEquals("A5DBFFFF", format.build(FULL, FULL, ZERO, ZERO));
+        assertEquals("A5DB0000", format.build(ZERO, ZERO, FULL, FULL)); // stop; no trigger motors
+        assertFalse(format.hasTriggerMotors());
+        assertEquals(0, format.preludeFeatureReportId());
+        assertTrue(format.preludeReports().isEmpty());
+        assertEquals(0, format.refreshIntervalMs());
+    }
+
+    @Test
+    public void ultimate24gPreservesUnsignedMotorLevelsAcrossTheSignedBoundary() {
+        BluetoothHidRumble.ReportFormat format = BluetoothHidRumble.EIGHT_BIT_DO_ULTIMATE_24G;
+        assertEquals("A5DB7F80", format.build((short) 0x7FFF, (short) 0x8000, ZERO, ZERO));
+        assertEquals("A5DB0001", format.build((short) 0x00FF, (short) 0x0100, ZERO, ZERO));
+        assertEquals("A5DB0000", format.build(ZERO, ZERO, ZERO, ZERO));
+    }
+
+    @Test
     public void xboxReportMatchesTheVerifiedAutotestBytes() {
         assertEquals("030F00006464FF00FF", BluetoothHidRumble.buildXbox03(0x0F, 0, 0, 100, 100));
         assertEquals("030C64640000FF00FF", BluetoothHidRumble.buildXbox03(0x0C, 100, 100, 0, 0));

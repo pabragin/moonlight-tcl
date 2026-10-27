@@ -351,6 +351,26 @@ public final class BluetoothHidRumble {
     }
 
     /**
+     * Ultimate 2.4G in D-mode over Bluetooth (2dc8:3012), verified with controller firmware 2.04.
+     * A5 DB carries the large/low-frequency and small/high-frequency motor levels, 0..255 each.
+     * Unlike the other 8BitDo format, this needs no feature-report prelude. Six-second single-report
+     * pulses and zero-level stops were physically verified. The HID host adds the A2 framing.
+     */
+    public static final ReportFormat EIGHT_BIT_DO_ULTIMATE_24G = new ReportFormat() {
+        @Override
+        public String name() {
+            return "8bitdo-ultimate24g-a5db";
+        }
+
+        @Override
+        public String build(short lowFreqMotor, short highFreqMotor, short leftTriggerMotor, short rightTriggerMotor) {
+            byte[] report = {(byte) 0xA5, (byte) 0xDB,
+                    (byte) scaleByte(lowFreqMotor), (byte) scaleByte(highFreqMotor)};
+            return toHex(report);
+        }
+    };
+
+    /**
      * Amazon Luna Controller over Bluetooth (SDL_hidapi_luna): takes the Xbox output report 0x03, but has
      * no trigger motors. UNTESTED: written from SDL's source.
      */
@@ -493,6 +513,8 @@ public final class BluetoothHidRumble {
                 }
             case 0x2dc8: // 8BitDo
                 switch (productId) {
+                    case 0x3012: // Ultimate 2.4G, D-mode Bluetooth
+                        return EIGHT_BIT_DO_ULTIMATE_24G;
                     case 0x6000: // SF30 Pro
                     case 0x6100: // SF30 Pro, Bluetooth
                     case 0x6001: // SN30 Pro
