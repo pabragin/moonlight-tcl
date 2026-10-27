@@ -336,14 +336,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        Dialog.closeDialogs();
+        Dialog.closeDialogs(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         SpinnerDialog.closeDialogs(this);
-        Dialog.closeDialogs();
+        Dialog.closeDialogs(this);
         if (managerBinder != null) {
             unbindService(serviceConnection);
         }
@@ -1143,7 +1143,7 @@ public class MainActivity extends Activity {
                         Toast.makeText(this, getResources().getString(R.string.pcview_error_no_management_url), Toast.LENGTH_LONG).show();
                     }
                     else {
-                        HelpLauncher.launchTrustedUrl(this, url);
+                        HelpLauncher.launchTrustedUrl(this, url, computer.serverCert);
                     }
                 }));
             }
@@ -1256,7 +1256,7 @@ public class MainActivity extends Activity {
                 message = e.getMessage();
             }
 
-            Dialog.closeDialogs();
+            Dialog.closeDialogs(MainActivity.this);
 
             final String toastMessage = message;
             final boolean paired = success;

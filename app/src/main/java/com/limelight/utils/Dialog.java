@@ -1,6 +1,7 @@
 package com.limelight.utils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -50,6 +51,22 @@ public class Dialog implements Runnable {
             }
 
             rundownDialogs.clear();
+        }
+    }
+
+    /** Closes only the dialogs shown by this activity, so stopping one screen can't take another screen's dialog down. */
+    public static void closeDialogs(Activity activity)
+    {
+        synchronized (rundownDialogs) {
+            for (Iterator<Dialog> it = rundownDialogs.iterator(); it.hasNext(); ) {
+                Dialog d = it.next();
+                if (d.activity == activity) {
+                    if (d.alert != null && d.alert.isShowing()) {
+                        d.alert.dismiss();
+                    }
+                    it.remove();
+                }
+            }
         }
     }
 
