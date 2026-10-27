@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">센서: </string>
     <string name="debug_info_no_relevant_driver">없음 (해당 드라이버가 없거나 게임패드가 지원되지 않음)</string>
     <string name="debug_info_vibration">진동: </string>
+    <string name="debug_info_bt_hid_supported">Bluetooth HID로 지원 (%1$s)</string>
+    <string name="debug_info_android_details">Android에서 보고한 세부 정보 (Bluetooth HID 진동은 빠질 수 있음): </string>
     <string name="debug_info_supported">지원됨</string>
     <string name="debug_info_not_supported">지원되지 않음</string>
     <string name="debug_info_details">세부 정보: </string>

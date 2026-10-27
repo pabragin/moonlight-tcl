@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Érzékelők: </string>
     <string name="debug_info_no_relevant_driver">Nincs (nincs megfelelő illesztőprogram, vagy a kontroller nem támogatott)</string>
     <string name="debug_info_vibration">Rezgés: </string>
+    <string name="debug_info_bt_hid_supported">Támogatott Bluetooth HID-n keresztül (%1$s)</string>
+    <string name="debug_info_android_details">Az Android által jelentett részletek (a Bluetooth HID rezgés hiányozhat): </string>
     <string name="debug_info_supported">Támogatott</string>
     <string name="debug_info_not_supported">Nem támogatott</string>
     <string name="debug_info_details">Részletek: </string>

@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Sensoren: </string>
     <string name="debug_info_no_relevant_driver">Geen (geen passende driver of gamepad niet ondersteund)</string>
     <string name="debug_info_vibration">Trillen: </string>
+    <string name="debug_info_bt_hid_supported">Ondersteund via Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Details van Android (trillen via Bluetooth HID kan ontbreken): </string>
     <string name="debug_info_supported">Ondersteund</string>
     <string name="debug_info_not_supported">Niet ondersteund</string>
     <string name="debug_info_details">Details: </string>

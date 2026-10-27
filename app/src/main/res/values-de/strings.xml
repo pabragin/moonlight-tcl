@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Sensoren: </string>
     <string name="debug_info_no_relevant_driver">Keiner (kein passender Treiber oder Gamepad nicht unterstützt)</string>
     <string name="debug_info_vibration">Vibration: </string>
+    <string name="debug_info_bt_hid_supported">Über Bluetooth HID unterstützt (%1$s)</string>
+    <string name="debug_info_android_details">Von Android gemeldete Details (ohne Vibration über Bluetooth HID möglich): </string>
     <string name="debug_info_supported">Unterstützt</string>
     <string name="debug_info_not_supported">Nicht unterstützt</string>
     <string name="debug_info_details">Details: </string>

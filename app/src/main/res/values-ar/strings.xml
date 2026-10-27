@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">المستشعرات: </string>
     <string name="debug_info_no_relevant_driver">لا شيء (لا يوجد برنامج تشغيل مناسب أو يد التحكم غير مدعومة)</string>
     <string name="debug_info_vibration">الاهتزاز: </string>
+    <string name="debug_info_bt_hid_supported">مدعوم عبر Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">بيانات Android (قد لا تشمل اهتزاز Bluetooth HID): </string>
     <string name="debug_info_supported">مدعوم</string>
     <string name="debug_info_not_supported">غير مدعوم</string>
     <string name="debug_info_details">التفاصيل: </string>

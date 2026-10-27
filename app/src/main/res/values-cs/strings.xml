@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Senzory:</string>
     <string name="debug_info_no_relevant_driver">Žádný (chybí ovladač nebo gamepad není podporován)</string>
     <string name="debug_info_vibration">Vibrace:</string>
+    <string name="debug_info_bt_hid_supported">Podporováno přes Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Údaje systému Android (nemusí zahrnovat vibrace přes Bluetooth HID):</string>
     <string name="debug_info_supported">Podporováno</string>
     <string name="debug_info_not_supported">Nepodporováno</string>
     <string name="debug_info_details">Podrobnosti:</string>

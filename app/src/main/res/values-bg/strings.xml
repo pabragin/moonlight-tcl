@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Сензори:</string>
     <string name="debug_info_no_relevant_driver">Няма (няма драйвер или геймпадът не се поддържа)</string>
     <string name="debug_info_vibration">Вибрация:</string>
+    <string name="debug_info_bt_hid_supported">Поддържа се чрез Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Данни от Android (може да не включват вибрацията през Bluetooth HID):</string>
     <string name="debug_info_supported">Поддържа се</string>
     <string name="debug_info_not_supported">Не се поддържа</string>
     <string name="debug_info_details">Подробности:</string>

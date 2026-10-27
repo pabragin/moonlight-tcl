@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">传感器：</string>
     <string name="debug_info_no_relevant_driver">无（没有相关驱动或手柄不受支持）</string>
     <string name="debug_info_vibration">震动：</string>
+    <string name="debug_info_bt_hid_supported">通过 Bluetooth HID 支持 (%1$s)</string>
+    <string name="debug_info_android_details">Android 报告的详情（可能未包含 Bluetooth HID 震动）：</string>
     <string name="debug_info_supported">支持</string>
     <string name="debug_info_not_supported">不支持</string>
     <string name="debug_info_details">详情：</string>

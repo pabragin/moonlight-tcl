@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Sensores: </string>
     <string name="debug_info_no_relevant_driver">Ninguno (no hay controlador adecuado o el mando no es compatible)</string>
     <string name="debug_info_vibration">Vibración: </string>
+    <string name="debug_info_bt_hid_supported">Compatible mediante Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Detalles de Android (pueden omitir la vibración por Bluetooth HID): </string>
     <string name="debug_info_supported">Compatible</string>
     <string name="debug_info_not_supported">No compatible</string>
     <string name="debug_info_details">Detalles: </string>

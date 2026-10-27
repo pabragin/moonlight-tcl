@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">حسگرها: </string>
     <string name="debug_info_no_relevant_driver">هیچ (درایور مرتبطی نیست یا دسته پشتیبانی نمی‌شود)</string>
     <string name="debug_info_vibration">لرزش: </string>
+    <string name="debug_info_bt_hid_supported">پشتیبانی از طریق Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">جزئیات گزارش‌شده توسط Android (ممکن است لرزش Bluetooth HID را نشان ندهد): </string>
     <string name="debug_info_supported">پشتیبانی می‌شود</string>
     <string name="debug_info_not_supported">پشتیبانی نمی‌شود</string>
     <string name="debug_info_details">جزئیات: </string>

@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Czujniki:</string>
     <string name="debug_info_no_relevant_driver">Brak (brak sterownika lub pad nieobsługiwany)</string>
     <string name="debug_info_vibration">Wibracje:</string>
+    <string name="debug_info_bt_hid_supported">Obsługiwane przez Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Dane z Androida (mogą pomijać wibracje przez Bluetooth HID):</string>
     <string name="debug_info_supported">Obsługiwane</string>
     <string name="debug_info_not_supported">Nieobsługiwane</string>
     <string name="debug_info_details">Szczegóły:</string>

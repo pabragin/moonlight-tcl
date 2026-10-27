@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Sensorer: </string>
     <string name="debug_info_no_relevant_driver">Ingen (ingen relevant driver, eller gamepaden understøttes ikke)</string>
     <string name="debug_info_vibration">Vibration: </string>
+    <string name="debug_info_bt_hid_supported">Understøttet via Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Oplysninger fra Android (kan udelade vibration via Bluetooth HID): </string>
     <string name="debug_info_supported">Understøttet</string>
     <string name="debug_info_not_supported">Ikke understøttet</string>
     <string name="debug_info_details">Detaljer: </string>

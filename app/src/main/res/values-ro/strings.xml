@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Senzori: </string>
     <string name="debug_info_no_relevant_driver">Niciunul (fără driver potrivit sau gamepad nesuportat)</string>
     <string name="debug_info_vibration">Vibrație: </string>
+    <string name="debug_info_bt_hid_supported">Suportată prin Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Detalii raportate de Android (pot omite vibrația prin Bluetooth HID): </string>
     <string name="debug_info_supported">Suportat</string>
     <string name="debug_info_not_supported">Nesuportat</string>
     <string name="debug_info_details">Detalii: </string>

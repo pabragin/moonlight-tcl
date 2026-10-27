@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">センサー: </string>
     <string name="debug_info_no_relevant_driver">なし (対応ドライバーがないか、ゲームパッドが非対応)</string>
     <string name="debug_info_vibration">振動: </string>
+    <string name="debug_info_bt_hid_supported">Bluetooth HID で対応 (%1$s)</string>
+    <string name="debug_info_android_details">Android が報告する詳細 (Bluetooth HID の振動は含まれない場合があります): </string>
     <string name="debug_info_supported">対応</string>
     <string name="debug_info_not_supported">非対応</string>
     <string name="debug_info_details">詳細: </string>

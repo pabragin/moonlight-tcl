@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">सेंसर: </string>
     <string name="debug_info_no_relevant_driver">कोई नहीं (उपयुक्त ड्राइवर नहीं या गेमपैड समर्थित नहीं)</string>
     <string name="debug_info_vibration">वाइब्रेशन: </string>
+    <string name="debug_info_bt_hid_supported">Bluetooth HID के ज़रिए समर्थित (%1$s)</string>
+    <string name="debug_info_android_details">Android द्वारा दिए गए विवरण (Bluetooth HID वाइब्रेशन शामिल न हो सकता है): </string>
     <string name="debug_info_supported">समर्थित</string>
     <string name="debug_info_not_supported">समर्थित नहीं</string>
     <string name="debug_info_details">विवरण: </string>

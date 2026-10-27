@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">חיישנים: </string>
     <string name="debug_info_no_relevant_driver">אין (אין דרייבר מתאים או שהבקר לא נתמך)</string>
     <string name="debug_info_vibration">רטט: </string>
+    <string name="debug_info_bt_hid_supported">נתמך דרך Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">פרטים מ-Android (ייתכן שאינם כוללים רטט דרך Bluetooth HID): </string>
     <string name="debug_info_supported">נתמך</string>
     <string name="debug_info_not_supported">לא נתמך</string>
     <string name="debug_info_details">פרטים: </string>

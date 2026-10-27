@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Capteurs : </string>
     <string name="debug_info_no_relevant_driver">Aucun (pas de pilote adapté ou manette non prise en charge)</string>
     <string name="debug_info_vibration">Vibration : </string>
+    <string name="debug_info_bt_hid_supported">Pris en charge via Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Détails fournis par Android (peuvent omettre la vibration Bluetooth HID) : </string>
     <string name="debug_info_supported">Prise en charge</string>
     <string name="debug_info_not_supported">Non prise en charge</string>
     <string name="debug_info_details">Détails : </string>

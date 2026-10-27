@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Sensores: </string>
     <string name="debug_info_no_relevant_driver">Nenhum (sem driver adequado ou controle não suportado)</string>
     <string name="debug_info_vibration">Vibração: </string>
+    <string name="debug_info_bt_hid_supported">Compatível via Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Detalhes do Android (podem omitir a vibração via Bluetooth HID): </string>
     <string name="debug_info_supported">Suportado</string>
     <string name="debug_info_not_supported">Não suportado</string>
     <string name="debug_info_details">Detalhes: </string>

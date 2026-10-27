@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Cảm biến: </string>
     <string name="debug_info_no_relevant_driver">Không (không có driver phù hợp hoặc tay cầm không được hỗ trợ)</string>
     <string name="debug_info_vibration">Rung: </string>
+    <string name="debug_info_bt_hid_supported">Hỗ trợ qua Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Chi tiết do Android báo cáo (có thể thiếu rung qua Bluetooth HID): </string>
     <string name="debug_info_supported">Hỗ trợ</string>
     <string name="debug_info_not_supported">Không hỗ trợ</string>
     <string name="debug_info_details">Chi tiết: </string>

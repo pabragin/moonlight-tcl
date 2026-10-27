@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Anturit: </string>
     <string name="debug_info_no_relevant_driver">Ei mitään (ei sopivaa ajuria tai ohjainta ei tueta)</string>
     <string name="debug_info_vibration">Tärinä: </string>
+    <string name="debug_info_bt_hid_supported">Tuettu Bluetooth HID:n kautta (%1$s)</string>
+    <string name="debug_info_android_details">Androidin ilmoittamat tiedot (Bluetooth HID -tärinä voi puuttua): </string>
     <string name="debug_info_supported">Tuettu</string>
     <string name="debug_info_not_supported">Ei tuettu</string>
     <string name="debug_info_details">Tiedot: </string>
