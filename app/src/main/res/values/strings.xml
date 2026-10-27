@@ -417,6 +417,8 @@
     <string name="debug_info_no_relevant_driver">None (no relevant driver or gamepad not supported)</string>
     <string name="debug_info_vid_pid" translatable="false">VID_PID: </string>
     <string name="debug_info_vibration">Vibration: </string>
+    <string name="debug_info_bt_hid_supported">Supported over Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Android-reported details (may omit Bluetooth HID rumble): </string>
     <string name="debug_info_supported">Supported</string>
     <string name="debug_info_not_supported">Not Supported</string>
     <string name="debug_info_details">Details: </string>

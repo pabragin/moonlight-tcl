@@ -327,6 +327,8 @@
     <string name="debug_info_sensors">Αισθητήρες: </string>
     <string name="debug_info_no_relevant_driver">Κανένα (χωρίς κατάλληλο πρόγραμμα οδήγησης ή μη υποστηριζόμενο χειριστήριο)</string>
     <string name="debug_info_vibration">Δόνηση: </string>
+    <string name="debug_info_bt_hid_supported">Υποστηρίζεται μέσω Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Στοιχεία Android (ενδέχεται να μην αναφέρουν δόνηση Bluetooth HID): </string>
     <string name="debug_info_supported">Υποστηρίζεται</string>
     <string name="debug_info_not_supported">Δεν υποστηρίζεται</string>
     <string name="debug_info_details">Λεπτομέρειες: </string>

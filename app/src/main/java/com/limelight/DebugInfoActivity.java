@@ -301,9 +301,21 @@ public class DebugInfoActivity extends Activity implements View.OnClickListener 
                     sb.append(getString(R.string.debug_info_vid_pid) + dev.getVendorId() + "_" + dev.getProductId()
                             + "\t    [" + String.format("%04x", dev.getVendorId()) + "_" + String.format("%04x", dev.getProductId()) + "]");
                     sb.append("\n");
-                    sb.append(getString(R.string.debug_info_vibration) + (dev.getVibrator().hasVibrator() ? getString(R.string.debug_info_supported) : getString(R.string.debug_info_not_supported)));
+                    // InputDevice only describes the Android vibrator path. Known Bluetooth HID
+                    // protocols can provide rumble even when that system capability is absent.
+                    // This reports protocol support, not whether permission/proxy binding is ready.
+                    BluetoothHidRumble.ReportFormat rumbleFormat =
+                            BluetoothHidRumble.reportFormatFor(dev.getVendorId(), dev.getProductId());
+                    sb.append(getString(R.string.debug_info_vibration));
+                    if (rumbleFormat != null) {
+                        sb.append(getString(R.string.debug_info_bt_hid_supported, rumbleFormat.name()));
+                    } else {
+                        sb.append(getString(dev.getVibrator().hasVibrator() ?
+                                R.string.debug_info_supported : R.string.debug_info_not_supported));
+                    }
                     sb.append("\n");
-                    sb.append(getString(R.string.debug_info_details) + "\n");
+                    sb.append(getString(rumbleFormat != null ? R.string.debug_info_android_details :
+                            R.string.debug_info_details) + "\n");
                     sb.append(dev.toString());
                     sb.append("\n");
                 }
