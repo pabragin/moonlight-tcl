@@ -298,8 +298,8 @@ so none are used.
 - Moonlight TCL therefore sends rumble to Bluetooth gamepads through the Bluetooth stack's own HID host: the output report
   reaches the pad by the same Bluetooth path the kernel's force feedback would take, but `system_server` and its input reader
   are never involved. It needs the Nearby devices (Bluetooth) permission, which the app asks for once. Rumble is **on** by default.
-- Xbox pads are verified on the TV; DualShock 4, DualSense, Switch Pro and Joy-Con, 8BitDo, Amazon Luna, Google Stadia, NVIDIA
-  Shield 2017 and GameSir 8K pads are written from the Linux and SDL driver sources and still wait for someone with the hardware
+- Xbox pads are verified on the TV, the 8BitDo Ultimate 2.4G (Bluetooth D-mode) on a C7K; DualShock 4, DualSense, Switch Pro
+  and Joy-Con, other 8BitDo pads, Amazon Luna, Google Stadia, NVIDIA Shield 2017 and GameSir 8K pads are written from the Linux and SDL driver sources and still wait for someone with the hardware
   (an issue saying whether yours rumbles would settle it). Other Bluetooth pads stay silent on this TV: there is no switch back
   to the input service, because that path is what restarts the TV. A gamepad on a USB cable is driven by Moonlight's own USB
   driver and never touches the input stack either.

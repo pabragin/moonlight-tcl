@@ -349,6 +349,8 @@
     <string name="debug_info_sensors">Датчики:</string>
     <string name="debug_info_no_relevant_driver">Нет (нет драйвера или геймпад не поддерживается)</string>
     <string name="debug_info_vibration">Вибрация:</string>
+    <string name="debug_info_bt_hid_supported">Поддерживается через Bluetooth HID (%1$s)</string>
+    <string name="debug_info_android_details">Данные Android (могут не учитывать вибрацию через Bluetooth HID):</string>
     <string name="debug_info_supported">Поддерживается</string>
     <string name="debug_info_not_supported">Не поддерживается</string>
     <string name="debug_info_details">Детали:</string>
