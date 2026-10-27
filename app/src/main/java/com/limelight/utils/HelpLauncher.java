@@ -6,6 +6,9 @@ import android.net.Uri;
 
 import com.limelight.HelpActivity;
 
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+
 public class HelpLauncher {
     // "@<resId>" is how a string resource reference arrives from a raw XML attribute
     private static String resolveStringRef(Context context, String url) {
@@ -47,11 +50,18 @@ public class HelpLauncher {
         context.startActivity(i);
     }
 
-    /** The web UI of the user's own PC: its self-signed certificate is accepted by the in-app browser. */
-    public static void launchTrustedUrl(Context context, String url) {
+    /** The web UI of the user's own PC: the in-app browser accepts only the certificate it was paired with. */
+    public static void launchTrustedUrl(Context context, String url, X509Certificate serverCert) {
         Intent i = new Intent(context, HelpActivity.class);
         i.setData(Uri.parse(url));
         i.putExtra(HelpActivity.EXTRA_TRUST_HOST, true);
+        if (serverCert != null) {
+            try {
+                i.putExtra(HelpActivity.EXTRA_SERVER_CERT, serverCert.getEncoded());
+            } catch (CertificateEncodingException e) {
+                return;
+            }
+        }
         context.startActivity(i);
     }
 
