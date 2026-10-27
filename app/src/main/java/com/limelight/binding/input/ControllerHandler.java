@@ -669,6 +669,13 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             return true;
         }
 
+        // TCL firmware can expose an internal "virtual-search" gamepad alongside its IR receiver.
+        // Keep the receiver's Back key for navigation even when that gamepad has no Select key.
+        if (devName.equals("MTK Smart TV IR Receiver") &&
+                !hasJoystickAxes(dev) && !hasGamepadButtons(dev)) {
+            return true;
+        }
+
         // Otherwise, dynamically try to determine whether we should allow this
         // back button to function for navigation.
         //
