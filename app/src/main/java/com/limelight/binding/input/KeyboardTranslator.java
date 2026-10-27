@@ -51,7 +51,7 @@ public class KeyboardTranslator implements InputManager.InputDeviceListener {
     public static final int VK_SEMICOLON = 59;
     public static final int VK_SLASH = 47;
     public static final int VK_SPACE = 32;
-    public static final int VK_PRINTSCREEN = 154;
+    public static final int VK_SNAPSHOT = 0x2C; // Windows VK for PrintScreen (upstream PR #1618)
     public static final int VK_TAB = 9;
     public static final int VK_LEFT = 37;
     public static final int VK_RIGHT = 39;
@@ -344,7 +344,7 @@ public class KeyboardTranslator implements InputManager.InputDeviceListener {
                 
             case KeyEvent.KEYCODE_SYSRQ:
                 // Android defines this as SysRq/PrntScrn
-                translated = VK_PRINTSCREEN;
+                translated = VK_SNAPSHOT;
                 break;
                 
             case KeyEvent.KEYCODE_TAB:
