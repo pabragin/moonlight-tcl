@@ -1,0 +1,6 @@
+- Streaming core (moonlight-common-c) updated from upstream: gamepad packet use-after-free, RTSP parser and mouse batching fixes
+- Server web UI accepts only the certificate the PC was paired with
+- moonlight-tcl:// links open the app or start a stream from Home Assistant
+- Print Screen on a USB keyboard reaches the PC
+- Wired PowerA Xbox pads no longer hold Guide
+- Error for a missing PC or app no longer leaves an empty screen

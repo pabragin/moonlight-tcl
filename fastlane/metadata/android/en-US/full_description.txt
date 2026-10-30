@@ -1,37 +1,24 @@
-This app streams games, programs, or your full desktop from your PC or <a href="https://github.com/LizardByte/Sunshine">Sunshine</a> on your local network or the Internet. Mouse, keyboard, and controller input is sent from your Android device to the PC.
+<p>A build of Moonlight (via the Artemis fork) tuned for the MediaTek chip in <b>TCL Google TVs on Android 14 firmware</b>: C8K, C7K, C6K, QM6K, QM8K and similar. It streams games and the desktop from <a href="https://github.com/LizardByte/Sunshine">Sunshine</a> or <a href="https://github.com/ClassicOldSong/Apollo">Apollo</a> on your PC.</p>
 
-Streaming performance may vary based on your client device and network setup. HDR requires an HDR10-capable device, a GPU that can encode HEVC Main 10, and an HDR10-enabled game.
+<p><b>The TV never freezes or reboots.</b> TCL's Android 14 firmware crashes its input service when an app sends gamepad rumble: the TV shows the boot animation and every app restarts. Moonlight TCL sends rumble through the Bluetooth stack instead, so the pad shakes and the TV stays up. On older firmware that freezes when you leave the stream, it keeps a second layer above the video by default.</p>
 
-'''Features'''
-* Open-source and completely free (no ads, IAPs, or "Pro")
-* Streams games purchased from any store
-* Works on your home network or over the Internet/LTE
-* Up to 4K 120 FPS HDR streaming with 7.1 surround sound
-* H.264, HEVC, and AV1 codec support (AV1 requires Sunshine and a supported host GPU)
-* Keyboard and mouse support (best with Android 8.0 or later)
-* Stylus/S-Pen support
-* Supports PS3/4/5, Xbox 360/One/Series, and Android gamepads
-* Local co-op with up to 16 connected controllers (max of 4 controllers with GFE)
-* Force feedback and gamepad motion sensor support
-* Mouse control via gamepad by long-pressing Start
+<p><b>Every frame reaches the screen.</b> Same TV, same 4K60 HDR stream at 100 Mbps, counted at the TV's compositor: the official Artemis put all 60 frames on screen in 0 of 48 samples, Moonlight TCL in 44 of 48, with a third less CPU. Decoded frames go to the screen straight from the decoder's callback, and sound leaves through native AAudio.</p>
 
-'''Quick Setup Host Instructions for GeForce Experience (NVIDIA-only)'''
-# Make sure GeForce Experience is open on your PC. Turn on GameStream in the SHIELD settings page.
-# Tap on the PC in Moonlight and type the PIN on your PC
-# Start streaming!
+<p><b>Small and quick.</b> A 2 MB APK with all 32 languages, 32 MB of RAM on the main screen. The inherited crashes are fixed, and the settings that could not change anything on a TV are gone: 45 settings instead of 85.</p>
 
-'''Quick Setup Host Instructions for Sunshine (all GPUs)'''
-# Install Sunshine on your PC from https://github.com/LizardByte/Sunshine/releases
-# Navigate to the Sunshine Web UI on your PC for first-time setup
-# Tap on the PC in Moonlight and type the PIN in the Sunshine Web UI on your PC
-# Start streaming!
+<p><b>Made for the TV and the pad:</b></p>
+<ul>
+<li>PCs as chips, apps as posters, an action panel on Menu or Y, two-pane settings</li>
+<li>An on-screen keyboard with dictation, driven by the gamepad or the remote</li>
+<li>A card when a pad joins, runs low or goes on the charger</li>
+<li>Defaults set for a 4K TV: 3840×2160, 60 FPS, HEVC, HDR, 100 Mbps</li>
+<li><i>moonlight-tcl://</i> links to start a stream from Home Assistant</li>
+</ul>
 
-To have a good experience, you need a mid to high-end wireless router with a good wireless connection to your Android device (5 GHz highly recommended) and a good connection from your PC to your router (Ethernet highly recommended).
+<p>It installs as its own app (com.limelight.tcl) next to Moonlight or Artemis; pairings and settings are per app.</p>
 
-'''Detailed Setup Instructions'''
-See the full setup guide https://bit.ly/1skHFjN for:
-* Adding a PC manually (if your PC is not detected)
-* Streaming over the Internet or LTE
-* Using a controller connected directly to your PC
-* Streaming your full desktop
-* Adding custom apps to stream
+<p><b>Requirements:</b> a TCL Google TV on Android 14 (armeabi-v7a), and Sunshine or Apollo on the PC. HDR needs a GPU that encodes HEVC Main 10. Use Ethernet through a USB gigabit adapter: the TV's own port is 100 Mbps, and Wi-Fi adds latency and jitter.</p>
+
+<p>If the TV freezes or goes black when you leave the stream, update its firmware: TCL fixed that in V655 (T653T01 platform) and V339 (North American 0012T02).</p>
+
+<p>Source code, measurements and setup guide: <a href="https://github.com/pabragin/moonlight-tcl">github.com/pabragin/moonlight-tcl</a></p>
