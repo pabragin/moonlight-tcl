@@ -1,6 +1,8 @@
 package com.limelight.utils;
 
+import android.content.Context;
 import android.os.Build;
+import android.provider.Settings;
 
 public final class DeviceUtils {
 
@@ -41,5 +43,14 @@ public final class DeviceUtils {
             model = "";
         }
         return model;
+    }
+
+    /** The name the user gave the device in Android's settings, else the model: the host lists the client under it. */
+    public static String getDeviceName(Context context) {
+        String name = Settings.Global.getString(context.getContentResolver(), Settings.Global.DEVICE_NAME);
+        if (name != null && !name.trim().isEmpty()) {
+            return name.trim();
+        }
+        return getModel();
     }
 }

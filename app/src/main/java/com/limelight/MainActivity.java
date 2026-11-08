@@ -59,6 +59,7 @@ import com.limelight.profiles.ProfilesManager;
 import com.limelight.ui.GamepadStatusStrip;
 import com.limelight.ui.PanelMenu;
 import com.limelight.utils.CacheHelper;
+import com.limelight.utils.DeviceUtils;
 import com.limelight.utils.Dialog;
 import com.limelight.utils.HelpLauncher;
 import com.limelight.utils.ServerHelper;
@@ -1206,6 +1207,7 @@ public class MainActivity extends Activity {
                 httpConn = new NvHTTP(ServerHelper.getCurrentAddressFromComputer(computer),
                         computer.httpsPort, managerBinder.getUniqueId(), computer.serverCert,
                         PlatformBinding.getCryptoProvider(MainActivity.this));
+                httpConn.setDeviceName(DeviceUtils.getDeviceName(MainActivity.this));
                 if (httpConn.getPairState() == PairState.PAIRED) {
                     message = null;
                     success = true;

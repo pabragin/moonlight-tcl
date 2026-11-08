@@ -727,6 +727,11 @@ public class NvHTTP {
         return null;
     }
 
+    /** Name the host lists this client under; it is stored when pairing. */
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
     public PairingManager getPairingManager() {
         return pm;
     }
