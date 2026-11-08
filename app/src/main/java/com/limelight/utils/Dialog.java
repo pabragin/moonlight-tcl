@@ -41,19 +41,6 @@ public class Dialog implements Runnable {
         this.runOnDismiss = runOnDismiss;
     }
 
-    public static void closeDialogs()
-    {
-        synchronized (rundownDialogs) {
-            for (Dialog d : rundownDialogs) {
-                if (d.alert.isShowing()) {
-                    d.alert.dismiss();
-                }
-            }
-
-            rundownDialogs.clear();
-        }
-    }
-
     /** Closes only the dialogs shown by this activity, so stopping one screen can't take another screen's dialog down. */
     public static void closeDialogs(Activity activity)
     {

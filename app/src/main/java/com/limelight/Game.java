@@ -1086,7 +1086,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         super.onStop();
 
         SpinnerDialog.closeDialogs(this);
-        Dialog.closeDialogs();
+        Dialog.closeDialogs(this);
 
         if (conn != null) {
             int videoFormat = decoderRenderer.getActiveVideoFormat();
