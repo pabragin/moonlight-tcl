@@ -3,8 +3,10 @@ package com.limelight.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.widget.Toast;
 
 import com.limelight.HelpActivity;
+import com.limelight.R;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -59,6 +61,8 @@ public class HelpLauncher {
             try {
                 i.putExtra(HelpActivity.EXTRA_SERVER_CERT, serverCert.getEncoded());
             } catch (CertificateEncodingException e) {
+                // Without the paired certificate the web UI can't be checked, so it isn't opened at all
+                Toast.makeText(context, R.string.help_ssl_error, Toast.LENGTH_LONG).show();
                 return;
             }
         }
