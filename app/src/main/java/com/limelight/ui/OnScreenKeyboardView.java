@@ -29,10 +29,10 @@ import java.util.Locale;
  * activity draws its own.
  *
  * Three pages: a US QWERTY keyboard, a Russian ЙЦУКЕН one and a page of function keys and shortcuts.
- * Latin letters, digits, punctuation and the special keys go to the host as key presses, exactly like
- * a physical US keyboard plugged into the PC, so games and shortcuts see real keys and the host's own
- * layout decides the character. Cyrillic letters go as text, which types the same letter whatever
- * layout the host is in. Shift, Ctrl and Alt are sticky: one tap holds them for the next key, a second
+ * Every character key types the character on its keycap as text, whatever layout the host is in. With
+ * Ctrl or Alt held, a Latin letter, digit or punctuation key goes as a key press instead, like on a
+ * physical US keyboard, so shortcuts work; the special keys (Esc, Tab, Enter, arrows, F-keys) are
+ * always key presses. Shift, Ctrl and Alt are sticky: one tap holds them for the next key, a second
  * tap locks them, a third releases. Win is a plain key, so a tap opens the Start menu as on a real
  * keyboard; the Win shortcuts live on the Fn page.
  *
@@ -589,12 +589,14 @@ public final class OnScreenKeyboardView extends View {
     private void pressKey(Key key) {
         switch (key.kind) {
             case KIND_KEY:
-                if (key.shiftText != null && shiftActive()) {
-                    // A digit whose shifted symbol depends on the layout is typed as text instead
-                    sendText(key.shiftText);
+                if (key.special || shortcutModifierActive()) {
+                    sendKey(key.keyCode);
+                }
+                else if (shiftActive()) {
+                    sendText(key.shiftText != null ? key.shiftText : key.shiftLabel);
                 }
                 else {
-                    sendKey(key.keyCode);
+                    sendText(key.label);
                 }
                 flash(key);
                 break;
@@ -831,6 +833,11 @@ public final class OnScreenKeyboardView extends View {
 
     private boolean shiftActive() {
         return modState[MOD_SHIFT] != MOD_OFF;
+    }
+
+    /** Ctrl or Alt held: character keys go as key presses so the host sees a shortcut. */
+    private boolean shortcutModifierActive() {
+        return modState[MOD_CTRL] != MOD_OFF || modState[MOD_ALT] != MOD_OFF;
     }
 
     private byte modifierBits() {
@@ -1183,7 +1190,7 @@ public final class OnScreenKeyboardView extends View {
         return k;
     }
 
-    /** A letter: lower-case label, capital while Shift is active, always a key event. */
+    /** A letter: lower-case label, capital while Shift is active; typed as text, a key press under Ctrl/Alt. */
     private static Key letter(char c, int keyCode) {
         Key k = key(KIND_KEY, String.valueOf(c), 1f);
         k.shiftLabel = String.valueOf(c).toUpperCase(Locale.ROOT);
@@ -1191,7 +1198,7 @@ public final class OnScreenKeyboardView extends View {
         return k;
     }
 
-    /** A symbol key with its shifted symbol in the corner (US layout), always a key event. */
+    /** A symbol key with its shifted symbol in the corner (US layout); typed as text, a key press under Ctrl/Alt. */
     private static Key sym(String label, String shiftLabel, int keyCode) {
         Key k = key(KIND_KEY, label, 1f);
         k.shiftLabel = shiftLabel;
@@ -1200,7 +1207,7 @@ public final class OnScreenKeyboardView extends View {
         return k;
     }
 
-    /** A digit: key event unshifted; with Shift the Russian layout's symbol is typed as text. */
+    /** A digit on the Cyrillic page: Shift gives the Russian layout's symbol ("№" on 3). */
     private static Key digitRu(String label, String shiftSymbol, int keyCode) {
         Key k = sym(label, shiftSymbol, keyCode);
         k.shiftText = shiftSymbol;
