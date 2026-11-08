@@ -393,4 +393,8 @@
     <string name="save">Uložit</string>
     <string name="export_launcher_computer_details_incomplete">Nelze exportovat: údaje o počítači jsou neúplné.</string>
     <string name="export_launcher_app_details_incomplete">Nelze exportovat: údaje o aplikaci jsou neúplné.</string>
+    <string name="help_ssl_error">Certifikát tohoto webu není důvěryhodný</string>
+    <string name="help_auth_username">Uživatelské jméno</string>
+    <string name="help_auth_password">Heslo</string>
+    <string name="help_auth_title">Přihlášení k %1$s</string>
 </resources>

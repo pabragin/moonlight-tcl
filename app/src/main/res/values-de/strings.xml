@@ -393,4 +393,8 @@
     <string name="save">Speichern</string>
     <string name="export_launcher_computer_details_incomplete">Export nicht möglich: die Computerdaten sind unvollständig.</string>
     <string name="export_launcher_app_details_incomplete">Export nicht möglich: die App-Daten sind unvollständig.</string>
+    <string name="help_ssl_error">Das Zertifikat dieser Seite ist nicht vertrauenswürdig</string>
+    <string name="help_auth_username">Benutzername</string>
+    <string name="help_auth_password">Passwort</string>
+    <string name="help_auth_title">Bei %1$s anmelden</string>
 </resources>

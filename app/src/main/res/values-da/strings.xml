@@ -393,4 +393,8 @@
     <string name="save">Gem</string>
     <string name="export_launcher_computer_details_incomplete">Kan ikke eksportere: computeroplysningerne er ufuldstændige.</string>
     <string name="export_launcher_app_details_incomplete">Kan ikke eksportere: appoplysningerne er ufuldstændige.</string>
+    <string name="help_ssl_error">Dette websteds certifikat er ikke tillidsværdigt</string>
+    <string name="help_auth_username">Brugernavn</string>
+    <string name="help_auth_password">Adgangskode</string>
+    <string name="help_auth_title">Log ind på %1$s</string>
 </resources>

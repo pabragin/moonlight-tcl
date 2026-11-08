@@ -393,4 +393,8 @@
     <string name="save">Salvează</string>
     <string name="export_launcher_computer_details_incomplete">Nu se poate exporta: datele calculatorului sunt incomplete.</string>
     <string name="export_launcher_app_details_incomplete">Nu se poate exporta: datele aplicației sunt incomplete.</string>
+    <string name="help_ssl_error">Certificatul acestui site nu este de încredere</string>
+    <string name="help_auth_username">Nume de utilizator</string>
+    <string name="help_auth_password">Parolă</string>
+    <string name="help_auth_title">Conectare la %1$s</string>
 </resources>

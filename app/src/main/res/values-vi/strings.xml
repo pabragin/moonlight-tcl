@@ -393,4 +393,8 @@
     <string name="save">Lưu</string>
     <string name="export_launcher_computer_details_incomplete">Không thể xuất: thông tin máy tính chưa đầy đủ.</string>
     <string name="export_launcher_app_details_incomplete">Không thể xuất: thông tin ứng dụng chưa đầy đủ.</string>
+    <string name="help_ssl_error">Chứng chỉ của trang này không đáng tin cậy</string>
+    <string name="help_auth_username">Tên người dùng</string>
+    <string name="help_auth_password">Mật khẩu</string>
+    <string name="help_auth_title">Đăng nhập vào %1$s</string>
 </resources>

@@ -393,4 +393,8 @@
     <string name="save">Зберегти</string>
     <string name="export_launcher_computer_details_incomplete">Не вдалося експортувати: дані про комп\'ютер неповні.</string>
     <string name="export_launcher_app_details_incomplete">Не вдалося експортувати: дані про застосунок неповні.</string>
+    <string name="help_ssl_error">Сертифікат цього сайту не є надійним</string>
+    <string name="help_auth_username">Ім’я користувача</string>
+    <string name="help_auth_password">Пароль</string>
+    <string name="help_auth_title">Вхід до %1$s</string>
 </resources>

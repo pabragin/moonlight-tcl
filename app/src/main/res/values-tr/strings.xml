@@ -393,4 +393,8 @@
     <string name="save">Kaydet</string>
     <string name="export_launcher_computer_details_incomplete">Dışa aktarılamıyor: bilgisayar bilgileri eksik.</string>
     <string name="export_launcher_app_details_incomplete">Dışa aktarılamıyor: uygulama bilgileri eksik.</string>
+    <string name="help_ssl_error">Bu sitenin sertifikası güvenilir değil</string>
+    <string name="help_auth_username">Kullanıcı adı</string>
+    <string name="help_auth_password">Parola</string>
+    <string name="help_auth_title">%1$s oturumu aç</string>
 </resources>

@@ -393,4 +393,8 @@
     <string name="save">Mentés</string>
     <string name="export_launcher_computer_details_incomplete">Nem exportálható: a számítógép adatai hiányosak.</string>
     <string name="export_launcher_app_details_incomplete">Nem exportálható: az alkalmazás adatai hiányosak.</string>
+    <string name="help_ssl_error">A webhely tanúsítványa nem megbízható</string>
+    <string name="help_auth_username">Felhasználónév</string>
+    <string name="help_auth_password">Jelszó</string>
+    <string name="help_auth_title">Bejelentkezés: %1$s</string>
 </resources>

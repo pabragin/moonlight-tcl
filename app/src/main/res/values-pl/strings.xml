@@ -393,4 +393,8 @@
     <string name="save">Zapisz</string>
     <string name="export_launcher_computer_details_incomplete">Nie można eksportować: dane komputera są niekompletne.</string>
     <string name="export_launcher_app_details_incomplete">Nie można eksportować: dane aplikacji są niekompletne.</string>
+    <string name="help_ssl_error">Certyfikat tej witryny nie jest zaufany</string>
+    <string name="help_auth_username">Nazwa użytkownika</string>
+    <string name="help_auth_password">Hasło</string>
+    <string name="help_auth_title">Zaloguj się do %1$s</string>
 </resources>

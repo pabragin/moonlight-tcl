@@ -393,4 +393,8 @@
     <string name="save">Lagre</string>
     <string name="export_launcher_computer_details_incomplete">Kan ikke eksportere: opplysningene om datamaskinen er ufullstendige.</string>
     <string name="export_launcher_app_details_incomplete">Kan ikke eksportere: opplysningene om appen er ufullstendige.</string>
+    <string name="help_ssl_error">Sertifikatet til dette nettstedet er ikke klarert</string>
+    <string name="help_auth_username">Brukernavn</string>
+    <string name="help_auth_password">Passord</string>
+    <string name="help_auth_title">Logg på %1$s</string>
 </resources>

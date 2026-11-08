@@ -393,4 +393,8 @@
     <string name="save">저장</string>
     <string name="export_launcher_computer_details_incomplete">내보낼 수 없습니다: PC 정보가 불완전합니다.</string>
     <string name="export_launcher_app_details_incomplete">내보낼 수 없습니다: 앱 정보가 불완전합니다.</string>
+    <string name="help_ssl_error">이 사이트의 인증서를 신뢰할 수 없습니다</string>
+    <string name="help_auth_username">사용자 이름</string>
+    <string name="help_auth_password">비밀번호</string>
+    <string name="help_auth_title">%1$s에 로그인</string>
 </resources>

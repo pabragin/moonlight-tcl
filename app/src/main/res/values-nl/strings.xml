@@ -393,4 +393,8 @@
     <string name="save">Opslaan</string>
     <string name="export_launcher_computer_details_incomplete">Exporteren niet mogelijk: de computergegevens zijn onvolledig.</string>
     <string name="export_launcher_app_details_incomplete">Exporteren niet mogelijk: de appgegevens zijn onvolledig.</string>
+    <string name="help_ssl_error">Het certificaat van deze site wordt niet vertrouwd</string>
+    <string name="help_auth_username">Gebruikersnaam</string>
+    <string name="help_auth_password">Wachtwoord</string>
+    <string name="help_auth_title">Aanmelden bij %1$s</string>
 </resources>

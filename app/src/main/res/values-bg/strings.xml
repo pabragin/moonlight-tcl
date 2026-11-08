@@ -393,4 +393,8 @@
     <string name="save">Запази</string>
     <string name="export_launcher_computer_details_incomplete">Не може да се експортира: данните за компютъра са непълни.</string>
     <string name="export_launcher_app_details_incomplete">Не може да се експортира: данните за приложението са непълни.</string>
+    <string name="help_ssl_error">Сертификатът на този сайт не е надежден</string>
+    <string name="help_auth_username">Потребителско име</string>
+    <string name="help_auth_password">Парола</string>
+    <string name="help_auth_title">Вход в %1$s</string>
 </resources>

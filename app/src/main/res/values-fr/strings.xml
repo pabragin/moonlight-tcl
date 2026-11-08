@@ -393,4 +393,8 @@
     <string name="save">Enregistrer</string>
     <string name="export_launcher_computer_details_incomplete">Export impossible : les informations du PC sont incomplètes.</string>
     <string name="export_launcher_app_details_incomplete">Export impossible : les informations de l\'application sont incomplètes.</string>
+    <string name="help_ssl_error">Le certificat de ce site n’est pas approuvé</string>
+    <string name="help_auth_username">Nom d’utilisateur</string>
+    <string name="help_auth_password">Mot de passe</string>
+    <string name="help_auth_title">Connexion à %1$s</string>
 </resources>

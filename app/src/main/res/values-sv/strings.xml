@@ -393,4 +393,8 @@
     <string name="save">Spara</string>
     <string name="export_launcher_computer_details_incomplete">Kan inte exportera: datoruppgifterna är ofullständiga.</string>
     <string name="export_launcher_app_details_incomplete">Kan inte exportera: appuppgifterna är ofullständiga.</string>
+    <string name="help_ssl_error">Den här webbplatsens certifikat är inte betrott</string>
+    <string name="help_auth_username">Användarnamn</string>
+    <string name="help_auth_password">Lösenord</string>
+    <string name="help_auth_title">Logga in på %1$s</string>
 </resources>

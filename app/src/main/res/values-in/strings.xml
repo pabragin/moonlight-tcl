@@ -393,4 +393,8 @@
     <string name="save">Simpan</string>
     <string name="export_launcher_computer_details_incomplete">Tidak dapat mengekspor: detail komputer tidak lengkap.</string>
     <string name="export_launcher_app_details_incomplete">Tidak dapat mengekspor: detail aplikasi tidak lengkap.</string>
+    <string name="help_ssl_error">Sertifikat situs ini tidak tepercaya</string>
+    <string name="help_auth_username">Nama pengguna</string>
+    <string name="help_auth_password">Kata sandi</string>
+    <string name="help_auth_title">Masuk ke %1$s</string>
 </resources>

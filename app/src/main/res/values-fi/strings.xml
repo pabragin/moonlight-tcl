@@ -393,4 +393,8 @@
     <string name="save">Tallenna</string>
     <string name="export_launcher_computer_details_incomplete">Vienti ei onnistu: tietokoneen tiedot ovat puutteelliset.</string>
     <string name="export_launcher_app_details_incomplete">Vienti ei onnistu: sovelluksen tiedot ovat puutteelliset.</string>
+    <string name="help_ssl_error">Tämän sivuston varmenne ei ole luotettu</string>
+    <string name="help_auth_username">Käyttäjätunnus</string>
+    <string name="help_auth_password">Salasana</string>
+    <string name="help_auth_title">Kirjaudu: %1$s</string>
 </resources>

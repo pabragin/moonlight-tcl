@@ -393,4 +393,8 @@
     <string name="save">Salva</string>
     <string name="export_launcher_computer_details_incomplete">Impossibile esportare: i dati del computer sono incompleti.</string>
     <string name="export_launcher_app_details_incomplete">Impossibile esportare: i dati dell\'app sono incompleti.</string>
+    <string name="help_ssl_error">Il certificato di questo sito non è attendibile</string>
+    <string name="help_auth_username">Nome utente</string>
+    <string name="help_auth_password">Password</string>
+    <string name="help_auth_title">Accedi a %1$s</string>
 </resources>

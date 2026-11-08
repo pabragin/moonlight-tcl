@@ -393,4 +393,8 @@
     <string name="save">Αποθήκευση</string>
     <string name="export_launcher_computer_details_incomplete">Αδύνατη η εξαγωγή: τα στοιχεία του υπολογιστή είναι ελλιπή.</string>
     <string name="export_launcher_app_details_incomplete">Αδύνατη η εξαγωγή: τα στοιχεία της εφαρμογής είναι ελλιπή.</string>
+    <string name="help_ssl_error">Το πιστοποιητικό αυτού του ιστότοπου δεν είναι αξιόπιστο</string>
+    <string name="help_auth_username">Όνομα χρήστη</string>
+    <string name="help_auth_password">Κωδικός πρόσβασης</string>
+    <string name="help_auth_title">Σύνδεση στο %1$s</string>
 </resources>

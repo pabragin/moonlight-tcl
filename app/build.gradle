@@ -78,8 +78,7 @@ android {
     }
 
     androidResources {
-        // The languages with a (near) complete translation: ru and both Chinese variants cover ~90% of
-        // the strings, fr and vi ~77%, every other locale under half and falls back to English mid-screen.
+        // Every shipped locale translates all of res/values/strings.xml; a new string goes into each of them.
         // res/values/arrays.xml (language picker) lists the same set; add a locale in both places.
         localeFilters += ["en", "ar", "bg", "cs", "da", "de", "el", "es", "fa", "fi", "fr", "hi", "hu", "in", "it", "iw", "ja", "ko", "nb", "nl", "pl", "pt", "pt-rBR", "ro", "ru", "sv", "th", "tr", "uk", "vi", "zh-rCN", "zh-rTW"]
     }

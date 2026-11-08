@@ -393,4 +393,8 @@
     <string name="save">Guardar</string>
     <string name="export_launcher_computer_details_incomplete">No se puede exportar: los datos del equipo están incompletos.</string>
     <string name="export_launcher_app_details_incomplete">No se puede exportar: los datos de la aplicación están incompletos.</string>
+    <string name="help_ssl_error">El certificado de este sitio no es de confianza</string>
+    <string name="help_auth_username">Usuario</string>
+    <string name="help_auth_password">Contraseña</string>
+    <string name="help_auth_title">Iniciar sesión en %1$s</string>
 </resources>

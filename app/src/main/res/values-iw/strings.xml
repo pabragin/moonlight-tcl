@@ -393,4 +393,8 @@
     <string name="save">שמור</string>
     <string name="export_launcher_computer_details_incomplete">לא ניתן לייצא: פרטי המחשב חלקיים.</string>
     <string name="export_launcher_app_details_incomplete">לא ניתן לייצא: פרטי האפליקציה חלקיים.</string>
+    <string name="help_ssl_error">האישור של אתר זה אינו מהימן</string>
+    <string name="help_auth_username">שם משתמש</string>
+    <string name="help_auth_password">סיסמה</string>
+    <string name="help_auth_title">התחברות אל %1$s</string>
 </resources>

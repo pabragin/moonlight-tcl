@@ -393,4 +393,8 @@
     <string name="save">保存</string>
     <string name="export_launcher_computer_details_incomplete">エクスポートできません: PCの情報が不完全です。</string>
     <string name="export_launcher_app_details_incomplete">エクスポートできません: アプリの情報が不完全です。</string>
+    <string name="help_ssl_error">このサイトの証明書は信頼されていません</string>
+    <string name="help_auth_username">ユーザー名</string>
+    <string name="help_auth_password">パスワード</string>
+    <string name="help_auth_title">%1$s にサインイン</string>
 </resources>

@@ -393,4 +393,8 @@
     <string name="save">حفظ</string>
     <string name="export_launcher_computer_details_incomplete">تعذّر التصدير: بيانات الكمبيوتر غير مكتملة.</string>
     <string name="export_launcher_app_details_incomplete">تعذّر التصدير: بيانات التطبيق غير مكتملة.</string>
+    <string name="help_ssl_error">شهادة هذا الموقع غير موثوقة</string>
+    <string name="help_auth_username">اسم المستخدم</string>
+    <string name="help_auth_password">كلمة المرور</string>
+    <string name="help_auth_title">تسجيل الدخول إلى %1$s</string>
 </resources>

@@ -393,4 +393,8 @@
     <string name="save">सहेजें</string>
     <string name="export_launcher_computer_details_incomplete">निर्यात नहीं हो सकता: कंप्यूटर का विवरण अधूरा है।</string>
     <string name="export_launcher_app_details_incomplete">निर्यात नहीं हो सकता: ऐप का विवरण अधूरा है।</string>
+    <string name="help_ssl_error">इस साइट का प्रमाणपत्र विश्वसनीय नहीं है</string>
+    <string name="help_auth_username">उपयोगकर्ता नाम</string>
+    <string name="help_auth_password">पासवर्ड</string>
+    <string name="help_auth_title">%1$s में साइन इन करें</string>
 </resources>
