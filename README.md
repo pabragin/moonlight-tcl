@@ -118,9 +118,11 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 
 > [!IMPORTANT]
 > **Does the TV freeze or go black when you leave the stream or open a menu over it? Update the TV firmware.** TCL fixed this in
-> **V655** (C6K, C7K, C8K, X11K and the rest of the `T653T01` / `0012T01` platform) and **V339** (North American QM8K, QM7K,
+> **V655** (C6K, C7K, C8K, C805, X11K and the rest of the `T653T01` / `0012T01` platform) and **V339** (North American QM8K, QM7K,
 > Q77K, QM6K: `0012T02`). To see your version, open the **TV's own settings** (not Moonlight's): Settings → System → About → Product Information, a line
-> like `V8-0012T01-LF1V667`.
+> like `V8-0012T01-LF1V667`. If the TV doesn't offer the update itself, full OTA images are here:
+> [`T653T01` / `0012T01`](https://disk.yandex.ru/d/SE7SY4RPhqD7YA) (V655 or newer) and
+> [`0012T02`](https://disk.yandex.ru/d/8XcazPTVNxsyXw) (V339 or newer). Pick the one that matches the platform in your firmware line.
 >
 > On older firmware Moonlight TCL turns on `Settings → Advanced → Keep a second layer above the video (only if the TV freezes)`
 > by default. It keeps a tiny transparent surface above the video and removes the video before the stream screen closes, so the
@@ -247,7 +249,7 @@ so none are used.
 
   | Platform | Models | Freezes | Fixed in |
   |---|---|---|---|
-  | `T653T01` / `0012T01` | C6K, C7K, C8K, X11K, C955 and similar | Android 14 builds up to V643 | **V655** |
+  | `T653T01` / `0012T01` | C6K, C7K, C8K, C805, X11K, C955 and similar | Android 14 builds up to V643 | **V655** |
   | `T653T02` / `0012T02` | QM8K, QM7K, Q77K, QM6K, 2024 QM8/QM7 (North America) | Android 14 builds up to V333 | **V339** |
 
   Below those versions `Settings → Advanced → Keep a second layer above the video` is on by default: a 2×2 px surface stays above
