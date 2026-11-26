@@ -113,7 +113,7 @@ with dictation driven by the gamepad or the remote. A card when a pad joins, run
 |---|---|
 | **TV** | TCL Google TV on Android 14 firmware: C8K, C6K, QM6K, QM8K and similar. Android 14 and `armeabi-v7a` only. |
 | **PC** | [Sunshine](https://github.com/LizardByte/Sunshine) or [Apollo](https://github.com/ClassicOldSong/Apollo). HDR needs a GPU that encodes HEVC Main 10 and an HDR game. |
-| **Network** | Ethernet through a **USB gigabit adapter**. Wi-Fi adds milliseconds of latency and jitter; on Ethernet the hop to the PC is under a millisecond. The TV's own port is 100 Mbps, too small for a 100 Mbps stream. |
+| **Network** | A cable, not Wi-Fi. Best is Ethernet through a **USB gigabit adapter**: the hop to the PC is under a millisecond. The TV's own port is 100 Mbps, too small for a 100 Mbps stream; on it, keep the bitrate at 80 Mbps or lower. On Wi-Fi, turn off Wi-Fi scanning (see [Set up the TV](#set-up-the-tv)). |
 | **Gamepad** | Any pad the TV sees. Rumble over Bluetooth is verified on Xbox pads; a pad on a USB cable goes through Moonlight's own USB driver. |
 
 > [!IMPORTANT]
@@ -385,6 +385,14 @@ settings are worth a look; the screenshots are from firmware V655 with the menu 
 and the jitter is what drops frames. On Ethernet the TV reaches the PC in under a millisecond. The TV's built-in port is only
 100 Mbps, which does not carry a 100 Mbps stream with its audio and overhead; a USB gigabit Ethernet adapter does. The TV
 picks it up without drivers and the link negotiates 1000 Mbps. All the numbers in this README were measured on such a link.
+
+**No USB adapter? Use the built-in port anyway.** A 100 Mbps cable still beats Wi-Fi: the latency stays flat, it only caps the
+bitrate. Set 80 Mbps or lower in Moonlight TCL so the video, audio and overhead fit.
+
+**Wi-Fi only? Turn off Wi-Fi scanning.** Settings → Privacy → Location: turn off Location and the Wi-Fi scanning switch
+("Always allow scanning"). While it is on, the TV keeps leaving its channel to look for networks, and every trip shows up as a
+stall in the stream. On a user's TCL Q7D Pro on 5 GHz, ping spikes above 20 ms fell from 30 % of pings (up to 206 ms) to 3 %
+(up to 75 ms) once scanning was off. Use 5 GHz, a fixed channel (36–48) and a separate network name for it.
 
 **Turn off hands-free "Hey Google".** Settings → Accounts & Profiles → your account → Google Assistant → *Hands-free mic* off.
 With it on, the Assistant's hotword detector used a quarter of a CPU core the whole time the TV was on. The microphone button on
