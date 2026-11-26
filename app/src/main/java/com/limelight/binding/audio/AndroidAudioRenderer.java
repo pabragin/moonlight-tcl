@@ -100,11 +100,12 @@ public class AndroidAudioRenderer implements AudioRenderer {
         if (audioConfig == null) {
             return MoonBridge.AUDIO_CODEC_OPUS;
         }
+        // Stereo stays on Opus: a 32 ms Dolby frame only adds latency there
         int channels = audioConfig.channelCount;
-        if (channels != 2 && channels != 6 && channels != 8) {
+        if (channels != 6 && channels != 8) {
             return MoonBridge.AUDIO_CODEC_OPUS;
         }
-        int channelMask = channels >= 6 ? AudioFormat.CHANNEL_OUT_5POINT1 : AudioFormat.CHANNEL_OUT_STEREO;
+        int channelMask = AudioFormat.CHANNEL_OUT_5POINT1;
         int[] encodings = {AudioFormat.ENCODING_AC3, AudioFormat.ENCODING_E_AC3};
         int[] codecFlags = {MoonBridge.AUDIO_CODEC_AC3, MoonBridge.AUDIO_CODEC_EAC3};
         AudioAttributes gameAttrs = buildEncodedAttributes(true);

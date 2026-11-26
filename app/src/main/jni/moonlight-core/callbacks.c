@@ -359,7 +359,9 @@ int BridgeArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusCon
         if (err == 0) {
             NegotiatedEncodedFormat = androidEncoding;
             EncodedAudioBufferLength = 4096;
-            EncodedAudioBuffer = (*env)->NewGlobalRef(env, (*env)->NewByteArray(env, EncodedAudioBufferLength));
+            jbyteArray localBuffer = (*env)->NewByteArray(env, EncodedAudioBufferLength);
+            EncodedAudioBuffer = (*env)->NewGlobalRef(env, localBuffer);
+            (*env)->DeleteLocalRef(env, localBuffer);
         }
         return err;
     }

@@ -136,6 +136,10 @@ public class DolbyPassthroughAudioRendererTest {
         assertEquals(MoonBridge.AUDIO_CODEC_AC3 | MoonBridge.AUDIO_CODEC_EAC3,
                 AndroidAudioRenderer.probeSupportedDolbyCodecs(context, surround51));
 
+        // Stereo stays on Opus even when the sink takes Dolby
+        assertEquals(MoonBridge.AUDIO_CODEC_OPUS,
+                AndroidAudioRenderer.probeSupportedDolbyCodecs(context, new MoonBridge.AudioConfiguration(2, 0x3)));
+
         // LowLatencyAudioRenderer must decline Dolby when audio FX equalizer is enabled
         LowLatencyAudioRenderer fxRenderer = new LowLatencyAudioRenderer(context, true, true, 40);
         assertEquals(MoonBridge.AUDIO_CODEC_OPUS, fxRenderer.getSupportedDolbyCodecs(surround51));
