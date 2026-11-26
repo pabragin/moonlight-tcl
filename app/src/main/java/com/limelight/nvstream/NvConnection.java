@@ -426,6 +426,10 @@ public class NvConnection {
                 // we must not invoke that functionality in parallel.
                 synchronized (MoonBridge.class) {
                     MoonBridge.setupBridge(videoDecoderRenderer, audioRenderer, connectionListener);
+                    int supportedAudioCodecs = audioRenderer != null
+                            ? audioRenderer.getSupportedDolbyCodecs(context.streamConfig.getAudioConfiguration())
+                            : MoonBridge.AUDIO_CODEC_OPUS;
+                    MoonBridge.setSupportedAudioCodecs(supportedAudioCodecs);
                     int ret = MoonBridge.startConnection(context.serverAddress.address,
                             context.serverAppVersion, context.serverGfeVersion, context.rtspSessionUrl,
                             context.serverCodecModeSupport,

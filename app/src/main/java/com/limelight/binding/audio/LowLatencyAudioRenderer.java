@@ -28,6 +28,15 @@ public class LowLatencyAudioRenderer implements AudioRenderer {
     }
 
     @Override
+    public int getSupportedDolbyCodecs(MoonBridge.AudioConfiguration audioConfiguration) {
+        // Audio FX equalizers only apply to PCM AudioTrack sessions; decline Dolby so host falls back to Opus
+        if (enableAudioFx) {
+            return MoonBridge.AUDIO_CODEC_OPUS;
+        }
+        return AndroidAudioRenderer.probeSupportedDolbyCodecs(context, audioConfiguration);
+    }
+
+    @Override
     public int setup(MoonBridge.AudioConfiguration audioConfiguration, int sampleRate, int samplesPerFrame) {
         // The system equalizer needs an AudioTrack session, so AAudio only applies without audio FX
         if (preferAAudio && !enableAudioFx) {
@@ -42,6 +51,13 @@ public class LowLatencyAudioRenderer implements AudioRenderer {
         }
         fallback = new AndroidAudioRenderer(context, enableAudioFx, maxPendingMs);
         return fallback.setup(audioConfiguration, sampleRate, samplesPerFrame);
+    }
+
+    @Override
+    public int setupEncoded(MoonBridge.AudioConfiguration audioConfiguration, int sampleRate, int encoding) {
+        usingAAudio = false;
+        fallback = new AndroidAudioRenderer(context, enableAudioFx, maxPendingMs);
+        return fallback.setupEncoded(audioConfiguration, sampleRate, encoding);
     }
 
     @Override
@@ -71,6 +87,17 @@ public class LowLatencyAudioRenderer implements AudioRenderer {
         if (fallback != null) {
             fallback.playDecodedAudio(audioData);
         }
+    }
+
+    @Override
+    public void playEncodedAudio(byte[] audioData, int length, int encoding) {
+        if (fallback != null) {
+            fallback.playEncodedAudio(audioData, length, encoding);
+        }
+    }
+
+    AndroidAudioRenderer getFallbackRendererForTest() {
+        return fallback;
     }
 
     @Override

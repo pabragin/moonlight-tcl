@@ -1967,6 +1967,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     }
                     if (com.limelight.binding.audio.AAudioRenderer.isActive()) {
                         sb.append('\n').append(com.limelight.binding.audio.AAudioRenderer.perfLine(context));
+                    } else if (com.limelight.binding.audio.AndroidAudioRenderer.isActive()) {
+                        sb.append('\n').append(com.limelight.binding.audio.AndroidAudioRenderer.perfLine(context));
                     }
                 }
                 String fullLog = sb.toString();

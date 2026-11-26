@@ -283,10 +283,12 @@ so none are used.
 </details>
 
 <details>
-<summary><b>Audio</b>: native AAudio</summary>
+<summary><b>Audio</b>: native AAudio and AC-3 / E-AC-3 passthrough</summary>
 
 - Native AAudio low-latency output, no Java between the decoder and the audio driver. Falls back to `AudioTrack` on its own,
   and when the system equalizer is on.
+- Direct AC-3 / E-AC-3 (5.1) bitstream passthrough over HDMI eARC when the host offers `x-ss-audio-codec-offer` (e.g. Vibepollo) and the TV reports direct playback support (*Pass Through*). Falls back to Opus automatically
+  when unsupported or when the system equalizer is on.
 
 </details>
 
