@@ -174,6 +174,11 @@ Java_com_limelight_nvstream_jni_MoonBridge_getPendingAudioDuration(JNIEnv *env, 
     return LiGetPendingAudioDuration();
 }
 
+JNIEXPORT void JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_setSupportedAudioCodecs(JNIEnv *env, jclass clazz, jint supportedCodecs) {
+    LiSetSupportedAudioCodecs(supportedCodecs);
+}
+
 JNIEXPORT jint JNICALL
 Java_com_limelight_nvstream_jni_MoonBridge_getPendingVideoFrames(JNIEnv *env, jclass clazz) {
     return LiGetPendingVideoFrames();

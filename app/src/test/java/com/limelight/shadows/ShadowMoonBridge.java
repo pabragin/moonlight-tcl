@@ -31,7 +31,17 @@ public class ShadowMoonBridge {
 
     public static int CAPABILITY_SLICES_PER_FRAME(byte s) { return 0; }
 
-    public static int getPendingAudioDuration() { return 0; }
+    private static int pendingAudioDurationMs = 0;
+
+    public static void setPendingAudioDurationForTest(int pendingMs) {
+        pendingAudioDurationMs = pendingMs;
+    }
+
+    @Implementation
+    protected static int getPendingAudioDuration() { return pendingAudioDurationMs; }
+
+    @Implementation
+    protected static void setSupportedAudioCodecs(int supportedCodecs) {}
 
     // stubbed methods used by code but not relevant to unit tests
     public static void cleanupBridge() {}

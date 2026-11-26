@@ -256,9 +256,22 @@ public class MoonBridge {
         }
     }
 
+    public static final int AUDIO_CODEC_OPUS = 0;
+    public static final int AUDIO_CODEC_AC3 = 1;
+    public static final int AUDIO_CODEC_EAC3 = 2;
+
     public static int bridgeArInit(int audioConfiguration, int sampleRate, int samplesPerFrame) {
         if (audioRenderer != null) {
             return audioRenderer.setup(new AudioConfiguration(audioConfiguration), sampleRate, samplesPerFrame);
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public static int bridgeArInitEncoded(int audioConfiguration, int sampleRate, int encoding) {
+        if (audioRenderer != null) {
+            return audioRenderer.setupEncoded(new AudioConfiguration(audioConfiguration), sampleRate, encoding);
         }
         else {
             return -1;
@@ -287,6 +300,12 @@ public class MoonBridge {
     public static void bridgeArPlaySample(short[] pcmData) {
         if (audioRenderer != null) {
             audioRenderer.playDecodedAudio(pcmData);
+        }
+    }
+
+    public static void bridgeArPlayEncodedSample(byte[] encodedData, int length, int encoding) {
+        if (audioRenderer != null) {
+            audioRenderer.playEncodedAudio(encodedData, length, encoding);
         }
     }
 
@@ -428,6 +447,8 @@ public class MoonBridge {
     public static native String findExternalAddressIP4(String stunHostName, int stunPort);
 
     public static native int getPendingAudioDuration();
+
+    public static native void setSupportedAudioCodecs(int supportedCodecs);
 
     // moonlight-common-c's clock (CLOCK_MONOTONIC_RAW on Android): the frame timestamps it hands us live in
     // this domain, so latency math against them must use it too, not SystemClock.uptimeMillis().

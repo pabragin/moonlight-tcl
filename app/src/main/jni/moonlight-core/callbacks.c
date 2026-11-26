@@ -27,10 +27,12 @@ static jmethodID BridgeDrStopMethod;
 static jmethodID BridgeDrCleanupMethod;
 static jmethodID BridgeDrSubmitDecodeUnitMethod;
 static jmethodID BridgeArInitMethod;
+static jmethodID BridgeArInitEncodedMethod;
 static jmethodID BridgeArStartMethod;
 static jmethodID BridgeArStopMethod;
 static jmethodID BridgeArCleanupMethod;
 static jmethodID BridgeArPlaySampleMethod;
+static jmethodID BridgeArPlayEncodedSampleMethod;
 static jmethodID BridgeClStageStartingMethod;
 static jmethodID BridgeClStageCompleteMethod;
 static jmethodID BridgeClStageFailedMethod;
@@ -65,6 +67,9 @@ static uint32_t DirectCopiedFrames, DirectCopyFallbacks;
 #define DR_PREPARE_SKIP (-2)
 #define DR_PREPARE_FALLBACK (-3)
 static jshortArray DecodedAudioBuffer;
+static jbyteArray EncodedAudioBuffer;
+static jint EncodedAudioBufferLength;
+static int NegotiatedEncodedFormat;
 // Scratch for the native AAudio path (no JNI on the audio hot path)
 static int16_t* NativeAudioScratch;
 
@@ -116,10 +121,12 @@ Java_com_limelight_nvstream_jni_MoonBridge_init(JNIEnv *env, jclass clazz) {
     BridgeDrPrepareDecodeUnitMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeDrPrepareDecodeUnit", "(IIICJJ)J");
     BridgeDrCommitDecodeUnitMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeDrCommitDecodeUnit", "([BI)I");
     BridgeArInitMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeArInit", "(III)I");
+    BridgeArInitEncodedMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeArInitEncoded", "(III)I");
     BridgeArStartMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeArStart", "()V");
     BridgeArStopMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeArStop", "()V");
     BridgeArCleanupMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeArCleanup", "()V");
     BridgeArPlaySampleMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeArPlaySample", "([S)V");
+    BridgeArPlayEncodedSampleMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeArPlayEncodedSample", "([BII)V");
     BridgeClStageStartingMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeClStageStarting", "(I)V");
     BridgeClStageCompleteMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeClStageComplete", "(I)V");
     BridgeClStageFailedMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeClStageFailed", "(II)V");
@@ -339,7 +346,25 @@ int BridgeDrSubmitDecodeUnit(PDECODE_UNIT decodeUnit) {
 int BridgeArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags) {
     JNIEnv* env = GetThreadEnv();
     int err;
+    int negotiatedCodec = LiGetNegotiatedAudioCodec();
 
+    if (negotiatedCodec == AUDIO_CODEC_AC3 || negotiatedCodec == AUDIO_CODEC_EAC3) {
+        // Android AudioFormat.ENCODING_AC3 = 5, AudioFormat.ENCODING_E_AC3 = 6
+        int androidEncoding = (negotiatedCodec == AUDIO_CODEC_EAC3) ? 6 : 5;
+        err = (*env)->CallStaticIntMethod(env, GlobalBridgeClass, BridgeArInitEncodedMethod,
+                                          audioConfiguration, opusConfig->sampleRate, androidEncoding);
+        if ((*env)->ExceptionCheck(env)) {
+            err = -1;
+        }
+        if (err == 0) {
+            NegotiatedEncodedFormat = androidEncoding;
+            EncodedAudioBufferLength = 4096;
+            EncodedAudioBuffer = (*env)->NewGlobalRef(env, (*env)->NewByteArray(env, EncodedAudioBufferLength));
+        }
+        return err;
+    }
+
+    NegotiatedEncodedFormat = 0;
     err = (*env)->CallStaticIntMethod(env, GlobalBridgeClass, BridgeArInitMethod, audioConfiguration, opusConfig->sampleRate, opusConfig->samplesPerFrame);
     if ((*env)->ExceptionCheck(env)) {
         // This is called on a Java thread, so it's safe to return
@@ -381,17 +406,50 @@ void BridgeArStop(void) {
 void BridgeArCleanup() {
     JNIEnv* env = GetThreadEnv();
 
-    opus_multistream_decoder_destroy(Decoder);
+    if (Decoder != NULL) {
+        opus_multistream_decoder_destroy(Decoder);
+        Decoder = NULL;
+    }
 
     free(NativeAudioScratch);
     NativeAudioScratch = NULL;
 
-    (*env)->DeleteGlobalRef(env, DecodedAudioBuffer);
+    if (DecodedAudioBuffer != NULL) {
+        (*env)->DeleteGlobalRef(env, DecodedAudioBuffer);
+        DecodedAudioBuffer = NULL;
+    }
+    if (EncodedAudioBuffer != NULL) {
+        (*env)->DeleteGlobalRef(env, EncodedAudioBuffer);
+        EncodedAudioBuffer = NULL;
+        EncodedAudioBufferLength = 0;
+    }
+    NegotiatedEncodedFormat = 0;
 
     (*env)->CallStaticVoidMethod(env, GlobalBridgeClass, BridgeArCleanupMethod);
 }
 
 void BridgeArDecodeAndPlaySample(char* sampleData, int sampleLength) {
+    if (NegotiatedEncodedFormat != 0) {
+        if (sampleData == NULL || sampleLength <= 0) {
+            // Packet loss: skip Opus PLC on compressed Dolby bitstreams
+            return;
+        }
+        if (sampleLength > EncodedAudioBufferLength || EncodedAudioBuffer == NULL) {
+            __android_log_print(ANDROID_LOG_WARN, "moonlight-core",
+                                "Dropping oversized encoded audio packet (%d > %d)",
+                                sampleLength, EncodedAudioBufferLength);
+            return;
+        }
+        JNIEnv* env = GetThreadEnv();
+        (*env)->SetByteArrayRegion(env, EncodedAudioBuffer, 0, sampleLength, (const jbyte*)sampleData);
+        (*env)->CallStaticVoidMethod(env, GlobalBridgeClass, BridgeArPlayEncodedSampleMethod,
+                                     EncodedAudioBuffer, sampleLength, NegotiatedEncodedFormat);
+        if ((*env)->ExceptionCheck(env)) {
+            (*JVM)->DetachCurrentThread(JVM);
+        }
+        return;
+    }
+
     if (AAudioRenderer_IsActive() && NativeAudioScratch != NULL) {
         // Native AAudio path: decode straight into the ring, never touch Java here
         int decodeLen = opus_multistream_decode(Decoder,
